@@ -3,14 +3,14 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Reflection;
+using System.Threading;
 
 namespace onboard
 {
     public class Menu
     {
-        //private int screenWidth;
-        //private int screenHeight;
         private GraphicsDeviceManager _device;
 
         private List<string> gameTitles;
@@ -29,12 +29,18 @@ namespace onboard
         }
 
         public void getGames() {
-            gameTitles = new List<String> { "Meatball", "meatball2", "Wilson", "Are you Wilson?", "TSCHOMBPFTHPFHP" };
+            gameTitles = new List<String> { "Meatball", "meatball2", "Wilson", "Are you Wilson?", "TSCHOMBPFTHPFHP", "shreck 13", "Meatball, but again", "aaaaaaaaaa", "kubernetes", "Wilson again", "Caffeine", "Wheeeee", "Something actually scary"};
+
         }
 
         public int gamesLen()
         {
             return gameTitles.Count;
+        }
+
+        public string gameAt(int at)
+        {
+            return gameTitles.ElementAt(at);
         }
 
         public void drawTitle(SpriteFont font, SpriteBatch _spriteBatch)
@@ -62,15 +68,25 @@ namespace onboard
                 Color.White, 3);
         }
 
-        public void drawGames(SpriteFont font, SpriteBatch _spriteBatch)
+        public void drawGames(SpriteFont font, SpriteBatch _spriteBatch, int itemSelected, int maxItems)
         {
+            int startPosition = (int)(Math.Floor(itemSelected / (double)maxItems) * maxItems);
+            for (int i = 0; i < maxItems; i++)
+            {
+                if (startPosition + i > gameTitles.Count - 1)
+                    break;
+                string gameTitle = gameTitles.ElementAt(startPosition+i);
+                Vector2 gameTitleSize = font.MeasureString(gameTitle);
+                _spriteBatch.DrawString(font, gameTitle, new Vector2(_sWidth / 2 - gameTitleSize.X / 2, ((_sHeight / 5) + (_sHeight / 10)) + ((_sHeight / 10) * i)), Color.White);
+            }
+            /*
             int index = 0;
             foreach (String gameTitle in gameTitles)
             {
                 Vector2 gameTitleSize = font.MeasureString(gameTitle);
                 _spriteBatch.DrawString(font, gameTitle, new Vector2(_sWidth / 2 - gameTitleSize.X / 2, ((_sHeight / 5) + (_sHeight / 10)) + ((_sHeight / 10) * index)), Color.White);
                 index++;
-            }    
+            }    */
         }
     }
 }

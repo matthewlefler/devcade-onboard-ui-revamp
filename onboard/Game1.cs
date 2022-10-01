@@ -13,6 +13,7 @@ namespace onboard
         private SpriteFont _devcadeMenuBig;
 
         private Menu _mainMenu;
+        private DevcadeClient _client;
 
         int itemSelected = 0;
 
@@ -23,6 +24,7 @@ namespace onboard
         {
             _graphics = new GraphicsDeviceManager(this);
             _mainMenu = new Menu(_graphics);
+            _client = new DevcadeClient();
             Content.RootDirectory = "Content";
             IsMouseVisible = false;
         }
@@ -47,7 +49,7 @@ namespace onboard
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
-
+                
             // TODO: Add your update logic here
 
             KeyboardState myState = Keyboard.GetState();
@@ -60,6 +62,9 @@ namespace onboard
 
             if (myState.IsKeyDown(Keys.Up) && lastState.IsKeyUp(Keys.Up) && itemSelected > 0)
                 itemSelected--;
+
+            if (myState.IsKeyDown(Keys.Enter) && lastState.IsKeyUp(Keys.Enter) && itemSelected > 0)
+                _client.runGame(_mainMenu.gameAt(itemSelected));
 
             lastState = Keyboard.GetState();
 
@@ -75,9 +80,10 @@ namespace onboard
 
             _spriteBatch.Begin();
 
+            int maxItems = 5;
             _mainMenu.drawTitle(_devcadeMenuBig, _spriteBatch);
-            _mainMenu.drawGames(_devcadeMenuBig, _spriteBatch);
-            _mainMenu.drawSelection(_spriteBatch, itemSelected);
+            _mainMenu.drawGames(_devcadeMenuBig, _spriteBatch, itemSelected, maxItems);
+            _mainMenu.drawSelection(_spriteBatch, itemSelected % maxItems);
 
             _spriteBatch.End();
 
