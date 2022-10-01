@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System;
 
 namespace onboard
 {
@@ -8,6 +9,8 @@ namespace onboard
     {
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
+
+        private SpriteFont _devcadeMenuBig;
 
         public Game1()
         {
@@ -26,6 +29,7 @@ namespace onboard
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
+            _devcadeMenuBig = Content.Load<SpriteFont>("devcade-menu-big");
 
             // TODO: use this.Content to load your game content here
         }
@@ -42,9 +46,22 @@ namespace onboard
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(Color.DeepPink);
 
             // TODO: Add your drawing code here
+
+            int screenWidth = GraphicsDevice.Viewport.Width;
+            int screenHeight = GraphicsDevice.Viewport.Height;
+
+            _spriteBatch.Begin();
+
+            string welcome = "Welcome to Devcade";
+            Vector2 welcomeSize = _devcadeMenuBig.MeasureString(welcome);
+            _spriteBatch.DrawString(_devcadeMenuBig, "Welcome to Devcade", new Vector2(screenWidth/2 - welcomeSize.X/2, screenHeight/2 - welcomeSize.Y), Color.White);
+
+            _spriteBatch.End();
+
+
 
             base.Draw(gameTime);
         }
