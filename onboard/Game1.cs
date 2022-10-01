@@ -12,9 +12,12 @@ namespace onboard
 
         private SpriteFont _devcadeMenuBig;
 
+        private Menu _mainMenu;
+
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
+            _mainMenu = new Menu(_graphics);
             Content.RootDirectory = "Content";
             IsMouseVisible = false;
         }
@@ -50,14 +53,9 @@ namespace onboard
 
             // TODO: Add your drawing code here
 
-            int screenWidth = GraphicsDevice.Viewport.Width;
-            int screenHeight = GraphicsDevice.Viewport.Height;
-
             _spriteBatch.Begin();
 
-            string welcome = "Welcome to Devcade";
-            Vector2 welcomeSize = _devcadeMenuBig.MeasureString(welcome);
-            _spriteBatch.DrawString(_devcadeMenuBig, "Welcome to Devcade", new Vector2(screenWidth/2 - welcomeSize.X/2, screenHeight/2 - welcomeSize.Y), Color.White);
+            _mainMenu.drawTitle(_devcadeMenuBig, _spriteBatch);
 
             _spriteBatch.End();
 
