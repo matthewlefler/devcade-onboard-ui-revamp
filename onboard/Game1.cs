@@ -14,6 +14,11 @@ namespace onboard
 
         private Menu _mainMenu;
 
+        int itemSelected = 0;
+
+        KeyboardState lastState;
+
+
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -45,6 +50,19 @@ namespace onboard
 
             // TODO: Add your update logic here
 
+            KeyboardState myState = Keyboard.GetState();
+
+            if (lastState == null)
+                lastState = Keyboard.GetState(); // god i hate video games
+
+            if (myState.IsKeyDown(Keys.Down) && lastState.IsKeyUp(Keys.Down) && itemSelected < _mainMenu.gamesLen() - 1)
+                itemSelected++;
+
+            if (myState.IsKeyDown(Keys.Up) && lastState.IsKeyUp(Keys.Up) && itemSelected > 0)
+                itemSelected--;
+
+            lastState = Keyboard.GetState();
+
             base.Update(gameTime);
         }
 
@@ -59,10 +77,9 @@ namespace onboard
 
             _mainMenu.drawTitle(_devcadeMenuBig, _spriteBatch);
             _mainMenu.drawGames(_devcadeMenuBig, _spriteBatch);
+            _mainMenu.drawSelection(_spriteBatch, itemSelected);
 
             _spriteBatch.End();
-
-
 
             base.Draw(gameTime);
         }
