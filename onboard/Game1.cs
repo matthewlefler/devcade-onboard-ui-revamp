@@ -35,6 +35,7 @@ namespace onboard
             _devcadeMenuBig = Content.Load<SpriteFont>("devcade-menu-big");
 
             // TODO: use this.Content to load your game content here
+            _mainMenu.getGames();
         }
 
         protected override void Update(GameTime gameTime)
@@ -50,12 +51,14 @@ namespace onboard
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.DeepPink);
+            _mainMenu.updateDims();
 
             // TODO: Add your drawing code here
 
             _spriteBatch.Begin();
 
             _mainMenu.drawTitle(_devcadeMenuBig, _spriteBatch);
+            _mainMenu.drawGames(_devcadeMenuBig, _spriteBatch);
 
             _spriteBatch.End();
 
