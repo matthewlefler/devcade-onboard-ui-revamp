@@ -1,0 +1,21 @@
+#  /etc/systemd/system/devcade-onboard.service
+[Unit]
+Description=CSH Devcade Onboarding Service
+Documentation=haha youre funny
+After=network.target auditd.service
+
+[Service]
+User=devcade
+Group=devcade
+ExecStart=startx /home/devcade/test/publish/onboard
+
+ExecReload=startx /home/devcade/test/publish/onboard
+ExecReload=/bin/kill -9 -HUP $MAINPID
+KillMode=process
+Restart=on-failure
+RestartPreventExitStatus=255
+Type=simple
+
+[Install]
+WantedBy=multi-user.target
+Alias=devcade-onboard.service
