@@ -84,6 +84,7 @@ namespace onboard
             _mainMenu.drawTitle(_devcadeMenuBig, _spriteBatch);
             _mainMenu.drawGames(_devcadeMenuBig, _spriteBatch, itemSelected, maxItems);
             _mainMenu.drawSelection(_spriteBatch, itemSelected % maxItems);
+            _mainMenu.drawGameCount(_devcadeMenuBig, _spriteBatch, itemSelected + 1, _mainMenu.gamesLen());
 
             _spriteBatch.End();
 

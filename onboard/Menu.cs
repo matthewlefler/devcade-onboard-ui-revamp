@@ -29,7 +29,8 @@ namespace onboard
         }
 
         public void getGames() {
-            gameTitles = new List<String> { "Meatball", "meatball2", "Wilson", "Are you Wilson?", "TSCHOMBPFTHPFHP", "shreck 13", "Meatball, but again", "aaaaaaaaaa", "kubernetes", "Wilson again", "Caffeine", "Wheeeee", "Something actually scary"};
+            gameTitles = new List<String> { "Meatball", "meatball2", "Wilson", "Are you Wilson?", "TSCHOMBPFTHPFHP", "shreck 13", "Meatball, but again", "aaaaaaaaaa", "kubernetes", "Wilson again", "Caffeine", "Wheeeee", "Something actually scary" };
+            //gameTitles = new List<String> { "Flappy Meatball", "Lightspeed", "Bank Shot", "Brick Breaker", "Minecraft 2" };
 
         }
 
@@ -66,6 +67,11 @@ namespace onboard
                     rectHeight
                 ),
                 Color.White, 3);
+        }
+
+        public void drawGameCount(SpriteFont font, SpriteBatch _spriteBatch, int itemSelected, int totalItems)
+        {
+            _spriteBatch.DrawString(font, itemSelected + " / " + totalItems, new Vector2(50, 50), Color.White);
         }
 
         public void drawGames(SpriteFont font, SpriteBatch _spriteBatch, int itemSelected, int maxItems)
