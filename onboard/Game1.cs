@@ -64,7 +64,9 @@ namespace onboard
                 itemSelected--;
 
             if (myState.IsKeyDown(Keys.Enter) && lastState.IsKeyUp(Keys.Enter) && itemSelected > 0)
-                _client.runGame(_mainMenu.gameAt(itemSelected));
+                _client.runGame("bankshot.zip");
+
+            //_client.runGame(_mainMenu.gameAt(itemSelected));
 
             lastState = Keyboard.GetState();
 
