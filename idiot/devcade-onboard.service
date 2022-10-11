@@ -7,9 +7,9 @@ After=network.target auditd.service
 [Service]
 User=devcade
 Group=devcade
-ExecStart=startx /home/devcade/test/publish/onboard
+ExecStart=startx /home/devcade/publish/onboard
 
-ExecReload=startx /home/devcade/test/publish/onboard
+ExecReload=startx /home/devcade/publish/onboard
 ExecReload=/bin/kill -9 -HUP $MAINPID
 KillMode=process
 Restart=on-failure

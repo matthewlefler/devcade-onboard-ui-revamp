@@ -2,6 +2,15 @@
 The onboard menu and control software for the Devcade custom arcade system.
 
 
+## Building
+
+To make a build to run on the Idiot, do the following from `/onboard`:
+```
+dotnet publish -c Release -r linux-x64 --no-self-contained
+```
+
+To put it on the Idiot, compress the `publish` folder located at `\Devcade-onboard\onboard\bin\Release\netcoreapp3.1\linux-x64` and `scp` that to the Idiot.
+
 ## The Idiot
 
 ### Prereqs
@@ -24,4 +33,13 @@ You can find everything(tm) you need to set up the Devcade Idiot in `/idiot`. Th
 /etc/systemd/system/devcade-onboard.service
 ```
 
+You'll also need to add/change some lines in your `/etc/X11/Xwrapper.config`
+
+```
+needs_root_rights=yes
+allowed_users=anybody
+```
+
 This should be interactable as a normal systemd service, so `enable`/`disable` it as normal.
+
+_Helpful Tip: Remember to `chmod +x onboard`. You may get weird syntax errors if you don't_

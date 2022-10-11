@@ -348,3 +348,14 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
+
+# Python (for the upload script)
+HACKING/venv/
+HACKING/__pycache__/
+HACKING/venv/**
+HACKING/__pycache__/**
+
+#.env file
+.env
+onboard/.env
+HACKING/.env
