@@ -5,6 +5,8 @@ using System.IO.Compression;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using System.Collections;
+using System.Collections.Generic;
 
 using Amazon;
 using Amazon.S3;
@@ -17,17 +19,19 @@ namespace onboard
 {
     public class DevcadeClient
     {
-
+        private string accessKey = Environment.GetEnvironmentVariable("AWS_ACCESS_KEY_ID");
+        private string secretKey = Environment.GetEnvironmentVariable("AWS_SECRET_ACCESS_KEY");
 
         private string _bucketName = "devcade-games";
 
-        private AmazonS3Config _config;
-        private AmazonS3Client _s3Client;
+        private static AmazonS3Config _config;
+        private static AmazonS3Client _s3Client;
 
         public DevcadeClient()
         {
             _config = new AmazonS3Config();
             _config.ServiceURL = "https://s3.csh.rit.edu";
+            _config.ForcePathStyle = true;
 
             _s3Client = new AmazonS3Client(
                     accessKey,
@@ -41,37 +45,35 @@ namespace onboard
                 Console.WriteLine("{0}\t{1}", b.BucketName, b.CreationDate);
             }
 
+            List<string> bucketContents = ListBucketContentsAsync("devcade-games").Result;
                 
-            // List all objects
-            ListObjectsRequest listRequest = new ListObjectsRequest
-            {
-                BucketName = _bucketName,
-            };
-
-            ListObjectsResponse listResponse;
-            do
-            {
-                // Get a list of objects
-                listResponse = _s3Client.ListObjectsAsync(listRequest).Result;
-                foreach (S3Object obj in listResponse.S3Objects)
-                {
-                    Console.WriteLine("Object - " + obj.Key);
-                    Console.WriteLine(" Size - " + obj.Size);
-                    Console.WriteLine(" LastModified - " + obj.LastModified);
-                    Console.WriteLine(" Storage class - " + obj.StorageClass);
-                }
-
-                // Set the marker property
-                listRequest.Marker = listResponse.NextMarker;
-            } while (listResponse.IsTruncated);
-
-
-            TransferUtility fileTransferUtility = new TransferUtility(_s3Client);
-            return;
-
+            //TransferUtility fileTransferUtility = new TransferUtility(_s3Client);
 
             // Note the 'fileName' is the 'key' of the object in S3 (which is usually just the file name)
-            fileTransferUtility.Download("/tmp/bankshot.zip", _bucketName, "bankshot.zip");
+        //    fileTransferUtility.Download("/tmp/bankshot.zip", _bucketName, "bankshot.zip");
+        }
+        // Returns true if success and false otherwise
+        // permissions can be an int or a string. For example it can also be +x, -x etc..
+        bool Chmod(string filePath, string permissions = "700", bool recursive = false)
+        {
+                string cmd;
+                if (recursive)
+                    cmd = $"chmod -R {permissions} {filePath}";
+                else
+                    cmd = $"chmod {permissions} {filePath}";
+
+                try
+                {
+                    using (Process proc = Process.Start("/bin/bash", $"-c \"{cmd}\""))
+                    {
+                        proc.WaitForExit();
+                        return proc.ExitCode == 0;
+                    }
+                }
+                catch
+                {
+                    return false;
+                }
         }
 
         public void runGame(string game)
@@ -84,50 +86,36 @@ namespace onboard
             //request.Key = "bankshot.zip";
             //GetObjectResponse response = GetObjectAsync(request).Result;
             //WriteResponseStreamToFileAsync(response, "/tmp/" + game);
-
-            ListObjectsRequest request = new ListObjectsRequest();
-            request.BucketName = _bucketName;
-            do
-            {
-                ListObjectsResponse response = _s3Client.ListObjectsAsync(request).Result;
-
-                // Process response.
-                // ...
-
-                // If response is truncated, set the marker to get the next 
-                // set of keys.
-                if (response.IsTruncated)
-                {
-                    request.Marker = response.NextMarker;
-                }
-                else
-                {
-                    request = null;
-                }
-            } while (request != null);
-
+            
             TransferUtility fileTransferUtility = new TransferUtility(_s3Client);
-            return;
 
+            string path = "/tmp/" + game + ".zip";
 
+            Console.WriteLine("Getting " + path);
             // Note the 'fileName' is the 'key' of the object in S3 (which is usually just the file name)
-            fileTransferUtility.Download("/tmp/bankshot.zip", _bucketName, "bankshot.zip");
+            fileTransferUtility.Download(path, _bucketName, game);
 
-            //string path = "/tmp/" + game;
-            //ZipFile.ExtractToDirectory(path, "/tmp");
+            try
+            {
+            Console.WriteLine("Extracting " + path);
+            // Extract the specified path (the zip file) to the specified directory (/tmp/, probably)
+            System.IO.Directory.CreateDirectory("/tmp/" + game);
+            ZipFile.ExtractToDirectory(path, "/tmp/" + game);
+            } catch (System.IO.IOException e) {
+                Console.WriteLine(e);
+            }
 
+            Console.WriteLine("Running " + path);
 
-            string path = "/tmp/bankshot.zip";
-            ZipFile.ExtractToDirectory(path, "/tmp/");
-
-            //string myPath = "C:\\Users\\dingus\\Downloads\\publish_noah_windoze\\publish\\BankShot.exe";
+            string execPath = "/tmp/" + game + "/publish/" + game;
+            Chmod(execPath,"+x",false);
 
             Process process = new Process()
             {
-                StartInfo = new ProcessStartInfo("/tmp/bankshot/publish/BankShot")
+                StartInfo = new ProcessStartInfo(execPath) // chom
                 {
                     WindowStyle = ProcessWindowStyle.Normal,
-                    WorkingDirectory = Path.GetDirectoryName(path)
+                    WorkingDirectory = Path.GetDirectoryName(execPath)
                 }
             };
 
@@ -168,6 +156,55 @@ namespace onboard
 
             //var chom = await _s3Client.GetObjectAsync(request);
            // return response;
+        }
+        
+        /// <summary>
+        /// Shows how to list the objects in an Amazon S3 bucket.
+        /// </summary>
+        /// <param name="bucketName">The name of the bucket for which to list
+        /// the contents.</param>
+        /// <returns>A boolean value indicating the success or failure of the
+        /// copy operation.</returns>
+        public async Task<List<string>> ListBucketContentsAsync(string bucketName)
+        {
+            try
+            {
+
+                List<string> myGameTitles = new List<String>();
+                var request = new ListObjectsV2Request
+                {
+                    BucketName = bucketName,
+                    MaxKeys = 5,
+                };
+
+                Console.WriteLine("--------------------------------------");
+                Console.WriteLine($"Listing the contents of {bucketName}:");
+                Console.WriteLine("--------------------------------------");
+
+                var response = new ListObjectsV2Response();
+
+                do
+                {
+                    response = await _s3Client.ListObjectsV2Async(request);
+
+                    response.S3Objects
+                        .ForEach(obj => Console.WriteLine($"{obj.Key,-35}{obj.LastModified.ToShortDateString(),10}{obj.Size,10}"));
+
+                    response.S3Objects.ForEach(obj => myGameTitles.Add(obj.Key));
+
+                    // If the response is truncated, set the request ContinuationToken
+                    // from the NextContinuationToken property of the response.
+                    request.ContinuationToken = response.NextContinuationToken;
+                }
+                while (response.IsTruncated);
+
+                return myGameTitles;
+            }
+            catch (AmazonS3Exception ex)
+            {
+                Console.WriteLine($"Error encountered on server. Message:'{ex.Message}' getting list of objects.");
+                return new List<String>();
+            }
         }
     }
 }

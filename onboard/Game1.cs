@@ -42,7 +42,8 @@ namespace onboard
             _devcadeMenuBig = Content.Load<SpriteFont>("devcade-menu-big");
 
             // TODO: use this.Content to load your game content here
-            _mainMenu.getGames();
+            //_mainMenu.getGames();
+            _mainMenu.setGames(_client.ListBucketContentsAsync("devcade-games").Result);
         }
 
         protected override void Update(GameTime gameTime)
@@ -63,10 +64,11 @@ namespace onboard
             if (myState.IsKeyDown(Keys.Up) && lastState.IsKeyUp(Keys.Up) && itemSelected > 0)
                 itemSelected--;
 
-            if (myState.IsKeyDown(Keys.Enter) && lastState.IsKeyUp(Keys.Enter) && itemSelected > 0)
-                _client.runGame("bankshot.zip");
-
-            //_client.runGame(_mainMenu.gameAt(itemSelected));
+            if (myState.IsKeyDown(Keys.Enter) && lastState.IsKeyUp(Keys.Enter))
+            {
+                Console.WriteLine("Running game!!!");
+                _client.runGame(_mainMenu.gameAt(itemSelected));
+            }
 
             lastState = Keyboard.GetState();
 

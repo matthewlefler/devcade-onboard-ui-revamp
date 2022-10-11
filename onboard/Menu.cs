@@ -29,9 +29,14 @@ namespace onboard
         }
 
         public void getGames() {
-            gameTitles = new List<String> { "Meatball", "meatball2", "Wilson", "Are you Wilson?", "TSCHOMBPFTHPFHP", "shreck 13", "Meatball, but again", "aaaaaaaaaa", "kubernetes", "Wilson again", "Caffeine", "Wheeeee", "Something actually scary" };
+            gameTitles = new List<String> { "bankshot", "spacewar", "brickbreaker", "Meatball", "meatball2", "Wilson", "Are you Wilson?", "TSCHOMBPFTHPFHP", "shreck 13", "Meatball, but again", "aaaaaaaaaa", "kubernetes", "Wilson again", "Caffeine", "Wheeeee", "Something actually scary" };
             //gameTitles = new List<String> { "Flappy Meatball", "Lightspeed", "Bank Shot", "Brick Breaker", "Minecraft 2" };
 
+        }
+
+        public void setGames(List<string> theGames)
+        {
+            gameTitles = theGames;
         }
 
         public int gamesLen()
