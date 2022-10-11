@@ -15,7 +15,9 @@ namespace onboard
         private Menu _mainMenu;
         private DevcadeClient _client;
 
-        int itemSelected = 0;
+        private int _itemSelected = 0;
+
+        private bool _loading = false;
 
         KeyboardState lastState;
 
@@ -42,7 +44,6 @@ namespace onboard
             _devcadeMenuBig = Content.Load<SpriteFont>("devcade-menu-big");
 
             // TODO: use this.Content to load your game content here
-            //_mainMenu.getGames();
             _mainMenu.setGames(_client.ListBucketContentsAsync("devcade-games").Result);
         }
 
@@ -52,25 +53,35 @@ namespace onboard
                 Exit();
                 
             // TODO: Add your update logic here
+            
+
+            // Keyboard control code
 
             KeyboardState myState = Keyboard.GetState();
 
             if (lastState == null)
                 lastState = Keyboard.GetState(); // god i hate video games
 
-            if (myState.IsKeyDown(Keys.Down) && lastState.IsKeyUp(Keys.Down) && itemSelected < _mainMenu.gamesLen() - 1)
-                itemSelected++;
+            if (myState.IsKeyDown(Keys.Down) && lastState.IsKeyUp(Keys.Down) && _itemSelected < _mainMenu.gamesLen() - 1)
+            {
+                _itemSelected++;
+            }
 
-            if (myState.IsKeyDown(Keys.Up) && lastState.IsKeyUp(Keys.Up) && itemSelected > 0)
-                itemSelected--;
+            if (myState.IsKeyDown(Keys.Up) && lastState.IsKeyUp(Keys.Up) && _itemSelected > 0)
+            {
+                _itemSelected--;
+            }
 
             if (myState.IsKeyDown(Keys.Enter) && lastState.IsKeyUp(Keys.Enter))
             {
                 Console.WriteLine("Running game!!!");
-                _client.runGame(_mainMenu.gameAt(itemSelected));
+                _client.runGame(_mainMenu.gameAt(_itemSelected));
             }
 
             lastState = Keyboard.GetState();
+
+            // Check for process that matches last launched game and display loading screen if it's running
+            _loading = Util.IsProcessOpen(_mainMenu.gameAt(_itemSelected));
 
             base.Update(gameTime);
         }
@@ -86,9 +97,14 @@ namespace onboard
 
             int maxItems = 5;
             _mainMenu.drawTitle(_devcadeMenuBig, _spriteBatch);
-            _mainMenu.drawGames(_devcadeMenuBig, _spriteBatch, itemSelected, maxItems);
-            _mainMenu.drawSelection(_spriteBatch, itemSelected % maxItems);
-            _mainMenu.drawGameCount(_devcadeMenuBig, _spriteBatch, itemSelected + 1, _mainMenu.gamesLen());
+            _mainMenu.drawGames(_devcadeMenuBig, _spriteBatch, _itemSelected, maxItems);
+            _mainMenu.drawSelection(_spriteBatch, _itemSelected % maxItems);
+            _mainMenu.drawGameCount(_devcadeMenuBig, _spriteBatch, _itemSelected + 1, _mainMenu.gamesLen());
+
+            if (_loading)
+            {
+               _mainMenu.drawLoading(_devcadeMenuBig, _spriteBatch);
+            }
 
             _spriteBatch.End();
 

@@ -61,6 +61,22 @@ namespace onboard
             _spriteBatch.DrawString(font, wares, new Vector2(_sWidth / 2 + welcomeSize.X / 8, (_sHeight / 4.2f)), Color.Yellow, -0.3f, new Vector2(0, 0), new Vector2(0.5f, 0.5f), SpriteEffects.None, 1);
         }
 
+        public void drawLoading(SpriteFont font, SpriteBatch _spriteBatch)
+        {
+            RectangleSprite.FillRectangle(_spriteBatch, new Rectangle(
+                    _sWidth / 2 - 100,
+                    _sHeight / 2 - 100,
+                    500,
+                    200
+                ),
+                Color.Black);
+
+
+            string loading = "LOADING...";
+            Vector2 loadingSize = font.MeasureString(loading);
+            _spriteBatch.DrawString(font, loading, new Vector2(_sWidth / 2 - loadingSize.X / 2, _sHeight / 2 - loadingSize.Y), Color.White, 0.0f, new Vector2(0, 0), new Vector2(2.5f, 2.5f), SpriteEffects.None, 1);
+        }
+
         public void drawSelection(SpriteBatch _spriteBatch, int menuItemSelected)
         {
             int rectLength = 300;
