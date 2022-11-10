@@ -13,7 +13,6 @@ if [ "$(pwd)" == "$HOME" ]; then
     exit 1
 fi
 
-CODE_PATH="$HOME"/Code/xopp-dev
 uname=$USER # Just trust me on this one.
 container='devcade-dotnet'
 

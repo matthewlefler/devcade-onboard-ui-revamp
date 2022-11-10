@@ -43,3 +43,13 @@ allowed_users=anybody
 This should be interactable as a normal systemd service, so `enable`/`disable` it as normal.
 
 _Helpful Tip: Remember to `chmod +x onboard`. You may get weird syntax errors if you don't_
+
+## HACKING
+
+To setup and launch a development environment, you can do the following:
+
+```
+cd HACKING
+./build-environment.sh
+./launch-environment.sh
+```
