@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
 
+
 namespace onboard
 {
     public class Game1 : Game
@@ -11,16 +12,24 @@ namespace onboard
         private SpriteBatch _spriteBatch;
 
         private SpriteFont _devcadeMenuBig;
+        private SpriteFont _devcadeMenuTitle;
 
         private Menu _mainMenu;
         private DevcadeClient _client;
 
-        private int _itemSelected = 0;
-
         private bool _loading = false;
+        
+        private string state = "launch";
+        private float fadeColor = 0f;
 
         KeyboardState lastState;
 
+        private Texture2D cardTexture;
+        private Texture2D loadingSpin;
+        private Texture2D BGgradient;
+        private Texture2D icon;
+        private Texture2D titleTexture;
+        private Texture2D descriptionTexture;
 
         public Game1()
         {
@@ -34,6 +43,12 @@ namespace onboard
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
+            if (GraphicsDevice == null)
+            {
+                _graphics.ApplyChanges();
+            }
+
+            _mainMenu.updateDims(_graphics);
 
             base.Initialize();
         }
@@ -42,69 +57,135 @@ namespace onboard
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             _devcadeMenuBig = Content.Load<SpriteFont>("devcade-menu-big");
+            _devcadeMenuTitle = Content.Load<SpriteFont>("devcade-menu-title");
+
+            cardTexture = Content.Load<Texture2D>("card");
+            titleTexture = Content.Load<Texture2D>("tansparent-logo");
+
+            descriptionTexture = Content.Load<Texture2D>("description");
+
+            BGgradient = Content.Load<Texture2D>("OnboardBackgroundGradient");
+            icon = Content.Load<Texture2D>("CSH");
+
+            loadingSpin = Content.Load<Texture2D>("loadingSheet");
 
             // TODO: use this.Content to load your game content here
             _mainMenu.setGames(_client.ListBucketContentsAsync("devcade-games").Result);
+            _mainMenu.setCards();
         }
 
         protected override void Update(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Tab))
                 Exit();
-                
-            // TODO: Add your update logic here
-            
 
             // Keyboard control code
-
             KeyboardState myState = Keyboard.GetState();
 
             if (lastState == null)
                 lastState = Keyboard.GetState(); // god i hate video games
 
-            if (myState.IsKeyDown(Keys.Down) && lastState.IsKeyUp(Keys.Down) && _itemSelected < _mainMenu.gamesLen() - 1)
+            // If the state is loading, it is still taking input as though it is in the input state..?
+            switch(state)
             {
-                _itemSelected++;
-            }
+                // Fade in when the app launches
+                case "launch":
+                    if(fadeColor < 1f)
+                    {
+                        fadeColor += (float)(gameTime.ElapsedGameTime.TotalSeconds);
+                    }
+                    else 
+                    {
+                        // Once the animation completes, begin tracking input
+                        state = "input";
+                    }
 
-            if (myState.IsKeyDown(Keys.Up) && lastState.IsKeyUp(Keys.Up) && _itemSelected > 0)
-            {
-                _itemSelected--;
-            }
+                    break;
 
-            if (myState.IsKeyDown(Keys.Enter) && lastState.IsKeyUp(Keys.Enter))
-            {
-                Console.WriteLine("Running game!!!");
-                _client.runGame(_mainMenu.gameAt(_itemSelected));
+                case "loading":
+                    // Check for process that matches last launched game and display loading screen if it's running 
+                    _loading = Util.IsProcessOpen(_mainMenu.gameSelected());
+                    
+                    if(fadeColor < 1f)
+                    {
+                        fadeColor += (float)(gameTime.ElapsedGameTime.TotalSeconds);
+                    } 
+                    
+                    if(!_loading)
+                    {
+                        fadeColor = 0f;
+                        state = "launch";
+                    }
+                    break;
+                
+                // In this state, the user is able to scroll through the menu and launch games
+                // TODO: Update _itemSelected  and top/bottom of list check to be a part of Menu.cs
+                case "input":
+                    if (myState.IsKeyDown(Keys.Down) && lastState.IsKeyUp(Keys.Down) && _mainMenu.itemSelected < _mainMenu.gamesLen() - 1)
+                    {
+                        _mainMenu.beginAnimUp();
+                    }
+
+                    if (myState.IsKeyDown(Keys.Up) && lastState.IsKeyUp(Keys.Up) && _mainMenu.itemSelected > 0)
+                    {
+                        _mainMenu.beginAnimDown();
+                    }
+
+                    if (myState.IsKeyDown(Keys.Enter) && lastState.IsKeyUp(Keys.Enter))
+                    {
+                        state = "description";
+                    }
+                    _mainMenu.animate(gameTime);
+                    break;
+                
+                case "description":
+                    if (myState.IsKeyDown(Keys.Enter) && lastState.IsKeyUp(Keys.Enter))
+                    {
+                        Console.WriteLine("Running game!!!");
+                        _client.runGame(_mainMenu.gameSelected());
+                        fadeColor = 0f;
+                        _loading = true;
+                        state = "loading";
+                    }
+                    else if (myState.IsKeyDown(Keys.RightShift) && lastState.IsKeyUp(Keys.RightShift))
+                    {
+                        state = "input";
+                    }
+
+                    break;
             }
 
             lastState = Keyboard.GetState();
-
-            // Check for process that matches last launched game and display loading screen if it's running
-            _loading = Util.IsProcessOpen(_mainMenu.gameAt(_itemSelected));
-
             base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.DeepPink);
-            _mainMenu.updateDims();
-
-            // TODO: Add your drawing code here
-
             _spriteBatch.Begin();
+            GraphicsDevice.Clear(Color.Black);
 
-            int maxItems = 5;
-            _mainMenu.drawTitle(_devcadeMenuBig, _spriteBatch);
-            _mainMenu.drawGames(_devcadeMenuBig, _spriteBatch, _itemSelected, maxItems);
-            _mainMenu.drawSelection(_spriteBatch, _itemSelected % maxItems);
-            _mainMenu.drawGameCount(_devcadeMenuBig, _spriteBatch, _itemSelected + 1, _mainMenu.gamesLen());
-
-            if (_loading)
+            switch (state)
             {
-               _mainMenu.drawLoading(_devcadeMenuBig, _spriteBatch);
+                case "launch":
+                case "input":
+                    _mainMenu.drawBackground(_spriteBatch, BGgradient, icon, fadeColor);
+                    _mainMenu.drawTitle(_spriteBatch, titleTexture, fadeColor);
+                    _mainMenu.drawCards(_spriteBatch, cardTexture, _devcadeMenuBig);
+                    break;
+
+                case "loading":
+                    _mainMenu.drawLoading(_spriteBatch, loadingSpin, fadeColor);
+                    _mainMenu.drawTitle(_spriteBatch, titleTexture, fadeColor);
+                    break;
+                
+                case "description":
+                    _mainMenu.drawBackground(_spriteBatch, BGgradient, icon, fadeColor);
+                    _mainMenu.drawTitle(_spriteBatch,titleTexture,fadeColor);
+                    _mainMenu.drawDescription(_spriteBatch, descriptionTexture, _devcadeMenuTitle, _devcadeMenuBig);
+                    break;
             }
+
+            _spriteBatch.DrawString(_devcadeMenuBig, state, new Vector2(0,0), Color.White);
 
             _spriteBatch.End();
 
@@ -112,3 +193,5 @@ namespace onboard
         }
     }
 }
+
+// TODO: Add error handling!!!
