@@ -15,7 +15,7 @@ namespace onboard
 
         // Synonymous with cards list from my project
         // Will have to convert this to a list of MenuCards
-        private List<string> gameTitles;
+        public List<DevcadeGame> gameTitles { get; set; }
         private List<MenuCard> cards = new List<MenuCard>();
         public int itemSelected = 0;
         
@@ -52,22 +52,11 @@ namespace onboard
             _graphics.ApplyChanges();
         }
 
-        public void getGames() {
-            gameTitles = new List<String> { "bankshot", "spacewar", "brickbreaker", "Meatball", "meatball2", "Wilson", "Are you Wilson?", "TSCHOMBPFTHPFHP", "shreck 13", "Meatball, but again", "aaaaaaaaaa", "kubernetes", "Wilson again", "Caffeine", "Wheeeee", "Something actually scary" };
-            //gameTitles = new List<String> { "Flappy Meatball", "Lightspeed", "Bank Shot", "Brick Breaker", "Minecraft 2" };
-
-        }
-
-        public void setGames(List<string> theGames)
-        {
-            gameTitles = theGames;
-        }
-
         public void setCards()
         {
             for(int i=0; i<gameTitles.Count; i++)
             {
-                cards.Add(new MenuCard(i*-1,gameTitles[i]));
+                cards.Add(new MenuCard(i*-1,gameTitles[i].name));
             }
         }
 
@@ -78,7 +67,7 @@ namespace onboard
 
         public string gameSelected()
         {
-            return gameTitles.ElementAt(itemSelected);
+            return gameTitles.ElementAt(itemSelected).name;
         }
 
         public void drawBackground(SpriteBatch _spriteBatch, Texture2D BGgradient, Texture2D icon, float col)
@@ -196,7 +185,7 @@ namespace onboard
             {
                 if (startPosition + i > gameTitles.Count - 1)
                     break;
-                string gameTitle = gameTitles.ElementAt(startPosition+i);
+                string gameTitle = gameTitles.ElementAt(startPosition+i).name;
                 Vector2 gameTitleSize = font.MeasureString(gameTitle);
                 _spriteBatch.DrawString(font, gameTitle, new Vector2(_sWidth / 2 - gameTitleSize.X / 2, ((_sHeight / 5) + (_sHeight / 10)) + ((_sHeight / 10) * i)), Color.White);
             }

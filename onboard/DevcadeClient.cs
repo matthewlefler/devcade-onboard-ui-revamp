@@ -33,15 +33,13 @@ namespace onboard
 
     public class DevcadeClient
     {
-        private string accessKey = Environment.GetEnvironmentVariable("AWS_ACCESS_KEY_ID");
-        private string secretKey = Environment.GetEnvironmentVariable("AWS_SECRET_ACCESS_KEY");
+        private string _accessKey = Environment.GetEnvironmentVariable("AWS_ACCESS_KEY_ID");
+        private string _secretKey = Environment.GetEnvironmentVariable("AWS_SECRET_ACCESS_KEY");
 
         private string _bucketName = "devcade-games";
 
         private static AmazonS3Config _config;
         private static AmazonS3Client _s3Client;
-
-        private static HttpClient sharedClient;
 
         public DevcadeClient()
         {
@@ -50,48 +48,37 @@ namespace onboard
             _config.ForcePathStyle = true;
 
             _s3Client = new AmazonS3Client(
-                    accessKey,
-                    secretKey,
+                    _accessKey,
+                    _secretKey,
                     _config
-                    );
-
-/*            await ProcessRepositoriesAsync(client);
-
-             var json = await client.GetStringAsync(
-                 "https://devcade-api.apps.okd4.csh.rit.edu/api/games/gamelist"
             );
-
-             Console.Write(json);
-*/
-            GetGameInfo();
         }
         
-        void GetGameInfo()
+        public List<DevcadeGame> GetGames()
         {
-            Task<string> infoTask = asyncGetGameInfo();
+            Task<List<DevcadeGame>> infoTask = asyncGetGames();
+            return infoTask.Result;
         }
 
-        async Task<string> asyncGetGameInfo()
+        async Task<List<DevcadeGame>> asyncGetGames()
         {
             HttpClient client = new HttpClient();
+            List<DevcadeGame> games;
                 // Call asynchronous network methods in a try/catch block to handle exceptions.
             try
             {
                 string uri = "https://devcade-api.apps.okd4.csh.rit.edu/api/games/gamelist/"; // TODO: Env variable URI tld 
                 string responseBody = await client.GetStringAsync(uri);
 
-                List<DevcadeGame> games = JsonConvert.DeserializeObject<List<Devcadegame>>(responseBody);
-
-//                Console.WriteLine(responseBody);
-                Console.WriteLine(games.toString());
+                games = JsonConvert.DeserializeObject<List<DevcadeGame>>(responseBody);
+                return games;
             }
             catch (HttpRequestException e)
             {
                 Console.WriteLine("\nException Caught!");
                 Console.WriteLine("Message :{0} ", e.Message);
             }
-            return "chom";
-
+            return new List<DevcadeGame>();
         }
 
         // Returns true if success and false otherwise

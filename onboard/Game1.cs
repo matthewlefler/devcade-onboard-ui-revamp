@@ -70,7 +70,7 @@ namespace onboard
             loadingSpin = Content.Load<Texture2D>("loadingSheet");
 
             // TODO: use this.Content to load your game content here
-            _mainMenu.setGames(_client.ListBucketContentsAsync("devcade-games").Result);
+            _mainMenu.gameTitles = _client.GetGames();
             _mainMenu.setCards();
         }
 
