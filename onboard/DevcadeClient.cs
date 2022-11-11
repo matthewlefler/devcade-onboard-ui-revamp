@@ -8,29 +8,15 @@ using System.Xml.Linq;
 using System.Collections;
 using System.Collections.Generic;
 
-// RadosGW
 using Amazon;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Amazon.S3.Transfer;
+using Microsoft.Xna.Framework;
 
-using Microsoft.Xna.Framework; // FIXME: Is this necessary for the client code?
-
-// For making requests to the API
-using System.Net.Http;
-using Newtonsoft.Json;
 
 namespace onboard
 {
-    public class DevcadeGame
-    {
-        public string id { get; set; }
-        public string author { get; set; }
-        public DateTime uploadDate { get; set; }
-        public string name { get; set; }
-        public string hash { get; set; }
-    }
-
     public class DevcadeClient
     {
         private string accessKey = Environment.GetEnvironmentVariable("AWS_ACCESS_KEY_ID");
@@ -40,8 +26,6 @@ namespace onboard
 
         private static AmazonS3Config _config;
         private static AmazonS3Client _s3Client;
-
-        private static HttpClient sharedClient;
 
         public DevcadeClient()
         {
@@ -55,43 +39,16 @@ namespace onboard
                     _config
                     );
 
-/*            await ProcessRepositoriesAsync(client);
-
-             var json = await client.GetStringAsync(
-                 "https://devcade-api.apps.okd4.csh.rit.edu/api/games/gamelist"
-            );
-
-             Console.Write(json);
-*/
-            GetGameInfo();
-        }
-        
-        void GetGameInfo()
-        {
-            Task<string> infoTask = asyncGetGameInfo();
-        }
-
-        async Task<string> asyncGetGameInfo()
-        {
-            HttpClient client = new HttpClient();
-                // Call asynchronous network methods in a try/catch block to handle exceptions.
-            try
+            // List buckets, and objects in buckets
+            /*
+            ListBucketsResponse response = _s3Client.ListBucketsAsync().Result;
+            foreach (S3Bucket b in response.Buckets)
             {
-                string uri = "https://devcade-api.apps.okd4.csh.rit.edu/api/games/gamelist/"; // TODO: Env variable URI tld 
-                string responseBody = await client.GetStringAsync(uri);
-
-                List<DevcadeGame> games = JsonConvert.DeserializeObject<List<Devcadegame>>(responseBody);
-
-//                Console.WriteLine(responseBody);
-                Console.WriteLine(games.toString());
+                Console.WriteLine("{0}\t{1}", b.BucketName, b.CreationDate);
             }
-            catch (HttpRequestException e)
-            {
-                Console.WriteLine("\nException Caught!");
-                Console.WriteLine("Message :{0} ", e.Message);
-            }
-            return "chom";
 
+            List<string> bucketContents = ListBucketContentsAsync("devcade-games").Result;
+            */
         }
 
         // Returns true if success and false otherwise
