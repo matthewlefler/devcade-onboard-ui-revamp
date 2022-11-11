@@ -6,5 +6,4 @@ RUN wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod
      -O packages-microsoft-prod.deb && \
     dpkg -i packages-microsoft-prod.deb && \
     apt-get update && \
-    apt-get install -y dotnet-sdk-6.0 aspnetcore-runtime-6.0 dotnet-sdk-3.1 aspnetcore-runtime-3.1
-RUN dpkg-reconfigure fontconfig-config
+    apt-get install -y dotnet-sdk-6.0 dotnet-runtime-6.0

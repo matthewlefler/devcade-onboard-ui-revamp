@@ -2,7 +2,6 @@
 
 set -e
 
-
 function help() {
     echo "-u : Set username | -d : Set container | -h : Print help"
 }
@@ -42,7 +41,7 @@ podman run --name="$container" --rm -it                                \
     --group-add keep-groups                                            \
     --annotation io.crun.keep_original_groups=1                        \
     -v "$xauth_path"/.Xauthority:/root/.Xauthority:Z                   \
-    -v ./../:/Devcade-onboard:Z                                        \
+    -v ./../:/onboard:Z                                                \
     -v /tmp/.X11-unix:/tmp/.X11-unix                                   \
     --env 'PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH'  \
     "$container"
