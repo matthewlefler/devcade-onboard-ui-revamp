@@ -35,6 +35,8 @@ namespace onboard
         private float moveTime = 0.15f; // This is the total time the scrolling animation takes
         private float timeRemaining = 0f;
 
+        private float descX; // The X position of the description box is saved here. Used to animate the box
+
         public bool movingUp;
         public bool movingDown;
 
@@ -223,42 +225,101 @@ namespace onboard
             }    */
         }
 
-        public void drawDescription(SpriteBatch _spriteBatch, Texture2D descTexture, SpriteFont titleFont, SpriteFont descFont)
+        public void drawDescription(SpriteBatch _spriteBatch, Texture2D descTexture, SpriteFont titleFont, SpriteFont descFont, GameTime gameTime)
         {
             // If fonts on this page look blurry, then increase the font size in the .spritefont
             // TODO: Figure out how to format a large paragraph of text on the description
             //       Decide on a description page layout/style
             //       Add some cool animations
-            
-            Vector2 descPos = new Vector2(_sWidth/2, _sHeight/2 + descTexture.Height/(6*scalingAmount));
+
+            // This does the slide in animation, starting off screen and moving to the middle over 0.5 seconds
+            if(descX > _sWidth/2)
+            {
+                descX -= ((_sWidth+descTexture.Width)/0.5f)*(float)gameTime.ElapsedGameTime.TotalSeconds;
+            }
+            else
+            {
+                descX = (_sWidth/2);
+            }
+
+            // First, draw the backdrop of the description
+            Vector2 descPos = new Vector2(descX, _sHeight/2 + descTexture.Height/(6*scalingAmount));
 
             _spriteBatch.Draw(descTexture, 
                 descPos,
                 null,
-                Color.Purple,
+                Color.White,
                 0f,
                 new Vector2(descTexture.Width/2,descTexture.Height/2),
                 1f/scalingAmount,
                 SpriteEffects.None,
                 0f
-                );
+            );
 
+            // Wraps the description text to fit within the box
+            // Then draws the description
+            string testDesc = "Hello! This a test of the description feature. This string contains multiple words that hopefully will be formatted to fit within this square. If this text looks wrong, then I'm bad at C Sharp :(";
+            List<string> wrapDesc = wrapText(testDesc);
+            
+            Vector2 testSize = descFont.MeasureString(testDesc);
+
+            int lineNum = 0;
+            foreach(string line in wrapDesc)
+            {
+                writeString(_spriteBatch,
+                descFont,
+                line,
+                new Vector2(descPos.X, descPos.Y - descTexture.Height/(5*scalingAmount) + testSize.Y*lineNum)
+                );
+                lineNum++;
+            }
+
+            // Write the game's title
             writeString( _spriteBatch,
                 titleFont,
                 gameSelected().name,
-                new Vector2(descPos.X, descPos.Y - descTexture.Height/(3*scalingAmount)),
-                1f
+                new Vector2(descPos.X, descPos.Y - descTexture.Height/(2.5f*scalingAmount))
             );
 
+            // Write the game's author
             writeString(_spriteBatch,
                 descFont,
-                gameSelected().author,
-                new Vector2(descPos.X, descPos.Y - descTexture.Height/(4*scalingAmount)),
-                1.5f
+                "By: " + gameSelected().author,
+                new Vector2(descPos.X, descPos.Y - descTexture.Height/(3*scalingAmount))
             );
+
         }
 
-        public void writeString(SpriteBatch _spriteBatch, SpriteFont font, string str, Vector2 pos, float scale)
+        public List<string> wrapText(string desc)
+        {
+            // This function should take in a description and return a list of lines to print to the screen
+            int lineLimit = 20; // Soft character limit for each line
+            string[] words = desc.Split(' '); // Split the description up by words
+            List<string> lines = new List<string>(); // Create a list to return 
+            
+            lines.Add(' '.ToString()); 
+            int currentLine = 0;
+            foreach(string word in words)
+            {
+                // For each word in the description, we add it to a line. 
+                lines[currentLine] += word+' ';
+                // Once that line is over 20 characters, we move to the next line
+                if(lines[currentLine].Length > lineLimit)
+                {
+                    currentLine++;
+                    lines.Add(' '.ToString());
+                }
+            }
+
+            return lines;
+        }
+
+        public void setDescX(float val)
+        {
+            this.descX = val;
+        }
+
+        public void writeString(SpriteBatch _spriteBatch, SpriteFont font, string str, Vector2 pos)
         {
             Vector2 strSize = font.MeasureString(str);
 
@@ -268,7 +329,7 @@ namespace onboard
                 Color.White,
                 0f,
                 new Vector2(strSize.X/2,strSize.Y/2),
-                scale/scalingAmount,
+                1f/scalingAmount,
                 SpriteEffects.None,
                 0f
             );

@@ -149,6 +149,7 @@ namespace onboard
 						Input.GetButtonDown(1, Input.ArcadeButtons.Menu) ||                   // or menu button
 						Input.GetButtonDown(2, Input.ArcadeButtons.Menu))                     // of either player
 					{
+                        _mainMenu.setDescX(_graphics.PreferredBackBufferWidth+descriptionTexture.Width/2);
 						state = "description";
 					}
 					_mainMenu.animate(gameTime);
@@ -200,7 +201,7 @@ namespace onboard
 				case "description":
 					_mainMenu.drawBackground(_spriteBatch, BGgradient, icon, fadeColor, gameTime);
 					_mainMenu.drawTitle(_spriteBatch, titleTexture, fadeColor);
-					_mainMenu.drawDescription(_spriteBatch, descriptionTexture, _devcadeMenuTitle, _devcadeMenuBig);
+					_mainMenu.drawDescription(_spriteBatch, descriptionTexture, _devcadeMenuTitle, _devcadeMenuBig, gameTime);
 					break;
 			}
 
