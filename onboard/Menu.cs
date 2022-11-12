@@ -36,6 +36,7 @@ namespace onboard
         private float timeRemaining = 0f;
 
         private float descX; // The X position of the description box is saved here. Used to animate the box
+        private float descOpacity = 0f; // The opacity of the description box
 
         public bool movingUp;
         public bool movingDown;
@@ -233,13 +234,15 @@ namespace onboard
             //       Add some cool animations
 
             // This does the slide in animation, starting off screen and moving to the middle over 0.5 seconds
-            if(descX > _sWidth/2)
+            if(descX > _sWidth/2 )
             {
-                descX -= ((_sWidth+descTexture.Width)/0.5f)*(float)gameTime.ElapsedGameTime.TotalSeconds;
+                descX -= ((_sWidth+descTexture.Width)/0.8f)*(float)gameTime.ElapsedGameTime.TotalSeconds;
+                descOpacity += (2/0.8f)*(float)gameTime.ElapsedGameTime.TotalSeconds;
             }
             else
             {
-                descX = (_sWidth/2);
+                descOpacity = 1f;
+                //descX = (_sWidth/2);
             }
 
             // First, draw the backdrop of the description
@@ -248,7 +251,7 @@ namespace onboard
             _spriteBatch.Draw(descTexture, 
                 descPos,
                 null,
-                Color.White,
+                new Color(descOpacity,descOpacity,descOpacity,descOpacity),
                 0f,
                 new Vector2(descTexture.Width/2,descTexture.Height/2),
                 1f/scalingAmount,
@@ -314,9 +317,10 @@ namespace onboard
             return lines;
         }
 
-        public void setDescX(float val)
+        public void setDesc(float x, float opac)
         {
-            this.descX = val;
+            this.descX = x;
+            this.descOpacity = opac;
         }
 
         public void writeString(SpriteBatch _spriteBatch, SpriteFont font, string str, Vector2 pos)
@@ -326,7 +330,7 @@ namespace onboard
             _spriteBatch.DrawString(font,
                 str,
                 pos,
-                Color.White,
+                new Color(descOpacity,descOpacity,descOpacity,descOpacity),
                 0f,
                 new Vector2(strSize.X/2,strSize.Y/2),
                 1f/scalingAmount,

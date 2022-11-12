@@ -149,7 +149,7 @@ namespace onboard
 						Input.GetButtonDown(1, Input.ArcadeButtons.Menu) ||                   // or menu button
 						Input.GetButtonDown(2, Input.ArcadeButtons.Menu))                     // of either player
 					{
-                        _mainMenu.setDescX(_graphics.PreferredBackBufferWidth+descriptionTexture.Width/2);
+                        _mainMenu.setDesc(_graphics.PreferredBackBufferWidth+descriptionTexture.Width/2, 0f);
 						state = "description";
 					}
 					_mainMenu.animate(gameTime);
