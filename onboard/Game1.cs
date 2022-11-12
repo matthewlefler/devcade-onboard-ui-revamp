@@ -168,7 +168,7 @@ namespace onboard
             {
                 case "launch":
                 case "input":
-                    _mainMenu.drawBackground(_spriteBatch, BGgradient, icon, fadeColor);
+                    _mainMenu.drawBackground(_spriteBatch, BGgradient, icon, fadeColor, gameTime);
                     _mainMenu.drawTitle(_spriteBatch, titleTexture, fadeColor);
                     _mainMenu.drawCards(_spriteBatch, cardTexture, _devcadeMenuBig);
                     break;
@@ -179,7 +179,7 @@ namespace onboard
                     break;
                 
                 case "description":
-                    _mainMenu.drawBackground(_spriteBatch, BGgradient, icon, fadeColor);
+                    _mainMenu.drawBackground(_spriteBatch, BGgradient, icon, fadeColor, gameTime);
                     _mainMenu.drawTitle(_spriteBatch,titleTexture,fadeColor);
                     _mainMenu.drawDescription(_spriteBatch, descriptionTexture, _devcadeMenuTitle, _devcadeMenuBig);
                     break;

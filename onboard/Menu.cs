@@ -24,8 +24,9 @@ namespace onboard
         //private float alpha = 0f;
         //private const float moveSpeed = 255.0f / fadeTime;
 
-        private int column = 0;
-        private int row = 0;
+        private int loadingCol = 0;
+        private int loadingRow = 0;
+        private float offset = 0;
 
         private int _sWidth;
         private int _sHeight;
@@ -70,7 +71,7 @@ namespace onboard
             return gameTitles.ElementAt(itemSelected).name;
         }
 
-        public void drawBackground(SpriteBatch _spriteBatch, Texture2D BGgradient, Texture2D icon, float col)
+        public void drawBackground(SpriteBatch _spriteBatch, Texture2D BGgradient, Texture2D icon, float col, GameTime gameTime)
         {
             _spriteBatch.Draw(
                 BGgradient,
@@ -83,17 +84,38 @@ namespace onboard
                 SpriteEffects.None,
                 0f
             );
-            _spriteBatch.Draw(
-                icon,
-                new Vector2(0, 0),
-                null,
-                new Color(col,col,col),
-                0f,
-                new Vector2(0, 0),
-                1f,
-                SpriteEffects.None,
-                0f
-            );
+
+            // Idea for scrolling icons: This surprisingly worked with no hassle
+                // For row in range (# of rows)
+                    // For column in range (# of cols)
+                        // Draw a single icon. The location is based on it's row & column. Both of these values will incremement by 150 (150 is the size of the icon sprite)
+                        // Added to the X and Y values will be it's offset, which is calculated by 150 * time elapsed. Making it move 150 px in one second
+                        // Once offset reaches 150, it goes back to zero. 
+            
+            offset += (150 * (float)gameTime.ElapsedGameTime.TotalSeconds) / 2; // Divided by two to make the animation a little slower
+            if (offset > 150)
+            {
+                offset = 0;
+            }
+
+            for(int row=-150; row <= 1800; row+=150) // Starts at -150 to draw an extra row above the screen
+            {
+                for(int column=0; column<=1200; column+=150)
+                {
+                    _spriteBatch.Draw(
+                        icon,
+                        new Vector2(column-offset, row+offset),
+                        null,
+                        new Color(col,col,col),
+                        0f,
+                        new Vector2(0, 0),
+                        1f,
+                        SpriteEffects.None,
+                        0f
+                    );
+                } 
+            }
+
         }
 
         public void drawTitle(SpriteBatch _spriteBatch, Texture2D titleTexture, float col)
@@ -124,19 +146,19 @@ namespace onboard
 
         public void drawLoading(SpriteBatch _spriteBatch, Texture2D loadingSpin, float col)
         { 
-            if(column > 4)
+            if(loadingCol > 4)
             {
-                column = 0;
-                row++;
-                if (row>4){
-                    row = 0;
+                loadingCol = 0;
+                loadingRow++;
+                if (loadingRow>4){
+                    loadingRow = 0;
                 }
             }
 
             // Creates a boundary to get the right spot on the spritesheet to be drawn
             Rectangle spriteBounds = new Rectangle(
-                600 * column,
-                600 * row,
+                600 * loadingCol,
+                600 * loadingRow,
                 600,
                 600
             );
@@ -153,7 +175,7 @@ namespace onboard
                 0f
             );
 
-            column++;
+            loadingCol++;
             
         }
 
