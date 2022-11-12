@@ -225,8 +225,11 @@ namespace onboard
 
         public void drawDescription(SpriteBatch _spriteBatch, Texture2D descTexture, SpriteFont titleFont, SpriteFont descFont)
         {
-            Vector2 titleSize = titleFont.MeasureString(gameSelected().name);
-            Vector2 descSize = descFont.MeasureString(gameSelected().author);
+            // If fonts on this page look blurry, then increase the font size in the .spritefont
+            // TODO: Figure out how to format a large paragraph of text on the description
+            //       Decide on a description page layout/style
+            //       Add some cool animations
+            
             Vector2 descPos = new Vector2(_sWidth/2, _sHeight/2 + descTexture.Height/(6*scalingAmount));
 
             _spriteBatch.Draw(descTexture, 
@@ -240,24 +243,32 @@ namespace onboard
                 0f
                 );
 
-            _spriteBatch.DrawString(titleFont,
+            writeString( _spriteBatch,
+                titleFont,
                 gameSelected().name,
                 new Vector2(descPos.X, descPos.Y - descTexture.Height/(3*scalingAmount)),
-                Color.White,
-                0f,
-                new Vector2(titleSize.X/2,titleSize.Y/2),
-                2f/scalingAmount,
-                SpriteEffects.None,
-                0f
+                1f
             );
 
-            _spriteBatch.DrawString(descFont,
+            writeString(_spriteBatch,
+                descFont,
                 gameSelected().author,
                 new Vector2(descPos.X, descPos.Y - descTexture.Height/(4*scalingAmount)),
+                1.5f
+            );
+        }
+
+        public void writeString(SpriteBatch _spriteBatch, SpriteFont font, string str, Vector2 pos, float scale)
+        {
+            Vector2 strSize = font.MeasureString(str);
+
+            _spriteBatch.DrawString(font,
+                str,
+                pos,
                 Color.White,
                 0f,
-                new Vector2(descSize.X/2,descSize.Y/2),
-                1.5f/scalingAmount,
+                new Vector2(strSize.X/2,strSize.Y/2),
+                scale/scalingAmount,
                 SpriteEffects.None,
                 0f
             );
