@@ -104,7 +104,7 @@ namespace onboard
 
                 case "loading":
                     // Check for process that matches last launched game and display loading screen if it's running 
-                    _loading = Util.IsProcessOpen(_mainMenu.gameSelected());
+                    _loading = Util.IsProcessOpen(_mainMenu.gameSelected().name);
                     
                     if(fadeColor < 1f)
                     {
@@ -142,7 +142,7 @@ namespace onboard
                     if (myState.IsKeyDown(Keys.Enter) && lastState.IsKeyUp(Keys.Enter))
                     {
                         Console.WriteLine("Running game!!!");
-                        _client.runGame(_mainMenu.gameSelected());
+                        //_client.runGame(_mainMenu.gameSelected());
                         fadeColor = 0f;
                         _loading = true;
                         state = "loading";
