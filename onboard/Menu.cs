@@ -50,12 +50,9 @@ namespace onboard
 
         public void updateDims(GraphicsDeviceManager _graphics) 
         {
-            // This will be the apect ratio of the screen on the machine
-            //_sWidth = Int32.Parse(Environment.GetEnvironmentVariable("VIEW_WIDTH"));
-            //_sHeight = Int32.Parse(Environment.GetEnvironmentVariable("VIEW_HEIGHT"));
-
-            _sHeight = 960;
-            _sWidth = 540;
+            
+            _sWidth = Int32.Parse(Environment.GetEnvironmentVariable("VIEW_WIDTH"));
+            _sHeight = Int32.Parse(Environment.GetEnvironmentVariable("VIEW_HEIGHT"));
 
             scalingAmount = 1920/_sHeight; // This is the ratio of the optimal height to the current height, used to scale elements
 
@@ -235,7 +232,7 @@ namespace onboard
             }    */
         }
 
-        public void descFadeIn(GameTime gameTime, Texture2D descTexture)
+        public void descFadeIn(GameTime gameTime)
         {
             // This does the slide in animation, starting off screen and moving to the middle over 0.8 seconds
             if(descOpacity < 1)
@@ -245,7 +242,7 @@ namespace onboard
             }
         }
 
-        public void descFadeOut(GameTime gameTime, Texture2D descTexture)
+        public void descFadeOut(GameTime gameTime)
         {
             // This does the slide out animation, starting in the middle of the screen and moving it off over 0.8 seconds
             if(descOpacity > 0)

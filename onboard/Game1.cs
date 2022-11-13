@@ -128,7 +128,7 @@ namespace onboard
 
 				// In this state, the user is able to scroll through the menu and launch games
 				case "input":
-					_mainMenu.descFadeOut(gameTime, descriptionTexture);
+					_mainMenu.descFadeOut(gameTime);
 					_mainMenu.cardFadeIn(gameTime);
 
 					if (((myState.IsKeyDown(Keys.Down)) || 									 // Keyboard down
@@ -155,7 +155,7 @@ namespace onboard
 					break;
 
 				case "description":
-					_mainMenu.descFadeIn(gameTime, descriptionTexture);
+					_mainMenu.descFadeIn(gameTime);
 					_mainMenu.cardFadeOut(gameTime);
 
 					if ((myState.IsKeyDown(Keys.Enter) && lastState.IsKeyUp(Keys.Enter)) || // Keyboard Enter
