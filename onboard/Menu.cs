@@ -37,6 +37,7 @@ namespace onboard
 
         private float descX; // The X position of the description box is saved here. Used to animate the box
         private float descOpacity; // The opacity of the description box
+        private static float descFadeTime = 0.6f; // Time it takes to make the description box fade in/out
 
         public bool movingUp;
         public bool movingDown;
@@ -49,8 +50,11 @@ namespace onboard
         public void updateDims(GraphicsDeviceManager _graphics) 
         {
             // This will be the apect ratio of the screen on the machine
-            _sWidth = Int32.Parse(Environment.GetEnvironmentVariable("VIEW_WIDTH"));
-            _sHeight = Int32.Parse(Environment.GetEnvironmentVariable("VIEW_HEIGHT"));
+            //_sWidth = Int32.Parse(Environment.GetEnvironmentVariable("VIEW_WIDTH"));
+            //_sHeight = Int32.Parse(Environment.GetEnvironmentVariable("VIEW_HEIGHT"));
+
+            _sHeight = 1920;
+            _sWidth = 1080;
 
             scalingAmount = 1920/_sHeight; // This is the ratio of the optimal height to the current height, used to scale elements
 
@@ -226,8 +230,8 @@ namespace onboard
             // This does the slide in animation, starting off screen and moving to the middle over 0.8 seconds
             if(descX > _sWidth/2)
             {
-                descX -= (_sWidth*1.5f)/0.8f*(float)gameTime.ElapsedGameTime.TotalSeconds;
-                descOpacity += (2/0.8f)*(float)gameTime.ElapsedGameTime.TotalSeconds;
+                descX -= (_sWidth*1.5f)/descFadeTime*(float)gameTime.ElapsedGameTime.TotalSeconds;
+                descOpacity += (2/descFadeTime)*(float)gameTime.ElapsedGameTime.TotalSeconds;
             }
             else
             {
@@ -241,8 +245,8 @@ namespace onboard
             // This does the slide out animation, starting in the middle of the screen and moving it off over 0.8 seconds
             if(descX < _sWidth*1.5)
             {
-                descX += (_sWidth*1.5f)/0.8f*(float)gameTime.ElapsedGameTime.TotalSeconds;
-                descOpacity -= (1/0.8f)*(float)gameTime.ElapsedGameTime.TotalSeconds;
+                descX += (_sWidth*1.5f)/descFadeTime*(float)gameTime.ElapsedGameTime.TotalSeconds;
+                descOpacity -= (1/descFadeTime)*(float)gameTime.ElapsedGameTime.TotalSeconds;
             }
             else
             {
@@ -268,10 +272,8 @@ namespace onboard
 
             // Wraps the description text to fit within the box
             // Then draws the description
-            string testDesc = "Hello! This a test of the description feature. This string contains multiple words that hopefully will be formatted to fit within this square. If this text looks wrong, then I'm bad at C Sharp :(";
-            List<string> wrapDesc = wrapText(testDesc);
-            
-            Vector2 testSize = descFont.MeasureString(testDesc);
+            List<string> wrapDesc = wrapText(gameSelected().description);
+            float descHeight = descFont.MeasureString(gameSelected().description).Y;
 
             int lineNum = 0;
             foreach(string line in wrapDesc)
@@ -279,7 +281,7 @@ namespace onboard
                 writeString(_spriteBatch,
                 descFont,
                 line,
-                new Vector2(descPos.X, descPos.Y - descTexture.Height/(5*scalingAmount) + testSize.Y*lineNum)
+                new Vector2(descPos.X, descPos.Y - descTexture.Height/(5*scalingAmount) + descHeight*lineNum)
                 );
                 lineNum++;
             }

@@ -23,6 +23,9 @@ namespace onboard
         public DateTime uploadDate { get; set; }
         public string name { get; set; }
         public string hash { get; set; }
+        public string description { get; set; }
+        public string iconLink { get; set; }
+        public string bannerLink { get; set; }
     }
 
     public class DevcadeClient
@@ -53,6 +56,19 @@ namespace onboard
                     Console.WriteLine("Message :{0} ", e.Message);
                 }
                 return new List<DevcadeGame>();
+            }
+        }
+
+        public void GetBanners()
+        {
+            try
+            {
+                string uri = $"https://";
+            }
+            catch(HttpRequestException e)
+            {
+                Console.WriteLine("\nException Caught!");
+                Console.WriteLine("Message :{0} ", e.Message);
             }
         }
 

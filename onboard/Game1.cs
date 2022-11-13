@@ -172,7 +172,6 @@ namespace onboard
 						Input.GetButtonDown(1, Input.ArcadeButtons.B4) ||																			 // or B4 button
 						Input.GetButtonDown(2, Input.ArcadeButtons.B4))																				 // of either player
 					{
-						_mainMenu.setDesc(_graphics.PreferredBackBufferWidth/2, 1f);
 						state = "input";
 					}
 
