@@ -51,11 +51,8 @@ namespace onboard
         public void updateDims(GraphicsDeviceManager _graphics) 
         {
             
-            //_sWidth = Int32.Parse(Environment.GetEnvironmentVariable("VIEW_WIDTH"));
-            //sHeight = Int32.Parse(Environment.GetEnvironmentVariable("VIEW_HEIGHT"));
-
-            _sWidth = 540;
-            _sHeight = 960;
+            _sWidth = Int32.Parse(Environment.GetEnvironmentVariable("VIEW_WIDTH"));
+            _sHeight = Int32.Parse(Environment.GetEnvironmentVariable("VIEW_HEIGHT"));
 
             scalingAmount = 1920/_sHeight; // This is the ratio of the optimal height to the current height, used to scale elements
 
