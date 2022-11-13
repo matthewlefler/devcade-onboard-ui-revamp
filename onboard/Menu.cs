@@ -37,8 +37,8 @@ namespace onboard
         private float timeRemaining = 0f;
 
         private float descX; // The X position of the description box is saved here. Used to animate the box
-        private float descOpacity; // The opacity of the description box
-        private static float descFadeTime = 0.6f; // Time it takes to make the description box fade in/out
+        private float descOpacity = 0f; // The opacity of the description box
+        private static float descFadeTime = 0.4f; // Time it takes to make the description box fade in/out
 
         public bool movingUp;
         public bool movingDown;
@@ -77,6 +77,8 @@ namespace onboard
                 }
                 
             }
+            MenuCard.cardX = 0;
+            descX = _sWidth*1.5f;
         }
 
         public DevcadeGame gameSelected()
@@ -236,29 +238,38 @@ namespace onboard
         public void descFadeIn(GameTime gameTime, Texture2D descTexture)
         {
             // This does the slide in animation, starting off screen and moving to the middle over 0.8 seconds
-            if(descX > _sWidth/2)
+            if(descOpacity < 1)
             {
-                descX -= (_sWidth*1.5f)/descFadeTime*(float)gameTime.ElapsedGameTime.TotalSeconds;
-                descOpacity += (2/descFadeTime)*(float)gameTime.ElapsedGameTime.TotalSeconds;
-            }
-            else
-            {
-                descOpacity = 1f;
-                descX = (_sWidth/2);
+                descX -= (_sWidth)/descFadeTime*(float)gameTime.ElapsedGameTime.TotalSeconds;
+                descOpacity += (1/descFadeTime)*(float)gameTime.ElapsedGameTime.TotalSeconds;
             }
         }
 
         public void descFadeOut(GameTime gameTime, Texture2D descTexture)
         {
             // This does the slide out animation, starting in the middle of the screen and moving it off over 0.8 seconds
-            if(descX < _sWidth*1.5)
+            if(descOpacity > 0)
             {
-                descX += (_sWidth*1.5f)/descFadeTime*(float)gameTime.ElapsedGameTime.TotalSeconds;
+                descX += (_sWidth)/descFadeTime*(float)gameTime.ElapsedGameTime.TotalSeconds;
                 descOpacity -= (1/descFadeTime)*(float)gameTime.ElapsedGameTime.TotalSeconds;
             }
-            else
+        }
+
+        public void cardFadeIn(GameTime gameTime)
+        {
+            if(MenuCard.cardOpacity < 1)
             {
-                descOpacity = 0f;
+                MenuCard.cardX += (_sWidth)/descFadeTime*(float)gameTime.ElapsedGameTime.TotalSeconds;
+                MenuCard.cardOpacity += (1/descFadeTime)*(float)gameTime.ElapsedGameTime.TotalSeconds;
+            }
+        }
+
+        public void cardFadeOut(GameTime gameTime)
+        {
+            if(MenuCard.cardOpacity > 0)
+            {
+                MenuCard.cardX -= (_sWidth)/descFadeTime*(float)gameTime.ElapsedGameTime.TotalSeconds;
+                MenuCard.cardOpacity -= (1/descFadeTime)*(float)gameTime.ElapsedGameTime.TotalSeconds;
             }
         }
 
@@ -332,12 +343,6 @@ namespace onboard
             }
 
             return lines;
-        }
-
-        public void setDesc(float x, float opac)
-        {
-            this.descX = x;
-            this.descOpacity = opac;
         }
 
         public void writeString(SpriteBatch _spriteBatch, SpriteFont font, string str, Vector2 pos)

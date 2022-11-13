@@ -129,6 +129,7 @@ namespace onboard
 				// In this state, the user is able to scroll through the menu and launch games
 				case "input":
 					_mainMenu.descFadeOut(gameTime, descriptionTexture);
+					_mainMenu.cardFadeIn(gameTime);
 
 					if (((myState.IsKeyDown(Keys.Down)) || 									 // Keyboard down
 						Input.GetButtonDown(1, Input.ArcadeButtons.StickDown) ||             // or joystick down
@@ -148,7 +149,6 @@ namespace onboard
 						Input.GetButtonDown(1, Input.ArcadeButtons.Menu) ||                   // or menu button
 						Input.GetButtonDown(2, Input.ArcadeButtons.Menu))                     // of either player
 					{
-                        _mainMenu.setDesc(_graphics.PreferredBackBufferWidth*1.5f, 0f);
 						state = "description";
 					}
 					_mainMenu.animate(gameTime);
@@ -156,6 +156,7 @@ namespace onboard
 
 				case "description":
 					_mainMenu.descFadeIn(gameTime, descriptionTexture);
+					_mainMenu.cardFadeOut(gameTime);
 
 					if ((myState.IsKeyDown(Keys.Enter) && lastState.IsKeyUp(Keys.Enter)) || // Keyboard Enter
 						Input.GetButtonDown(1, Input.ArcadeButtons.Menu) ||                   // or menu button
@@ -190,6 +191,7 @@ namespace onboard
 			{
 				case "launch":
 				case "input":
+				case "description":
 					_mainMenu.drawBackground(_spriteBatch, BGgradient, icon, fadeColor, gameTime);
 					_mainMenu.drawTitle(_spriteBatch, titleTexture, fadeColor);
 					_mainMenu.drawCards(_spriteBatch, cardTexture, _devcadeMenuBig);
@@ -199,12 +201,6 @@ namespace onboard
 				case "loading":
 					_mainMenu.drawLoading(_spriteBatch, loadingSpin, fadeColor);
 					_mainMenu.drawTitle(_spriteBatch, titleTexture, fadeColor);
-					break;
-
-				case "description":
-					_mainMenu.drawBackground(_spriteBatch, BGgradient, icon, fadeColor, gameTime);
-					_mainMenu.drawTitle(_spriteBatch, titleTexture, fadeColor);
-					_mainMenu.drawDescription(_spriteBatch, descriptionTexture, _devcadeMenuTitle, _devcadeMenuBig);
 					break;
 			}
 
