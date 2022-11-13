@@ -13,19 +13,19 @@ namespace onboard
         private static float moveTime = 0.15f; // Time it takes to finish scrolling anim
         //private float timeRemaining = 0;
 
-        public float rotation = 0f; // Initial pos
+        private float rotation = 0f; // Initial pos
         private static float rotation_amt = MathHelper.ToRadians(25f); // Amount the card moves when scrolling
 
         public int listPos; // Tracks the card's current position on the screen
-        public string name; // Each game name will taken from gameTitles list in Menu.cs
+        private string name; // Each game name will taken from gameTitles list in Menu.cs
         //public float layer = 0f; // This doesn't work idk why
 
         // Same as rotation variables, but for scale, color
-        public float scale = 1f;
+        private float scale = 1f;
         private static float scale_amt = 0.05f;
 
         // So uhh, I gues for decimal values the color should actually take 0.1-1.0, not 0.0-255.0? So technically this isn't correct?
-        public Color cardColor = new Color(125, 0, 0);
+        private Color cardColor = new Color(125, 0, 0);
         private static float red_amt = 30.0f;
         private static float color_amt = 50.0f;
 

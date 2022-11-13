@@ -129,31 +129,35 @@ namespace onboard
 				// In this state, the user is able to scroll through the menu and launch games
 				// TODO: Update _itemSelected  and top/bottom of list check to be a part of Menu.cs
 				case "input":
-					if (((myState.IsKeyDown(Keys.Down)) || 									// Keyboard down
+					_mainMenu.descFadeOut(gameTime, descriptionTexture);
+
+					if (((myState.IsKeyDown(Keys.Down)) || 									 // Keyboard down
 						Input.GetButtonDown(1, Input.ArcadeButtons.StickDown) ||             // or joystick down
-						Input.GetButtonDown(2, Input.ArcadeButtons.StickDown)))            // of either player
+						Input.GetButtonDown(2, Input.ArcadeButtons.StickDown)))              // of either player
 					{
 						_mainMenu.beginAnimUp();
 					}
 
-					if (((myState.IsKeyDown(Keys.Up)) || 										// Keyboard up
-						Input.GetButtonDown(1, Input.ArcadeButtons.StickUp) ||					 // or joystick up
-						Input.GetButtonDown(2, Input.ArcadeButtons.StickUp)))				 // of either player																			 // and not at top of list
+					if (((myState.IsKeyDown(Keys.Up)) || 									  // Keyboard up
+						Input.GetButtonDown(1, Input.ArcadeButtons.StickUp) ||				  // or joystick up
+						Input.GetButtonDown(2, Input.ArcadeButtons.StickUp)))				  // of either player																			 // and not at top of list
 					{
 						_mainMenu.beginAnimDown();
 					}
 
-					if ((myState.IsKeyDown(Keys.Enter) && lastState.IsKeyUp(Keys.Enter)) || // Keyboard Enter
+					if ((myState.IsKeyDown(Keys.Enter) && lastState.IsKeyUp(Keys.Enter)) ||   // Keyboard Enter
 						Input.GetButtonDown(1, Input.ArcadeButtons.Menu) ||                   // or menu button
 						Input.GetButtonDown(2, Input.ArcadeButtons.Menu))                     // of either player
 					{
-                        _mainMenu.setDesc(_graphics.PreferredBackBufferWidth+descriptionTexture.Width/2, 0f);
+                        _mainMenu.setDesc(_graphics.PreferredBackBufferWidth*1.5f, 0f);
 						state = "description";
 					}
 					_mainMenu.animate(gameTime);
 					break;
 
 				case "description":
+					_mainMenu.descFadeIn(gameTime, descriptionTexture);
+
 					if ((myState.IsKeyDown(Keys.Enter) && lastState.IsKeyUp(Keys.Enter)) || // Keyboard Enter
 						Input.GetButtonDown(1, Input.ArcadeButtons.Menu) ||                   // or menu button
 						Input.GetButtonDown(2, Input.ArcadeButtons.Menu))                     // of either player
@@ -163,10 +167,12 @@ namespace onboard
 						fadeColor = 0f;
 						_loading = true;
 						state = "loading";
+
 					} else if ((myState.IsKeyDown(Keys.RightShift) && lastState.IsKeyUp(Keys.RightShift)) || // Keyboard Rshift
 						Input.GetButtonDown(1, Input.ArcadeButtons.B4) ||																			 // or B4 button
 						Input.GetButtonDown(2, Input.ArcadeButtons.B4))																				 // of either player
 					{
+						_mainMenu.setDesc(_graphics.PreferredBackBufferWidth/2, 1f);
 						state = "input";
 					}
 
@@ -189,6 +195,7 @@ namespace onboard
 					_mainMenu.drawBackground(_spriteBatch, BGgradient, icon, fadeColor, gameTime);
 					_mainMenu.drawTitle(_spriteBatch, titleTexture, fadeColor);
 					_mainMenu.drawCards(_spriteBatch, cardTexture, _devcadeMenuBig);
+					_mainMenu.drawDescription(_spriteBatch, descriptionTexture, _devcadeMenuTitle, _devcadeMenuBig);
 					break;
 
 				case "loading":
@@ -199,7 +206,7 @@ namespace onboard
 				case "description":
 					_mainMenu.drawBackground(_spriteBatch, BGgradient, icon, fadeColor, gameTime);
 					_mainMenu.drawTitle(_spriteBatch, titleTexture, fadeColor);
-					_mainMenu.drawDescription(_spriteBatch, descriptionTexture, _devcadeMenuTitle, _devcadeMenuBig, gameTime);
+					_mainMenu.drawDescription(_spriteBatch, descriptionTexture, _devcadeMenuTitle, _devcadeMenuBig);
 					break;
 			}
 

@@ -36,7 +36,7 @@ namespace onboard
         private float timeRemaining = 0f;
 
         private float descX; // The X position of the description box is saved here. Used to animate the box
-        private float descOpacity = 0f; // The opacity of the description box
+        private float descOpacity; // The opacity of the description box
 
         public bool movingUp;
         public bool movingDown;
@@ -221,17 +221,12 @@ namespace onboard
             }    */
         }
 
-        public void drawDescription(SpriteBatch _spriteBatch, Texture2D descTexture, SpriteFont titleFont, SpriteFont descFont, GameTime gameTime)
+        public void descFadeIn(GameTime gameTime, Texture2D descTexture)
         {
-            // If fonts on this page look blurry, then increase the font size in the .spritefont
-            // TODO: Figure out how to format a large paragraph of text on the description
-            //       Decide on a description page layout/style
-            //       Add some cool animations
-
-            // This does the slide in animation, starting off screen and moving to the middle over 0.5 seconds
-            if(descX > _sWidth/2 )
+            // This does the slide in animation, starting off screen and moving to the middle over 0.8 seconds
+            if(descX > _sWidth/2)
             {
-                descX -= ((_sWidth+descTexture.Width)/0.8f)*(float)gameTime.ElapsedGameTime.TotalSeconds;
+                descX -= (_sWidth*1.5f)/0.8f*(float)gameTime.ElapsedGameTime.TotalSeconds;
                 descOpacity += (2/0.8f)*(float)gameTime.ElapsedGameTime.TotalSeconds;
             }
             else
@@ -239,7 +234,24 @@ namespace onboard
                 descOpacity = 1f;
                 descX = (_sWidth/2);
             }
+        }
 
+        public void descFadeOut(GameTime gameTime, Texture2D descTexture)
+        {
+            // This does the slide out animation, starting in the middle of the screen and moving it off over 0.8 seconds
+            if(descX < _sWidth*1.5)
+            {
+                descX += (_sWidth*1.5f)/0.8f*(float)gameTime.ElapsedGameTime.TotalSeconds;
+                descOpacity -= (1/0.8f)*(float)gameTime.ElapsedGameTime.TotalSeconds;
+            }
+            else
+            {
+                descOpacity = 0f;
+            }
+        }
+
+        public void drawDescription(SpriteBatch _spriteBatch, Texture2D descTexture, SpriteFont titleFont, SpriteFont descFont)
+        {
             // First, draw the backdrop of the description
             Vector2 descPos = new Vector2(descX, _sHeight/2 + descTexture.Height/(6*scalingAmount));
 
@@ -291,7 +303,7 @@ namespace onboard
         public List<string> wrapText(string desc)
         {
             // This function should take in a description and return a list of lines to print to the screen
-            int lineLimit = 20; // Soft character limit for each line
+            int lineLimit = 25; // Soft character limit for each line
             string[] words = desc.Split(' '); // Split the description up by words
             List<string> lines = new List<string>(); // Create a list to return 
             
