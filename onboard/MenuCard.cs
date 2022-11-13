@@ -11,7 +11,6 @@ namespace onboard
     public class MenuCard
     {
         private static float moveTime = 0.15f; // Time it takes to finish scrolling anim
-        //private float timeRemaining = 0;
 
         private float rotation = 0f; // Initial pos
         private static float rotation_amt = MathHelper.ToRadians(25f); // Amount the card moves when scrolling
@@ -20,8 +19,7 @@ namespace onboard
 
         public int listPos; // Tracks the card's current position on the screen
         private string name; // Each game name will taken from gameTitles list in Menu.cs
-        //public float layer = 0f; // This doesn't work idk why
-
+        
         // Same as rotation variables, but for scale, color
         private float scale = 1f;
         private static float scale_amt = 0.05f;

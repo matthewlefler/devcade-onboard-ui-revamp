@@ -146,16 +146,6 @@ namespace onboard
                 SpriteEffects.None,
                 0f
             );
-            /*
-            string welcome = "Welcome to Devcade";
-            Vector2 welcomeSize = font.MeasureString(welcome);
-            _spriteBatch.DrawString(font, welcome, new Vector2(_sWidth / 2 - welcomeSize.X / 2, _sHeight / 5 - welcomeSize.Y), Color.Black);
-                         
-
-            string wares = "Come enjoy our wares";
-            Vector2 waresSize = font.MeasureString(wares);
-            _spriteBatch.DrawString(font, wares, new Vector2(_sWidth / 2 + welcomeSize.X / 8, (_sHeight / 4.2f)), Color.Yellow, -0.3f, new Vector2(0, 0), new Vector2(0.5f, 0.5f), SpriteEffects.None, 1);
-            */
         }
 
         public void drawLoading(SpriteBatch _spriteBatch, Texture2D loadingSpin, float col)
@@ -191,48 +181,6 @@ namespace onboard
 
             loadingCol++;
             
-        }
-
-        // OLD
-        public void drawSelection(SpriteBatch _spriteBatch, int menuItemSelected)
-        {
-            int rectLength = 300;
-            int rectHeight = 40;
-            RectangleSprite.DrawRectangle(_spriteBatch, new Rectangle(
-                    _sWidth / 2 - rectLength/2,
-                    ((_sHeight / 5) + (_sHeight / 10)) + ((_sHeight / 10) * menuItemSelected),
-                    rectLength,
-                    rectHeight
-                ),
-                Color.White, 3);
-        }
-
-        // OLD
-        public void drawGameCount(SpriteFont font, SpriteBatch _spriteBatch, int itemSelected, int totalItems)
-        {
-            _spriteBatch.DrawString(font, itemSelected + " / " + totalItems, new Vector2(50, 50), Color.White);
-        }
-
-        // OLD
-        public void drawGames(SpriteFont font, SpriteBatch _spriteBatch, int itemSelected, int maxItems)
-        {
-            int startPosition = (int)(Math.Floor(itemSelected / (double)maxItems) * maxItems);
-            for (int i = 0; i < maxItems; i++)
-            {
-                if (startPosition + i > gameTitles.Count - 1)
-                    break;
-                string gameTitle = gameTitles.ElementAt(startPosition+i).name;
-                Vector2 gameTitleSize = font.MeasureString(gameTitle);
-                _spriteBatch.DrawString(font, gameTitle, new Vector2(_sWidth / 2 - gameTitleSize.X / 2, ((_sHeight / 5) + (_sHeight / 10)) + ((_sHeight / 10) * i)), Color.White);
-            }
-            /*
-            int index = 0;
-            foreach (String gameTitle in gameTitles)
-            {
-                Vector2 gameTitleSize = font.MeasureString(gameTitle);
-                _spriteBatch.DrawString(font, gameTitle, new Vector2(_sWidth / 2 - gameTitleSize.X / 2, ((_sHeight / 5) + (_sHeight / 10)) + ((_sHeight / 10) * index)), Color.White);
-                index++;
-            }    */
         }
 
         public void descFadeIn(GameTime gameTime)
