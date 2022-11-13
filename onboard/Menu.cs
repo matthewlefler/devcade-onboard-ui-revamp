@@ -49,8 +49,8 @@ namespace onboard
         public void updateDims(GraphicsDeviceManager _graphics) 
         {
             // This will be the apect ratio of the screen on the machine
-            _sWidth = 1080;
-            _sHeight = 1920;
+            _sWidth = Int32.Parse(Environment.GetEnvironmentVariable("VIEW_WIDTH"));
+            _sHeight = Int32.Parse(Environment.GetEnvironmentVariable("VIEW_HEIGHT"));
 
             scalingAmount = 1920/_sHeight; // This is the ratio of the optimal height to the current height, used to scale elements
 
