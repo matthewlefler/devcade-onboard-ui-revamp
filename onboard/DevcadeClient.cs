@@ -59,16 +59,30 @@ namespace onboard
             }
         }
 
-        public void GetBanners()
+        public void GetBanner(DevcadeGame game)
         {
-            try
+            // Path to where the banner image will be saved
+            string path = $"/tmp/{game.name}";
+
+            using (var client = new HttpClient())
             {
-                string uri = $"https://";
-            }
-            catch(HttpRequestException e)
-            {
-                Console.WriteLine("\nException Caught!");
-                Console.WriteLine("Message :{0} ", e.Message);
+                try
+                {
+                    // Download the image from this uri, save it to the path
+                    string uri = $"https://{_apiDomain}/download/banner/{game.id}";
+                    using (var s = client.GetStreamAsync(uri))
+                    {
+                        using (var fs = new FileStream(path, FileMode.OpenOrCreate))
+                        {
+                            s.Result.CopyTo(fs);
+                        }
+                    }
+                }
+                catch(HttpRequestException e)
+                {
+                    Console.WriteLine("\nException Caught!");
+                    Console.WriteLine("Message :{0} ", e.Message);
+                }
             }
         }
 
