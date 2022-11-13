@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -53,8 +54,8 @@ namespace onboard
             //_sWidth = Int32.Parse(Environment.GetEnvironmentVariable("VIEW_WIDTH"));
             //_sHeight = Int32.Parse(Environment.GetEnvironmentVariable("VIEW_HEIGHT"));
 
-            _sHeight = 1920;
-            _sWidth = 1080;
+            _sHeight = 960;
+            _sWidth = 540;
 
             scalingAmount = 1920/_sHeight; // This is the ratio of the optimal height to the current height, used to scale elements
 
@@ -63,11 +64,18 @@ namespace onboard
             _graphics.ApplyChanges();
         }
 
-        public void setCards()
+        public void setCards(DevcadeClient _client, GraphicsDevice graphics)
         {
             for(int i=0; i<gameTitles.Count; i++)
             {
-                cards.Add(new MenuCard(i*-1,gameTitles[i].name));
+                DevcadeGame game = gameTitles[i];
+                _client.GetBanner(game);
+                using (var fs = new FileStream($"/tmp/{game.name}", FileMode.Open))
+                {
+                    Texture2D cardTexture = Texture2D.FromStream(graphics, fs);
+                    cards.Add(new MenuCard(i*-1,game.name,cardTexture));
+                }
+                
             }
         }
 

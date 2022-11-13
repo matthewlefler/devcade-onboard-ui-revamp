@@ -73,7 +73,7 @@ namespace onboard
 
 			// TODO: use this.Content to load your game content here
 			_mainMenu.gameTitles = _client.GetGames();
-			_mainMenu.setCards();
+			_mainMenu.setCards(_client, GraphicsDevice);
 		}
 
 		protected override void Update(GameTime gameTime)
@@ -127,7 +127,6 @@ namespace onboard
 					break;
 
 				// In this state, the user is able to scroll through the menu and launch games
-				// TODO: Update _itemSelected  and top/bottom of list check to be a part of Menu.cs
 				case "input":
 					_mainMenu.descFadeOut(gameTime, descriptionTexture);
 
@@ -163,7 +162,7 @@ namespace onboard
 						Input.GetButtonDown(2, Input.ArcadeButtons.Menu))                     // of either player
 					{
 						Console.WriteLine("Running game!!!");
-						//_client.runGame(_mainMenu.gameSelected());
+						_client.runGame(_mainMenu.gameSelected());
 						fadeColor = 0f;
 						_loading = true;
 						state = "loading";

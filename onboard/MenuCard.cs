@@ -16,6 +16,8 @@ namespace onboard
         private float rotation = 0f; // Initial pos
         private static float rotation_amt = MathHelper.ToRadians(25f); // Amount the card moves when scrolling
 
+        private Texture2D texture;
+
         public int listPos; // Tracks the card's current position on the screen
         private string name; // Each game name will taken from gameTitles list in Menu.cs
         //public float layer = 0f; // This doesn't work idk why
@@ -35,10 +37,11 @@ namespace onboard
         private static float colorSpeed = color_amt / moveTime;
         private static float redSpeed = red_amt / moveTime;
     
-        public MenuCard(int initialPos, string theName)
+        public MenuCard(int initialPos, string theName, Texture2D cardTexture)
         {
             this.listPos = initialPos;
             this.name = theName;
+            this.texture = cardTexture;
 
             while(initialPos > 0)
             {
@@ -116,10 +119,10 @@ namespace onboard
         public void DrawSelf(SpriteBatch _spriteBatch, Texture2D cardTexture, SpriteFont font, int _sHeight, int scalingAmount)
         {
             _spriteBatch.Draw(
-                cardTexture,
+                texture,
                 new Vector2(0, _sHeight / 2 + cardTexture.Height / (2*scalingAmount)),
                 null,
-                cardColor,
+                Color.White,
                 rotation,
                 new Vector2(0, cardTexture.Height / 2),
                 scale/scalingAmount, 
@@ -127,7 +130,7 @@ namespace onboard
                 0f
                 );
 
-             _spriteBatch.DrawString(
+             /*_spriteBatch.DrawString(
                 font,
                 name,
                 new Vector2(0, _sHeight / 2 + cardTexture.Height / 4),
@@ -137,7 +140,7 @@ namespace onboard
                 1f,
                 SpriteEffects.None,
                 0f
-                );
+            );*/
         }
     
     }

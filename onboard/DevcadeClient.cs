@@ -47,6 +47,11 @@ namespace onboard
                     using (var responseBody = client.GetStringAsync(uri))
                     {
                         games = JsonConvert.DeserializeObject<List<DevcadeGame>>(responseBody.Result);
+                        // TODO: Add error handling if there is no games from the API
+                        if(games.Count == 0)
+                        {
+                            Console.WriteLine("Where the games at?");
+                        }
                         return games;
                     }
                 }
@@ -61,15 +66,21 @@ namespace onboard
 
         public void GetBanner(DevcadeGame game)
         {
+            // TODO: This function works, now just get the game to draw those images
+            //       Get some clarity on what each image is being used for
+
             // Path to where the banner image will be saved
+            // Making this game.name will name the downloaded image have that name, could set it to anything like id etc..
             string path = $"/tmp/{game.name}";
+
+            Console.WriteLine($"Downloading banner for: {game.name}");
 
             using (var client = new HttpClient())
             {
                 try
                 {
                     // Download the image from this uri, save it to the path
-                    string uri = $"https://{_apiDomain}/download/banner/{game.id}";
+                    string uri = $"https://{_apiDomain}/api/games/download/banner/{game.id}";
                     using (var s = client.GetStreamAsync(uri))
                     {
                         using (var fs = new FileStream(path, FileMode.OpenOrCreate))
