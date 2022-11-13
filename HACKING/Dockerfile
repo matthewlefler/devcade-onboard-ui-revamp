@@ -6,4 +6,5 @@ RUN wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod
      -O packages-microsoft-prod.deb && \
     dpkg -i packages-microsoft-prod.deb && \
     apt-get update && \
-    apt-get install -y dotnet-sdk-6.0 dotnet-runtime-6.0
+    apt-get install -y dotnet-sdk-6.0 dotnet-runtime-6.0 libgtk-3-0
+RUN dotnet tool install -g dotnet-mgcb; dotnet tool restore
