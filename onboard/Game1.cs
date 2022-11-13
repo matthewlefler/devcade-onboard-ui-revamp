@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
+using System.Diagnostics;
 using Devcade;
 
 
@@ -21,6 +22,7 @@ namespace onboard
 		private bool _loading = false;
 
 		private string state = "launch";
+		private Process gameProcess;
 		private float fadeColor = 0f;
 
 		KeyboardState lastState;
@@ -112,7 +114,7 @@ namespace onboard
 				case "loading":
 					// Check for process that matches last launched game and display loading screen if it's running 
 					// This can be done easier by keeping a reference to the process spawned and .HasExited property...
-					_loading = Util.IsProcessOpen(_mainMenu.gameSelected().name);
+					_loading = !gameProcess.HasExited;
 
 					if (fadeColor < 1f)
 					{
@@ -163,7 +165,7 @@ namespace onboard
 						Input.GetButtonDown(2, Input.ArcadeButtons.Menu))                     // of either player
 					{
 						Console.WriteLine("Running game!!!");
-						_client.runGame(_mainMenu.gameSelected());
+						gameProcess = _client.runGame(_mainMenu.gameSelected());
 						fadeColor = 0f;
 						_loading = true;
 						state = "loading";

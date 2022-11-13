@@ -121,7 +121,7 @@ namespace onboard
             }
         }
 
-        public void runGame(DevcadeGame game)
+        public Process runGame(DevcadeGame game)
         {
             string gameName = game.name.Replace(' ', '_');
             Console.WriteLine($"Game is: {gameName}");
@@ -163,6 +163,7 @@ namespace onboard
             };
 
             process.Start();
+            return process;
         }
     }
 }
