@@ -67,11 +67,6 @@ namespace onboard
             }
         }
 
-        public int gamesLen()
-        {
-            return gameTitles.Count;
-        }
-
         public DevcadeGame gameSelected()
         {
             return gameTitles.ElementAt(itemSelected);
@@ -242,7 +237,7 @@ namespace onboard
             else
             {
                 descOpacity = 1f;
-                //descX = (_sWidth/2);
+                descX = (_sWidth/2);
             }
 
             // First, draw the backdrop of the description
@@ -386,7 +381,7 @@ namespace onboard
 
         public void beginAnimUp()
         {
-            if (!(movingUp || movingDown))
+            if (!(movingUp || movingDown) && itemSelected < gameTitles.Count()-1) // scrolling beginds only if it is not already moving, and not at bottom of list
                 {
                     foreach(MenuCard card in cards)
                     {
@@ -401,7 +396,7 @@ namespace onboard
 
         public void beginAnimDown()
         {
-            if (!(movingDown || movingUp))
+            if (!(movingDown || movingUp) && itemSelected > 0) // scrolling begins only if it is not already moving, and not at the top of the list
                 {
                     foreach (MenuCard card in cards)
                     {

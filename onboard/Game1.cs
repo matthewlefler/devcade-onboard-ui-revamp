@@ -129,18 +129,16 @@ namespace onboard
 				// In this state, the user is able to scroll through the menu and launch games
 				// TODO: Update _itemSelected  and top/bottom of list check to be a part of Menu.cs
 				case "input":
-					if (((myState.IsKeyDown(Keys.Down) && lastState.IsKeyUp(Keys.Down)) || // Keyboard down
+					if (((myState.IsKeyDown(Keys.Down)) || 									// Keyboard down
 						Input.GetButtonDown(1, Input.ArcadeButtons.StickDown) ||             // or joystick down
-						Input.GetButtonDown(2, Input.ArcadeButtons.StickDown)) &&            // of either player
-						_mainMenu.itemSelected < _mainMenu.gamesLen() - 1)                   // and not at bottom of list
+						Input.GetButtonDown(2, Input.ArcadeButtons.StickDown)))            // of either player
 					{
 						_mainMenu.beginAnimUp();
 					}
 
-					if (((myState.IsKeyDown(Keys.Up) && lastState.IsKeyUp(Keys.Up)) || // Keyboard up
+					if (((myState.IsKeyDown(Keys.Up)) || 										// Keyboard up
 						Input.GetButtonDown(1, Input.ArcadeButtons.StickUp) ||					 // or joystick up
-						Input.GetButtonDown(2, Input.ArcadeButtons.StickUp)) && 				 // of either player
-						_mainMenu.itemSelected > 0)																			 // and not at top of list
+						Input.GetButtonDown(2, Input.ArcadeButtons.StickUp)))				 // of either player																			 // and not at top of list
 					{
 						_mainMenu.beginAnimDown();
 					}
@@ -213,5 +211,3 @@ namespace onboard
 		}
 	}
 }
-
-// TODO: Add error handling!!!
