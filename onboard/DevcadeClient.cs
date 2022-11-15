@@ -159,9 +159,14 @@ namespace onboard
                     StartInfo = new ProcessStartInfo(execPath) // chom
                     {
                         WindowStyle = ProcessWindowStyle.Normal,
-                        WorkingDirectory = Path.GetDirectoryName(execPath)
+                        WorkingDirectory = Path.GetDirectoryName(execPath),
+                        RedirectStandardError = true,
+                        RedirectStandardOutput = true,
                     }
                 };
+                // Forward stdout and stderr to the console
+                process.OutputDataReceived += (sender, args) => Console.WriteLine($"[{game.name}] {args.Data}");
+                process.ErrorDataReceived += (sender, args) => Console.WriteLine($"[{game.name}] {args.Data}");
                 process.Start();
                 return process;
             } catch (System.ComponentModel.Win32Exception e) {
