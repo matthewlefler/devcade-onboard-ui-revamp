@@ -65,3 +65,6 @@ cd HACKING
 ./build-environment.sh
 ./launch-environment.sh
 ```
+
+### `mgcb`
+`dotnet mgcb-editor`

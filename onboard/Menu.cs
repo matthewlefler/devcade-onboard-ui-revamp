@@ -66,8 +66,9 @@ namespace onboard
             for(int i=0; i<gameTitles.Count; i++)
             {
                 DevcadeGame game = gameTitles[i];
+                // Download banner and create texture on the fly
                 _client.GetBanner(game);
-                using (var fs = new FileStream($"/tmp/{game.name}", FileMode.Open))
+                using (var fs = new FileStream($"/tmp/{game.name}Banner.png", FileMode.Open))
                 {
                     Texture2D cardTexture = Texture2D.FromStream(graphics, fs);
                     cards.Add(new MenuCard(i*-1,game.name,cardTexture));
