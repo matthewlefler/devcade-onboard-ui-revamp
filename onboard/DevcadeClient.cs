@@ -71,7 +71,7 @@ namespace onboard
 
             // Path to where the banner image will be saved
             // Making this game.name will name the downloaded image have that name, could set it to anything like id etc..
-            string path = $"/tmp/{game.name}";
+            string path = $"/tmp/{game.name}Banner.png";
 
             Console.WriteLine($"Downloading banner for: {game.name}");
 
