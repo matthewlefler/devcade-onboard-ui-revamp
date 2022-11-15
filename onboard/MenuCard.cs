@@ -85,16 +85,16 @@ namespace onboard
             rotation += rotationSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds; // To rotate counter counterclockwise (aka down), decrease angle
         }
 
-        public void DrawSelf(SpriteBatch _spriteBatch, Texture2D cardTexture, SpriteFont font, int _sHeight, int scalingAmount)
+        public void DrawSelf(SpriteBatch _spriteBatch, Texture2D cardTexture, SpriteFont font, int _sHeight, double scalingAmount)
         {
             _spriteBatch.Draw(
                 texture,
-                new Vector2(cardX, _sHeight / 2 + cardTexture.Height / (2*scalingAmount)),
+                new Vector2(cardX, (int)(_sHeight / 2 + cardTexture.Height / (2 * scalingAmount))),
                 null,
                 new Color(cardOpacity, cardOpacity, cardOpacity, cardOpacity),
                 rotation,
                 new Vector2(0, cardTexture.Height / 2),
-                scale/scalingAmount, 
+                (float)(scale / scalingAmount), 
                 SpriteEffects.None,
                 0f
             );
