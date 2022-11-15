@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
+using System.Diagnostics;
 using Devcade;
 
 
@@ -21,6 +22,7 @@ namespace onboard
 		private bool _loading = false;
 
 		private string state = "launch";
+		private Process gameProcess;
 		private float fadeColor = 0f;
 
 		KeyboardState lastState;
@@ -73,7 +75,7 @@ namespace onboard
 
 			// TODO: use this.Content to load your game content here
 			_mainMenu.gameTitles = _client.GetGames();
-			_mainMenu.setCards();
+			_mainMenu.setCards(_client, GraphicsDevice);
 		}
 
 		protected override void Update(GameTime gameTime)
@@ -112,7 +114,7 @@ namespace onboard
 				case "loading":
 					// Check for process that matches last launched game and display loading screen if it's running 
 					// This can be done easier by keeping a reference to the process spawned and .HasExited property...
-					_loading = Util.IsProcessOpen(_mainMenu.gameSelected().name);
+					_loading = !gameProcess.HasExited;
 
 					if (fadeColor < 1f)
 					{
@@ -127,9 +129,9 @@ namespace onboard
 					break;
 
 				// In this state, the user is able to scroll through the menu and launch games
-				// TODO: Update _itemSelected  and top/bottom of list check to be a part of Menu.cs
 				case "input":
-					_mainMenu.descFadeOut(gameTime, descriptionTexture);
+					_mainMenu.descFadeOut(gameTime);
+					_mainMenu.cardFadeIn(gameTime);
 
 					if (((myState.IsKeyDown(Keys.Down)) || 									 // Keyboard down
 						Input.GetButtonDown(1, Input.ArcadeButtons.StickDown) ||             // or joystick down
@@ -149,21 +151,21 @@ namespace onboard
 						Input.GetButtonDown(1, Input.ArcadeButtons.Menu) ||                   // or menu button
 						Input.GetButtonDown(2, Input.ArcadeButtons.Menu))                     // of either player
 					{
-                        _mainMenu.setDesc(_graphics.PreferredBackBufferWidth*1.5f, 0f);
 						state = "description";
 					}
 					_mainMenu.animate(gameTime);
 					break;
 
 				case "description":
-					_mainMenu.descFadeIn(gameTime, descriptionTexture);
+					_mainMenu.descFadeIn(gameTime);
+					_mainMenu.cardFadeOut(gameTime);
 
 					if ((myState.IsKeyDown(Keys.Enter) && lastState.IsKeyUp(Keys.Enter)) || // Keyboard Enter
 						Input.GetButtonDown(1, Input.ArcadeButtons.Menu) ||                   // or menu button
 						Input.GetButtonDown(2, Input.ArcadeButtons.Menu))                     // of either player
 					{
 						Console.WriteLine("Running game!!!");
-						//_client.runGame(_mainMenu.gameSelected());
+						gameProcess = _client.runGame(_mainMenu.gameSelected());
 						fadeColor = 0f;
 						_loading = true;
 						state = "loading";
@@ -172,7 +174,6 @@ namespace onboard
 						Input.GetButtonDown(1, Input.ArcadeButtons.B4) ||																			 // or B4 button
 						Input.GetButtonDown(2, Input.ArcadeButtons.B4))																				 // of either player
 					{
-						_mainMenu.setDesc(_graphics.PreferredBackBufferWidth/2, 1f);
 						state = "input";
 					}
 
@@ -192,6 +193,7 @@ namespace onboard
 			{
 				case "launch":
 				case "input":
+				case "description":
 					_mainMenu.drawBackground(_spriteBatch, BGgradient, icon, fadeColor, gameTime);
 					_mainMenu.drawTitle(_spriteBatch, titleTexture, fadeColor);
 					_mainMenu.drawCards(_spriteBatch, cardTexture, _devcadeMenuBig);
@@ -201,12 +203,6 @@ namespace onboard
 				case "loading":
 					_mainMenu.drawLoading(_spriteBatch, loadingSpin, fadeColor);
 					_mainMenu.drawTitle(_spriteBatch, titleTexture, fadeColor);
-					break;
-
-				case "description":
-					_mainMenu.drawBackground(_spriteBatch, BGgradient, icon, fadeColor, gameTime);
-					_mainMenu.drawTitle(_spriteBatch, titleTexture, fadeColor);
-					_mainMenu.drawDescription(_spriteBatch, descriptionTexture, _devcadeMenuTitle, _devcadeMenuBig);
 					break;
 			}
 
