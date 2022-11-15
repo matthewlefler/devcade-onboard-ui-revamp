@@ -34,6 +34,9 @@ namespace onboard
 		private Texture2D titleTexture;
 		private Texture2D descriptionTexture;
 
+        // To indicate that there was a problem running the game
+        private bool _errorLoading = false;
+
 		public Game1()
 		{
 			_graphics = new GraphicsDeviceManager(this);
@@ -112,6 +115,7 @@ namespace onboard
 					break;
 
 				case "loading":
+                    _errorLoading = false; // Clear error loading if we successfully load.
 					// Check for process that matches last launched game and display loading screen if it's running 
 					// This can be done easier by keeping a reference to the process spawned and .HasExited property...
 					_loading = !gameProcess.HasExited;
@@ -166,6 +170,14 @@ namespace onboard
 					{
 						Console.WriteLine("Running game!!!");
 						gameProcess = _client.runGame(_mainMenu.gameSelected());
+                        // If for some reason we fail to download the game, then, uh, don't.
+                        if (gameProcess == null)
+                        {
+                            Console.WriteLine("Failed to launch game.");
+                            state = "input";
+                            _errorLoading = true;
+                            break;
+                        }
 						fadeColor = 0f;
 						_loading = true;
 						state = "loading";
@@ -207,6 +219,13 @@ namespace onboard
 			}
 
 			_spriteBatch.DrawString(_devcadeMenuBig, state, new Vector2(0, 0), Color.White);
+            if (_errorLoading)
+                _spriteBatch.DrawString(
+                    _devcadeMenuBig,
+                    "There was a problem running the game.",
+                    new Vector2(10, 400),
+                    Color.Red
+                );
 
 			_spriteBatch.End();
 

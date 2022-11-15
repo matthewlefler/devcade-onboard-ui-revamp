@@ -150,20 +150,25 @@ namespace onboard
                 Console.WriteLine(e);
             }
 
-            string execPath = $"/tmp/{gameName}/publish/{gameName.Replace("_","")}";
-            Console.WriteLine($"Running {execPath}");
-            Chmod(execPath,"+x",false);
-            Process process = new Process()
-            {
-                StartInfo = new ProcessStartInfo(execPath) // chom
+            try {
+                string execPath = $"/tmp/{gameName}/publish/{gameName.Replace("_","")}";
+                Console.WriteLine($"Running {execPath}");
+                Chmod(execPath,"+x",false);
+                Process process = new Process()
                 {
-                    WindowStyle = ProcessWindowStyle.Normal,
-                    WorkingDirectory = Path.GetDirectoryName(execPath)
-                }
-            };
+                    StartInfo = new ProcessStartInfo(execPath) // chom
+                    {
+                        WindowStyle = ProcessWindowStyle.Normal,
+                        WorkingDirectory = Path.GetDirectoryName(execPath)
+                    }
+                };
+                process.Start();
+                return process;
+            } catch (System.ComponentModel.Win32Exception e) {
+                Console.WriteLine(e);
+            }
 
-            process.Start();
-            return process;
+            return null;
         }
     }
 }
