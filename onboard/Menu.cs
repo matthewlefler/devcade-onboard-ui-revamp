@@ -31,7 +31,7 @@ namespace onboard
 
         private int _sWidth;
         private int _sHeight;
-        private int scalingAmount = 0;
+        private double scalingAmount = 0;
 
         private float moveTime = 0.15f; // This is the total time the scrolling animation takes
         private float timeRemaining = 0f;
@@ -54,7 +54,7 @@ namespace onboard
             _sWidth = Int32.Parse(Environment.GetEnvironmentVariable("VIEW_WIDTH"));
             _sHeight = Int32.Parse(Environment.GetEnvironmentVariable("VIEW_HEIGHT"));
 
-            scalingAmount = 1920/_sHeight; // This is the ratio of the optimal height to the current height, used to scale elements
+            scalingAmount = (double)1920/_sHeight; // This is the ratio of the optimal height to the current height, used to scale elements
 
             _graphics.PreferredBackBufferHeight = _sHeight;
             _graphics.PreferredBackBufferWidth = _sWidth;
@@ -135,7 +135,7 @@ namespace onboard
 
             _spriteBatch.Draw(
                 titleTexture,
-                new Rectangle(0,0, _sWidth, titleTexture.Height/scalingAmount),
+                new Rectangle(0,0, _sWidth, (int)(titleTexture.Height / scalingAmount)),
                 null,
                 new Color(col,col,col),
                 0f,
@@ -221,7 +221,7 @@ namespace onboard
         public void drawDescription(SpriteBatch _spriteBatch, Texture2D descTexture, SpriteFont titleFont, SpriteFont descFont)
         {
             // First, draw the backdrop of the description
-            Vector2 descPos = new Vector2(descX, _sHeight/2 + descTexture.Height/(6*scalingAmount));
+            Vector2 descPos = new Vector2(descX, _sHeight/2 + (int)(descTexture.Height / (6 * scalingAmount)));
 
             _spriteBatch.Draw(descTexture, 
                 descPos,
@@ -229,7 +229,7 @@ namespace onboard
                 new Color(descOpacity,descOpacity,descOpacity,descOpacity),
                 0f,
                 new Vector2(descTexture.Width/2,descTexture.Height/2),
-                1f/scalingAmount,
+                (float)(1f / scalingAmount),
                 SpriteEffects.None,
                 0f
             );
@@ -245,7 +245,8 @@ namespace onboard
                 writeString(_spriteBatch,
                 descFont,
                 line,
-                new Vector2(descPos.X, descPos.Y - descTexture.Height/(5*scalingAmount) + descHeight*lineNum)
+                new Vector2(descPos.X, (float)(descPos.Y - descTexture.Height / (5 * scalingAmount) +
+                                                descHeight * lineNum))
                 );
                 lineNum++;
             }
@@ -254,14 +255,14 @@ namespace onboard
             writeString( _spriteBatch,
                 titleFont,
                 gameSelected().name,
-                new Vector2(descPos.X, descPos.Y - descTexture.Height/(2.5f*scalingAmount))
+                new Vector2(descPos.X, descPos.Y - (int)(descTexture.Height / (2.5f * scalingAmount)))
             );
 
             // Write the game's author
             writeString(_spriteBatch,
                 descFont,
                 "By: " + gameSelected().author,
-                new Vector2(descPos.X, descPos.Y - descTexture.Height/(3*scalingAmount))
+                new Vector2(descPos.X, descPos.Y - (int)(descTexture.Height / (3 * scalingAmount)))
             );
 
         }
@@ -300,7 +301,7 @@ namespace onboard
                 new Color(descOpacity,descOpacity,descOpacity,descOpacity),
                 0f,
                 new Vector2(strSize.X/2,strSize.Y/2),
-                1f/scalingAmount,
+                (float)(1f / scalingAmount),
                 SpriteEffects.None,
                 0f
             );
