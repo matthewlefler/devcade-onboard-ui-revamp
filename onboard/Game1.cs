@@ -218,8 +218,10 @@ namespace onboard
 					break;
 			}
 
-			_spriteBatch.DrawString(_devcadeMenuBig, state, new Vector2(0, 0), Color.White);
-            if (_errorLoading)
+			// Draw a string in the top left showing the current state. Used for debugging. TODO: Use debug tags
+			//_spriteBatch.DrawString(_devcadeMenuBig, state, new Vector2(0, 0), Color.White);
+            
+			if (_errorLoading)
                 _spriteBatch.DrawString(
                     _devcadeMenuBig,
                     "There was a problem running the game.",

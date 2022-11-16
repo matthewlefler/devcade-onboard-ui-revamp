@@ -88,12 +88,11 @@ namespace onboard
         {
             _spriteBatch.Draw(
                 BGgradient,
-                new Vector2(0, 0),
+                new Rectangle(0, 0, _sWidth, _sHeight),
                 null,
                 new Color(col,col,col),
                 0f,
                 new Vector2(0, 0),
-                1f,
                 SpriteEffects.None,
                 0f
             );
@@ -111,9 +110,12 @@ namespace onboard
                 offset = 0;
             }
 
-            for(int row=-150; row <= 1800; row+=150) // Starts at -150 to draw an extra row above the screen
-            {
-                for(int column=0; column<=1200; column+=150)
+            int numColumns = (_sWidth / 150) + 1;
+            int numRows = (_sHeight / 150) + 1;
+
+            for(int row=-150; row <= numRows*150; row+=150) // Starts at -150 to draw an extra row above the screen
+            {  
+                for(int column=0; column<=numColumns*150; column+=150)
                 {
                     _spriteBatch.Draw(
                         icon,
