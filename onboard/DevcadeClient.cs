@@ -12,6 +12,7 @@ using Microsoft.Xna.Framework; // FIXME: Is this necessary for the client code?
 
 // For making requests to the API
 using System.Net.Http;
+using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json;
 
 namespace onboard
@@ -37,31 +38,25 @@ namespace onboard
             _apiDomain = Environment.GetEnvironmentVariable("DEVCADE_API_DOMAIN");
         }
         
-        public List<DevcadeGame> GetGames()
-        {
-            using (var client = new HttpClient())
-            {
-                List<DevcadeGame> games;
-                try {
-                    string uri = $"https://{_apiDomain}/api/games/gamelist/"; // TODO: Env variable URI tld 
-                    using (var responseBody = client.GetStringAsync(uri))
-                    {
-                        games = JsonConvert.DeserializeObject<List<DevcadeGame>>(responseBody.Result);
-                        // TODO: Add error handling if there is no games from the API
-                        if(games.Count == 0)
-                        {
-                            Console.WriteLine("Where the games at?");
-                        }
-                        return games;
-                    }
-                }
-                catch (HttpRequestException e)
+        public List<DevcadeGame> GetGames() {
+            using var client = new HttpClient();
+            try {
+                string uri = $"https://{_apiDomain}/api/games/gamelist/"; // TODO: Env variable URI tld 
+                using Task<string> responseBody = client.GetStringAsync(uri);
+                List<DevcadeGame> games = JsonConvert.DeserializeObject<List<DevcadeGame>>(responseBody.Result);
+                // TODO: Add error handling if there is no games from the API
+                if(games == null || games.Count == 0)
                 {
-                    Console.WriteLine("\nException Caught!");
-                    Console.WriteLine("Message :{0} ", e.Message);
+                    Console.WriteLine("Where the games at?");
                 }
-                return new List<DevcadeGame>();
+                return games;
             }
+            catch (HttpRequestException e)
+            {
+                Console.WriteLine("\nException Caught!");
+                Console.WriteLine("Message :{0} ", e.Message);
+            }
+            return new List<DevcadeGame>();
         }
 
         public void GetBanner(DevcadeGame game)
@@ -95,6 +90,16 @@ namespace onboard
                     Console.WriteLine("Message :{0} ", e.Message);
                 }
             }
+        }
+
+        private void getBanner(object callback) {
+            var game = (DevcadeGame)callback;
+            GetBanner(game);
+            Menu.instance.notifyTextureAvailable(game.name);
+        }
+
+        public void getBannerAsync(DevcadeGame game) {
+            ThreadPool.QueueUserWorkItem(getBanner, game);
         }
 
         // Returns true if success and false otherwise
