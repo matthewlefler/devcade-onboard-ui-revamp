@@ -89,12 +89,12 @@ namespace onboard
         {
             _spriteBatch.Draw(
                 texture ?? cardTexture,
-                new Vector2(cardX, (int)(_sHeight / 2 + cardTexture.Height / (2 * scalingAmount))),
+                new Vector2(cardX, (int)(_sHeight / 2 + (cardTexture.Height * scalingAmount) /2)),
                 null,
                 new Color(cardOpacity, cardOpacity, cardOpacity, cardOpacity),
                 rotation,
                 new Vector2(0, cardTexture.Height / 2),
-                (float)(scale / scalingAmount), 
+                (float)(scale * scalingAmount), 
                 SpriteEffects.None,
                 0f
             );
