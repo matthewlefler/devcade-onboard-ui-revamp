@@ -14,10 +14,12 @@ namespace onboard
     {
         private GraphicsDeviceManager _device;
 
+        public static Menu instance;
+
         // Synonymous with cards list from my project
         // Will have to convert this to a list of MenuCards
         public List<DevcadeGame> gameTitles { get; set; }
-        private List<MenuCard> cards = new List<MenuCard>();
+        private Dictionary<string, MenuCard> cards { get; set; } = new Dictionary<string, MenuCard>();
         public int itemSelected = 0;
         
         // Trying to make the lgo and other elements animate on startup
@@ -46,6 +48,7 @@ namespace onboard
         public Menu(GraphicsDeviceManager graph)
         {
             _device = graph;
+            instance = this;
         }
 
         public void updateDims(GraphicsDeviceManager _graphics) 
@@ -66,17 +69,42 @@ namespace onboard
             for(int i=0; i<gameTitles.Count; i++)
             {
                 DevcadeGame game = gameTitles[i];
-                // Download banner and create texture on the fly
-                _client.GetBanner(game);
-                using (var fs = new FileStream($"/tmp/{game.name}Banner.png", FileMode.Open))
+                // Start downloading the textures
+                _client.getBannerAsync(game);
+                // check if /tmp/ has the banner
+                string bannerPath = $"/tmp/{game.name}Banner.png";
+                if (File.Exists(bannerPath))
                 {
-                    Texture2D cardTexture = Texture2D.FromStream(graphics, fs);
-                    cards.Add(new MenuCard(i*-1,game.name,cardTexture));
+                    Texture2D banner = Texture2D.FromStream(graphics, File.OpenRead(bannerPath));
+                    cards.Add(game.name, new MenuCard(i * -1, game.name, banner));
+                }
+                else {
+                    // If the banner doesn't exist, use a placeholder until it can be downloaded later.
+                    cards.Add(game.name, new MenuCard(i * -1, game.name, null));
                 }
                 
             }
             MenuCard.cardX = 0;
             descX = _sWidth*1.5f;
+        }
+
+        public void notifyTextureAvailable(string gameName) {
+            if (!cards.ContainsKey(gameName)) return;
+            // check if file exists
+            string bannerPath = $"/tmp/{gameName}Banner.png";
+            if (!File.Exists(bannerPath)) {
+                Console.WriteLine("Bozo");
+                return;
+            }
+            // load texture
+            Texture2D banner = Texture2D.FromStream(_device.GraphicsDevice, File.OpenRead(bannerPath));
+            // set texture
+            cards[gameName].setTexture(banner);
+        }
+        
+        private void setCardTexture(string gameName, Texture2D texture)
+        {
+            cards[gameName].setTexture(texture);
         }
 
         public DevcadeGame gameSelected()
@@ -311,7 +339,7 @@ namespace onboard
         public void drawCards(SpriteBatch _spriteBatch, Texture2D cardTexture, SpriteFont font)
         {
             // I still have no idea why the layerDepth does not work
-            foreach(MenuCard card in cards)
+            foreach(MenuCard card in cards.Values)
             {
                 if(Math.Abs(card.listPos) == 4)
                 {
@@ -319,7 +347,7 @@ namespace onboard
                 }
                 
             }
-            foreach(MenuCard card in cards)
+            foreach(MenuCard card in cards.Values)
             {
                 if(Math.Abs(card.listPos) == 3)
                 {
@@ -327,7 +355,7 @@ namespace onboard
                 }
                 
             }
-            foreach(MenuCard card in cards)
+            foreach(MenuCard card in cards.Values)
             {
                 if(Math.Abs(card.listPos) == 2)
                 {
@@ -335,7 +363,7 @@ namespace onboard
                 }
                 
             }
-            foreach(MenuCard card in cards)
+            foreach(MenuCard card in cards.Values)
             {
                 if(Math.Abs(card.listPos) == 1)
                 {
@@ -343,7 +371,7 @@ namespace onboard
                 }
                 
             }
-            foreach(MenuCard card in cards)
+            foreach(MenuCard card in cards.Values)
             {
                 if(Math.Abs(card.listPos) == 0)
                 {
@@ -357,7 +385,7 @@ namespace onboard
         {
             if (!(movingUp || movingDown) && itemSelected < gameTitles.Count()-1) // scrolling beginds only if it is not already moving, and not at bottom of list
                 {
-                    foreach(MenuCard card in cards)
+                    foreach(MenuCard card in cards.Values)
                     {
                         card.listPos++;
                         //card.layer = (float)Math.Abs(card.listPos) / 4;
@@ -372,7 +400,7 @@ namespace onboard
         {
             if (!(movingDown || movingUp) && itemSelected > 0) // scrolling begins only if it is not already moving, and not at the top of the list
                 {
-                    foreach (MenuCard card in cards)
+                    foreach (MenuCard card in cards.Values)
                     {
                         card.listPos--;
                         //card.layer = (float)Math.Abs(card.listPos) / 4;
@@ -389,7 +417,7 @@ namespace onboard
             {
                 if(movingUp)
                 {
-                    foreach(MenuCard card in cards)
+                    foreach(MenuCard card in cards.Values)
                     {
                         card.moveUp(gameTime);
                     }
@@ -397,7 +425,7 @@ namespace onboard
 
                 else if(movingDown)
                 {
-                    foreach(MenuCard card in cards)
+                    foreach(MenuCard card in cards.Values)
                     {
                         card.moveDown(gameTime);
                     }
