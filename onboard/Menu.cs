@@ -21,11 +21,6 @@ namespace onboard
         public List<DevcadeGame> gameTitles { get; set; }
         private Dictionary<string, MenuCard> cards { get; set; } = new Dictionary<string, MenuCard>();
         public int itemSelected = 0;
-        
-        // Trying to make the lgo and other elements animate on startup
-        //private const float moveTime = 0.15f; // Time it takes to make the logo to slide in
-        //private float alpha = 0f;
-        //private const float moveSpeed = 255.0f / fadeTime;
 
         private int loadingCol = 0;
         private int loadingRow = 0;
@@ -163,10 +158,10 @@ namespace onboard
 
         public void drawTitle(SpriteBatch _spriteBatch, Texture2D titleTexture, float col)
         {
-
+            float scaling = (float)_sWidth/titleTexture.Width; // The title will always be scaled to fit the width of the screen. The height follows scaling based on how much the title was stretched horizontally
             _spriteBatch.Draw(
                 titleTexture,
-                new Rectangle(0,0, _sWidth, (int)(titleTexture.Height / scalingAmount)),
+                new Rectangle(0,0, _sWidth, (int)(titleTexture.Height * scaling)), 
                 null,
                 new Color(col,col,col),
                 0f,
