@@ -88,7 +88,7 @@ namespace onboard
         public void DrawSelf(SpriteBatch _spriteBatch, Texture2D cardTexture, SpriteFont font, int _sHeight, double scalingAmount)
         {
             _spriteBatch.Draw(
-                texture,
+                texture ?? cardTexture,
                 new Vector2(cardX, (int)(_sHeight / 2 + cardTexture.Height / (2 * scalingAmount))),
                 null,
                 new Color(cardOpacity, cardOpacity, cardOpacity, cardOpacity),
@@ -99,6 +99,9 @@ namespace onboard
                 0f
             );
         }
-    
+
+        public void setTexture(Texture2D texture) {
+            this.texture = texture;
+        }
     }
 }
