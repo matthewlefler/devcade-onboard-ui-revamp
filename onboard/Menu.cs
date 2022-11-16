@@ -52,7 +52,7 @@ namespace onboard
             _sWidth = Int32.Parse(Environment.GetEnvironmentVariable("VIEW_WIDTH"));
             _sHeight = Int32.Parse(Environment.GetEnvironmentVariable("VIEW_HEIGHT"));
 
-            scalingAmount = (double)1920/_sHeight; // This is the ratio of the optimal height to the current height, used to scale elements
+            scalingAmount = Math.Sqrt((_sHeight*_sWidth)/(double)(1920*1080)); // This is a constant value that is used to scale the UI elements
 
             _graphics.PreferredBackBufferHeight = _sHeight;
             _graphics.PreferredBackBufferWidth = _sWidth;
@@ -247,7 +247,8 @@ namespace onboard
         public void drawDescription(SpriteBatch _spriteBatch, Texture2D descTexture, SpriteFont titleFont, SpriteFont descFont)
         {
             // First, draw the backdrop of the description
-            Vector2 descPos = new Vector2(descX, _sHeight/2 + (int)(descTexture.Height / (6 * scalingAmount)));
+                // I'm not sure why I added descTexture.Height/6 to the position. It is to make the image draw slightly below the center of the screen, but there is probably a better way to do this?
+            Vector2 descPos = new Vector2(descX, _sHeight/2 + (int)((descTexture.Height*scalingAmount)/6)); 
 
             _spriteBatch.Draw(descTexture, 
                 descPos,
@@ -255,7 +256,7 @@ namespace onboard
                 new Color(descOpacity,descOpacity,descOpacity,descOpacity),
                 0f,
                 new Vector2(descTexture.Width/2,descTexture.Height/2),
-                (float)(1f / scalingAmount),
+                (float)(1f*scalingAmount),
                 SpriteEffects.None,
                 0f
             );
@@ -271,7 +272,7 @@ namespace onboard
                 writeString(_spriteBatch,
                 descFont,
                 line,
-                new Vector2(descPos.X, (float)(descPos.Y - descTexture.Height / (5 * scalingAmount) +
+                new Vector2(descPos.X, (float)(descPos.Y - (descTexture.Height * scalingAmount) / 5 +
                                                 descHeight * lineNum))
                 );
                 lineNum++;
@@ -281,14 +282,14 @@ namespace onboard
             writeString( _spriteBatch,
                 titleFont,
                 gameSelected().name,
-                new Vector2(descPos.X, descPos.Y - (int)(descTexture.Height / (2.5f * scalingAmount)))
+                new Vector2(descPos.X, descPos.Y - (int)((descTexture.Height * scalingAmount) / 2.5f))
             );
 
             // Write the game's author
             writeString(_spriteBatch,
                 descFont,
                 "By: " + gameSelected().author,
-                new Vector2(descPos.X, descPos.Y - (int)(descTexture.Height / (3 * scalingAmount)))
+                new Vector2(descPos.X, descPos.Y - (int)((descTexture.Height * scalingAmount) / 3))
             );
 
         }
@@ -327,7 +328,7 @@ namespace onboard
                 new Color(descOpacity,descOpacity,descOpacity,descOpacity),
                 0f,
                 new Vector2(strSize.X/2,strSize.Y/2),
-                (float)(1f / scalingAmount),
+                (float)(1f * scalingAmount),
                 SpriteEffects.None,
                 0f
             );
