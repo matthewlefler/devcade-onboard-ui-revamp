@@ -1,7 +1,7 @@
 FROM debian:buster
 
 RUN apt-get -y update
-RUN apt-get -y install vim wget git fonts-liberation fontconfig-config tmux xterm pulseaudio
+RUN apt-get -y install vim wget git fonts-liberation fontconfig-config tmux xterm pulseaudio zip unzip
 RUN wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod.deb \
      -O packages-microsoft-prod.deb && \
     dpkg -i packages-microsoft-prod.deb && \
