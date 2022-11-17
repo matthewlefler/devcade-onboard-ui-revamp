@@ -1,10 +1,13 @@
 # Devcade-onboard
 The onboard menu and control software for the Devcade custom arcade system.
 
-
 ## Building
 
-To make a build to run on the Idiot, do the following from `/onboard`:
+Run the `update_onboard.sh` script located in HACKING
+
+## Building (manual)
+
+To build and run on the Idiot, do the following from `/onboard`:
 ```
 dotnet publish -c Release -r linux-x64 --no-self-contained
 ```
@@ -19,28 +22,27 @@ Debian >=10
 
 A user named `devcade`
 
-`apt install xorg` and friends (I dont actually know what all is installed)
+`apt install xterm` and friends (I dont actually know what all is installed)
 
 ### Daemon
 
 _daemons are always watching. They are always with you. So is Willard._
 
-The Devcade Idiot is running Debian 10 with a very _very_ simple Xorg server setup. It has a systemd service configured to launch the onboarding program, along with said xorg server, as the `devcade` user.
+The Devcade Idiot is running Debian 10 with a very _very_ simple Xorg server setup. It has [xlogin](https://github.com/joukewitteveen/xlogin) configured to launch the onboarding program, along with said xorg server, as the `devcade` user.
 
-You can find everything(tm) you need to set up the Devcade Idiot in `/idiot`. This includes the systemd service, which contains the path you need to install it at.
+You can find everything(tm) you need to set up the Devcade Idiot in `/idiot`. This repo has a submodule, `xlogin` that can be cloned down with `git submodule update --init --recursive`.
+
+1. Run the `update_onboard.sh` script in `HACKING/`
+
+2. `cp idiot/.xinitrc /home/devcade/`
+
+3. To install `xlogin`, do the following
 
 ```
-/etc/systemd/system/devcade-onboard.service
+cd idiot/xlogin
+sudo make install
+sudo systemctl enable --now xlogin@devcade
 ```
-
-You'll also need to add/change some lines in your `/etc/X11/Xwrapper.config`
-
-```
-needs_root_rights=yes
-allowed_users=anybody
-```
-
-This should be interactable as a normal systemd service, so `enable`/`disable` it as normal.
 
 _Helpful Tip: Remember to `chmod +x onboard`. You may get weird syntax errors if you don't_
 
@@ -66,5 +68,7 @@ cd HACKING
 ./launch-environment.sh
 ```
 
-### `mgcb`
+#### `mgcb`
+
+The container has `mgcb-editor` installed. To run that, do this:
 `dotnet mgcb-editor`
