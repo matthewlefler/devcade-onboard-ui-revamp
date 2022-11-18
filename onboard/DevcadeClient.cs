@@ -66,7 +66,7 @@ namespace onboard
 
             // Path to where the banner image will be saved
             // Making this game.name will name the downloaded image have that name, could set it to anything like id etc..
-            string path = $"/tmp/{game.name}Banner.png";
+            string path = $"/tmp/{game.id}Banner.png";
 
             Console.WriteLine($"Downloading banner for: {game.name}");
 
@@ -95,7 +95,7 @@ namespace onboard
         private void getBanner(object callback) {
             var game = (DevcadeGame)callback;
             GetBanner(game);
-            Menu.instance.notifyTextureAvailable(game.name);
+            Menu.instance.notifyTextureAvailable(game.id);
         }
 
         public void getBannerAsync(DevcadeGame game) {

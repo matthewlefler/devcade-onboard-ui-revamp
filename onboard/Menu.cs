@@ -72,15 +72,15 @@ namespace onboard
                 // Start downloading the textures
                 _client.getBannerAsync(game);
                 // check if /tmp/ has the banner
-                string bannerPath = $"/tmp/{game.name}Banner.png";
+                string bannerPath = $"/tmp/{game.id}Banner.png";
                 if (File.Exists(bannerPath))
                 {
                     Texture2D banner = Texture2D.FromStream(graphics, File.OpenRead(bannerPath));
-                    cards.Add(game.name, new MenuCard(i * -1, game.name, banner));
+                    cards.Add(game.id, new MenuCard(i * -1, game.name, banner));
                 }
                 else {
                     // If the banner doesn't exist, use a placeholder until it can be downloaded later.
-                    cards.Add(game.name, new MenuCard(i * -1, game.name, null));
+                    cards.Add(game.id, new MenuCard(i * -1, game.name, null));
                 }
                 
             }
@@ -88,10 +88,10 @@ namespace onboard
             descX = _sWidth*1.5f;
         }
 
-        public void notifyTextureAvailable(string gameName) {
-            if (!cards.ContainsKey(gameName)) return;
+        public void notifyTextureAvailable(string gameID) {
+            if (!cards.ContainsKey(gameID)) return;
             // check if file exists
-            string bannerPath = $"/tmp/{gameName}Banner.png";
+            string bannerPath = $"/tmp/{gameID}Banner.png";
             if (!File.Exists(bannerPath)) {
                 Console.WriteLine("Bozo");
                 return;
@@ -99,7 +99,7 @@ namespace onboard
             // load texture
             Texture2D banner = Texture2D.FromStream(_device.GraphicsDevice, File.OpenRead(bannerPath));
             // set texture
-            cards[gameName].setTexture(banner);
+            cards[gameID].setTexture(banner);
         }
         
         private void setCardTexture(string gameName, Texture2D texture)
