@@ -21,11 +21,6 @@ namespace onboard
         public List<DevcadeGame> gameTitles { get; set; }
         private Dictionary<string, MenuCard> cards { get; set; } = new Dictionary<string, MenuCard>();
         public int itemSelected = 0;
-        
-        // Trying to make the lgo and other elements animate on startup
-        //private const float moveTime = 0.15f; // Time it takes to make the logo to slide in
-        //private float alpha = 0f;
-        //private const float moveSpeed = 255.0f / fadeTime;
 
         private int loadingCol = 0;
         private int loadingRow = 0;
@@ -57,7 +52,7 @@ namespace onboard
             _sWidth = Int32.Parse(Environment.GetEnvironmentVariable("VIEW_WIDTH"));
             _sHeight = Int32.Parse(Environment.GetEnvironmentVariable("VIEW_HEIGHT"));
 
-            scalingAmount = (double)1920/_sHeight; // This is the ratio of the optimal height to the current height, used to scale elements
+            scalingAmount = Math.Sqrt((_sHeight*_sWidth)/(double)(1920*1080)); // This is a constant value that is used to scale the UI elements
 
             _graphics.PreferredBackBufferHeight = _sHeight;
             _graphics.PreferredBackBufferWidth = _sWidth;
@@ -116,12 +111,11 @@ namespace onboard
         {
             _spriteBatch.Draw(
                 BGgradient,
-                new Vector2(0, 0),
+                new Rectangle(0, 0, _sWidth, _sHeight),
                 null,
                 new Color(col,col,col),
                 0f,
                 new Vector2(0, 0),
-                1f,
                 SpriteEffects.None,
                 0f
             );
@@ -139,9 +133,12 @@ namespace onboard
                 offset = 0;
             }
 
-            for(int row=-150; row <= 1800; row+=150) // Starts at -150 to draw an extra row above the screen
-            {
-                for(int column=0; column<=1200; column+=150)
+            int numColumns = (_sWidth / 150) + 1;
+            int numRows = (_sHeight / 150) + 1;
+
+            for(int row=-150; row <= numRows*150; row+=150) // Starts at -150 to draw an extra row above the screen
+            {  
+                for(int column=0; column<=numColumns*150; column+=150)
                 {
                     _spriteBatch.Draw(
                         icon,
@@ -161,10 +158,10 @@ namespace onboard
 
         public void drawTitle(SpriteBatch _spriteBatch, Texture2D titleTexture, float col)
         {
-
+            float scaling = (float)_sWidth/titleTexture.Width; // The title will always be scaled to fit the width of the screen. The height follows scaling based on how much the title was stretched horizontally
             _spriteBatch.Draw(
                 titleTexture,
-                new Rectangle(0,0, _sWidth, (int)(titleTexture.Height / scalingAmount)),
+                new Rectangle(0,0, _sWidth, (int)(titleTexture.Height * scaling)), 
                 null,
                 new Color(col,col,col),
                 0f,
@@ -250,7 +247,8 @@ namespace onboard
         public void drawDescription(SpriteBatch _spriteBatch, Texture2D descTexture, SpriteFont titleFont, SpriteFont descFont)
         {
             // First, draw the backdrop of the description
-            Vector2 descPos = new Vector2(descX, _sHeight/2 + (int)(descTexture.Height / (6 * scalingAmount)));
+                // I'm not sure why I added descTexture.Height/6 to the position. It is to make the image draw slightly below the center of the screen, but there is probably a better way to do this?
+            Vector2 descPos = new Vector2(descX, _sHeight/2 + (int)((descTexture.Height*scalingAmount)/6)); 
 
             _spriteBatch.Draw(descTexture, 
                 descPos,
@@ -258,7 +256,7 @@ namespace onboard
                 new Color(descOpacity,descOpacity,descOpacity,descOpacity),
                 0f,
                 new Vector2(descTexture.Width/2,descTexture.Height/2),
-                (float)(1f / scalingAmount),
+                (float)(1f*scalingAmount),
                 SpriteEffects.None,
                 0f
             );
@@ -274,7 +272,7 @@ namespace onboard
                 writeString(_spriteBatch,
                 descFont,
                 line,
-                new Vector2(descPos.X, (float)(descPos.Y - descTexture.Height / (5 * scalingAmount) +
+                new Vector2(descPos.X, (float)(descPos.Y - (descTexture.Height * scalingAmount) / 5 +
                                                 descHeight * lineNum))
                 );
                 lineNum++;
@@ -284,14 +282,14 @@ namespace onboard
             writeString( _spriteBatch,
                 titleFont,
                 gameSelected().name,
-                new Vector2(descPos.X, descPos.Y - (int)(descTexture.Height / (2.5f * scalingAmount)))
+                new Vector2(descPos.X, descPos.Y - (int)((descTexture.Height * scalingAmount) / 2.5f))
             );
 
             // Write the game's author
             writeString(_spriteBatch,
                 descFont,
                 "By: " + gameSelected().author,
-                new Vector2(descPos.X, descPos.Y - (int)(descTexture.Height / (3 * scalingAmount)))
+                new Vector2(descPos.X, descPos.Y - (int)((descTexture.Height * scalingAmount) / 3))
             );
 
         }
@@ -330,7 +328,7 @@ namespace onboard
                 new Color(descOpacity,descOpacity,descOpacity,descOpacity),
                 0f,
                 new Vector2(strSize.X/2,strSize.Y/2),
-                (float)(1f / scalingAmount),
+                (float)(1f * scalingAmount),
                 SpriteEffects.None,
                 0f
             );

@@ -28,5 +28,7 @@ xinput | tee -a onboard.log
 #echo "\nxrandr output:\n"
 #xrandr | tee -a onboard.log
 
+source /home/devcade/.env
+
 echo "\nonboard log:\n"
 /home/devcade/publish/onboard | tee -a /home/devcade/onboard.log
