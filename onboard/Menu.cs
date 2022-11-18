@@ -171,6 +171,24 @@ namespace onboard
             );
         }
 
+        public void drawInstructions(SpriteBatch _spriteBatch, SpriteFont font)
+        {
+            List<string> instructions = wrapText("Press the Red button to play!", 25);
+            float instructSize = font.MeasureString("Press the Red button to play!").Y;
+            int lineNum = 0;
+
+            foreach(string line in instructions)
+            {
+                writeString(_spriteBatch,
+                    font,
+                    line,
+                    new Vector2(_sWidth/2, (int)(500 * scalingAmount) + (instructSize * lineNum)), // 500 is the height of the title, this string goes right beneath that
+                    1f
+                );
+                lineNum++;
+            }
+        }
+
         public void drawLoading(SpriteBatch _spriteBatch, Texture2D loadingSpin, float col)
         { 
             if(loadingCol > 4)
@@ -263,7 +281,7 @@ namespace onboard
 
             // Wraps the description text to fit within the box
             // Then draws the description
-            List<string> wrapDesc = wrapText(gameSelected().description);
+            List<string> wrapDesc = wrapText(gameSelected().description, 25);
             float descHeight = descFont.MeasureString(gameSelected().description).Y;
 
             int lineNum = 0;
@@ -273,7 +291,8 @@ namespace onboard
                 descFont,
                 line,
                 new Vector2(descPos.X, (float)(descPos.Y - (descTexture.Height * scalingAmount) / 5 +
-                                                descHeight * lineNum))
+                                                descHeight * lineNum)),
+                descOpacity
                 );
                 lineNum++;
             }
@@ -282,22 +301,31 @@ namespace onboard
             writeString( _spriteBatch,
                 titleFont,
                 gameSelected().name,
-                new Vector2(descPos.X, descPos.Y - (int)((descTexture.Height * scalingAmount) / 2.5f))
+                new Vector2(descPos.X, descPos.Y - (int)((descTexture.Height * scalingAmount) / 2.5f)),
+                descOpacity
             );
 
             // Write the game's author
             writeString(_spriteBatch,
                 descFont,
                 "By: " + gameSelected().author,
-                new Vector2(descPos.X, descPos.Y - (int)((descTexture.Height * scalingAmount) / 3))
+                new Vector2(descPos.X, descPos.Y - (int)((descTexture.Height * scalingAmount) / 3)),
+                descOpacity
+            );
+
+            // Instructions to go back
+            writeString(_spriteBatch,
+                descFont,
+                "Press the Blue button to return",
+                new Vector2(descPos.X, descPos.Y + (int)((descTexture.Height * scalingAmount) / 2 - descHeight)),
+                descOpacity
             );
 
         }
 
-        public List<string> wrapText(string desc)
+        public List<string> wrapText(string desc, int lineLimit)
         {
             // This function should take in a description and return a list of lines to print to the screen
-            int lineLimit = 25; // Soft character limit for each line
             string[] words = desc.Split(' '); // Split the description up by words
             List<string> lines = new List<string>(); // Create a list to return 
             
@@ -307,7 +335,7 @@ namespace onboard
             {
                 // For each word in the description, we add it to a line. 
                 lines[currentLine] += word+' ';
-                // Once that line is over 20 characters, we move to the next line
+                // Once that line is over the limit of  characters, we move to the next line
                 if(lines[currentLine].Length > lineLimit)
                 {
                     currentLine++;
@@ -318,14 +346,14 @@ namespace onboard
             return lines;
         }
 
-        public void writeString(SpriteBatch _spriteBatch, SpriteFont font, string str, Vector2 pos)
+        public void writeString(SpriteBatch _spriteBatch, SpriteFont font, string str, Vector2 pos, float opacity)
         {
             Vector2 strSize = font.MeasureString(str);
 
             _spriteBatch.DrawString(font,
                 str,
                 pos,
-                new Color(descOpacity,descOpacity,descOpacity,descOpacity),
+                new Color(opacity,opacity,opacity,opacity),
                 0f,
                 new Vector2(strSize.X/2,strSize.Y/2),
                 (float)(1f * scalingAmount),

@@ -138,22 +138,22 @@ namespace onboard
 					_mainMenu.cardFadeIn(gameTime);
 
 					if (((myState.IsKeyDown(Keys.Down)) || 									 // Keyboard down
-						Input.GetButtonDown(1, Input.ArcadeButtons.StickDown) ||             // or joystick down
-						Input.GetButtonDown(2, Input.ArcadeButtons.StickDown)))              // of either player
+						Input.GetButton(1, Input.ArcadeButtons.StickDown) ||             // or joystick down
+						Input.GetButton(2, Input.ArcadeButtons.StickDown)))              // of either player
 					{
 						_mainMenu.beginAnimUp();
 					}
 
 					if (((myState.IsKeyDown(Keys.Up)) || 									  // Keyboard up
-						Input.GetButtonDown(1, Input.ArcadeButtons.StickUp) ||				  // or joystick up
-						Input.GetButtonDown(2, Input.ArcadeButtons.StickUp)))				  // of either player																			 // and not at top of list
+						Input.GetButton(1, Input.ArcadeButtons.StickUp) ||				  // or joystick up
+						Input.GetButton(2, Input.ArcadeButtons.StickUp)))				  // of either player																			 // and not at top of list
 					{
 						_mainMenu.beginAnimDown();
 					}
 
 					if ((myState.IsKeyDown(Keys.Enter) && lastState.IsKeyUp(Keys.Enter)) ||   // Keyboard Enter
-						Input.GetButtonDown(1, Input.ArcadeButtons.Menu) ||                   // or menu button
-						Input.GetButtonDown(2, Input.ArcadeButtons.Menu))                     // of either player
+						Input.GetButtonDown(1, Input.ArcadeButtons.A1) ||                   // or A1 button
+						Input.GetButtonDown(2, Input.ArcadeButtons.A1))                     // of either player
 					{
 						state = "description";
 					}
@@ -165,8 +165,8 @@ namespace onboard
 					_mainMenu.cardFadeOut(gameTime);
 
 					if ((myState.IsKeyDown(Keys.Enter) && lastState.IsKeyUp(Keys.Enter)) || // Keyboard Enter
-						Input.GetButtonDown(1, Input.ArcadeButtons.Menu) ||                   // or menu button
-						Input.GetButtonDown(2, Input.ArcadeButtons.Menu))                     // of either player
+						Input.GetButtonDown(1, Input.ArcadeButtons.A1) ||                   // or A1 button
+						Input.GetButtonDown(2, Input.ArcadeButtons.A1))                     // of either player
 					{
 						Console.WriteLine("Running game!!!");
 						gameProcess = _client.runGame(_mainMenu.gameSelected());
@@ -183,8 +183,8 @@ namespace onboard
 						state = "loading";
 
 					} else if ((myState.IsKeyDown(Keys.RightShift) && lastState.IsKeyUp(Keys.RightShift)) || // Keyboard Rshift
-						Input.GetButtonDown(1, Input.ArcadeButtons.B4) ||																			 // or B4 button
-						Input.GetButtonDown(2, Input.ArcadeButtons.B4))																				 // of either player
+						Input.GetButtonDown(1, Input.ArcadeButtons.A2) ||									 // or A2 button
+						Input.GetButtonDown(2, Input.ArcadeButtons.A2))										 // of either player
 					{
 						state = "input";
 					}
@@ -210,6 +210,7 @@ namespace onboard
 					_mainMenu.drawTitle(_spriteBatch, titleTexture, fadeColor);
 					_mainMenu.drawCards(_spriteBatch, cardTexture, _devcadeMenuBig);
 					_mainMenu.drawDescription(_spriteBatch, descriptionTexture, _devcadeMenuTitle, _devcadeMenuBig);
+					_mainMenu.drawInstructions(_spriteBatch, _devcadeMenuBig);
 					break;
 
 				case "loading":
