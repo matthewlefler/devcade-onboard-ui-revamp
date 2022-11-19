@@ -123,6 +123,58 @@ namespace onboard
             }
         }
 
+        public void startGame(DevcadeGame game) {
+            ThreadPool.QueueUserWorkItem(DownloadGame, game);
+        }
+
+        private void DownloadGame(object gameObj) {
+            DevcadeGame game = (DevcadeGame)gameObj;
+            string gameName = game.name.Replace(' ', '_');
+            Console.WriteLine($"Game is: {gameName}");
+            string path = $"/tmp/{gameName}.zip";
+            string URI = $"https://{_apiDomain}/api/games/download/{game.id}";
+            Console.WriteLine($"Getting {game.name} from {URI}");
+            
+            using var client = new HttpClient();
+            using Task<Stream> s = client.GetStreamAsync(URI);
+            using var fs = new FileStream(path, FileMode.OpenOrCreate);
+            s.Result.CopyTo(fs);
+            notifyDownloadComplete(game);
+        }
+        
+        private void notifyDownloadComplete(DevcadeGame game) {
+            string gameName = game.name.Replace(' ', '_');
+            string path = $"/tmp/{gameName}.zip";
+            try {
+                Console.WriteLine($"Extracting {path}");
+                Directory.CreateDirectory($"/tmp/{gameName}");
+                ZipFile.ExtractToDirectory(path, $"/tmp/{gameName}");
+            } catch (Exception e) {
+                Console.WriteLine($"Error extracting {path}: {e.Message}");
+            }
+
+            try {
+                string execPath = $"/tmp/{gameName}/publish/{gameName.Replace("_", " ")}";
+                Console.WriteLine($"Running {execPath}");
+                Chmod(execPath, "+x", false);
+                Process proc = new() {
+                    StartInfo = new ProcessStartInfo(execPath) {
+                        WindowStyle = ProcessWindowStyle.Normal,
+                        WorkingDirectory = Path.GetDirectoryName(execPath),
+                        RedirectStandardError = true,
+                        RedirectStandardOutput = true,
+                    }
+                };
+                // Redirect stdout and stderr to the console
+                proc.OutputDataReceived += (sender, args) => Console.WriteLine($"[{game.name}] {args.Data}");
+                proc.ErrorDataReceived += (sender, args) => Console.WriteLine($"[{game.name}] {args.Data}");
+                proc.Start();
+                Game1.instance.setActiveProcess(proc);
+            } catch (System.ComponentModel.Win32Exception e) {
+                Game1.instance.notifyLaunchError(e);
+            }
+        }
+
         public Process runGame(DevcadeGame game)
         {
             string gameName = game.name.Replace(' ', '_');

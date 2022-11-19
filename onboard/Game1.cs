@@ -8,8 +8,9 @@ using Devcade;
 
 namespace onboard
 {
-	public class Game1 : Game
-	{
+	public class Game1 : Game {
+		public static Game1 instance;
+		
 		private GraphicsDeviceManager _graphics;
 		private SpriteBatch _spriteBatch;
 
@@ -45,6 +46,7 @@ namespace onboard
 			_client = new DevcadeClient();
 			Content.RootDirectory = "Content";
 			IsMouseVisible = false;
+			instance = this;
 		}
 
 		protected override void Initialize()
@@ -120,7 +122,7 @@ namespace onboard
                     _errorLoading = false; // Clear error loading if we successfully load.
 					// Check for process that matches last launched game and display loading screen if it's running 
 					// This can be done easier by keeping a reference to the process spawned and .HasExited property...
-					_loading = !gameProcess.HasExited;
+                    _loading = gameProcess is not { HasExited: true };
 
 					if (fadeColor < 1f)
 					{
@@ -183,15 +185,10 @@ namespace onboard
 						Input.GetButtonDown(2, Input.ArcadeButtons.A1))                     // of either player
 					{
 						Console.WriteLine("Running game!!!");
-						gameProcess = _client.runGame(_mainMenu.gameSelected());
-                        // If for some reason we fail to download the game, then, uh, don't.
-                        if (gameProcess == null)
-                        {
-                            Console.WriteLine("Failed to launch game.");
-                            state = "input";
-                            _errorLoading = true;
-                            break;
-                        }
+						gameProcess = null; // Clear the process reference
+						// Start Game will set the game process reference later
+						// If it fails, it will set the error loading flag
+						_client.startGame(_mainMenu.gameSelected());
 						fadeColor = 0f;
 						_loading = true;
 						state = "loading";
@@ -247,6 +244,15 @@ namespace onboard
 			_spriteBatch.End();
 
 			base.Draw(gameTime);
+		}
+
+		public void setActiveProcess(Process proc) {
+			gameProcess = proc;
+		}
+
+		public void notifyLaunchError(Exception e) {
+			_loading = false;
+			_errorLoading = true;
 		}
 	}
 }
