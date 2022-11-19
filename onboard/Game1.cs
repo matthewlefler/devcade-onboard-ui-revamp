@@ -162,9 +162,10 @@ namespace onboard
 						(Input.GetButton(1, Input.ArcadeButtons.Menu) && Input.GetButton(2, Input.ArcadeButtons.Menu) &&  // OR Both Menu Buttons
 						Input.GetButton(1, Input.ArcadeButtons.B4)))													  // and Player 1 B4
 					{
+						_mainMenu.clearGames();
 						_mainMenu.gameTitles = _client.GetGames();
 						_mainMenu.setCards(_client, GraphicsDevice);
-						
+
 						state = "input";
 					}												  
 

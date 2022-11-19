@@ -59,6 +59,14 @@ namespace onboard
             _graphics.ApplyChanges();
         }
 
+        // Empties the gameTitles and cards lists. Called when the reload buttons are pressed
+        public void clearGames()
+        {
+            gameTitles.Clear();
+            cards.Clear();
+            itemSelected = 0;
+        }
+
         public void setCards(DevcadeClient _client, GraphicsDevice graphics)
         {
             for(int i=0; i<gameTitles.Count; i++)
