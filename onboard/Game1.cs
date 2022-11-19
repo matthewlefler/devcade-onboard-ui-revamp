@@ -151,12 +151,24 @@ namespace onboard
 						_mainMenu.beginAnimDown();
 					}
 
-					if ((myState.IsKeyDown(Keys.Enter) && lastState.IsKeyUp(Keys.Enter)) ||   // Keyboard Enter
+					if ((myState.IsKeyDown(Keys.Enter) && lastState.IsKeyUp(Keys.Enter)) || // Keyboard Enter
 						Input.GetButtonDown(1, Input.ArcadeButtons.A1) ||                   // or A1 button
 						Input.GetButtonDown(2, Input.ArcadeButtons.A1))                     // of either player
 					{
 						state = "description";
 					}
+
+					if ((myState.IsKeyDown(Keys.R) && lastState.IsKeyUp(Keys.R)) ||										  // Keyboard R
+						(Input.GetButton(1, Input.ArcadeButtons.Menu) && Input.GetButton(2, Input.ArcadeButtons.Menu) &&  // OR Both Menu Buttons
+						Input.GetButton(1, Input.ArcadeButtons.B4)))													  // and Player 1 B4
+					{
+						_mainMenu.clearGames();
+						_mainMenu.gameTitles = _client.GetGames();
+						_mainMenu.setCards(_client, GraphicsDevice);
+
+						state = "input";
+					}												  
+
 					_mainMenu.animate(gameTime);
 					break;
 
