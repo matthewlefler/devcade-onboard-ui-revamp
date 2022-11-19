@@ -32,6 +32,7 @@ namespace onboard
 		private Texture2D BGgradient;
 		private Texture2D icon;
 		private Texture2D titleTexture;
+		private Texture2D titleTextureWhite;
 		private Texture2D descriptionTexture;
 
         // To indicate that there was a problem running the game
@@ -67,7 +68,8 @@ namespace onboard
 			_devcadeMenuTitle = Content.Load<SpriteFont>("devcade-menu-title");
 
 			cardTexture = Content.Load<Texture2D>("card");
-			titleTexture = Content.Load<Texture2D>("tansparent-logo");
+			titleTexture = Content.Load<Texture2D>("transparent-logo");
+			titleTextureWhite = Content.Load<Texture2D>("transparent-logo-white");
 
 			descriptionTexture = Content.Load<Texture2D>("description");
 
@@ -227,7 +229,7 @@ namespace onboard
 
 				case "loading":
 					_mainMenu.drawLoading(_spriteBatch, loadingSpin, fadeColor);
-					_mainMenu.drawTitle(_spriteBatch, titleTexture, fadeColor);
+					_mainMenu.drawTitle(_spriteBatch, titleTextureWhite, fadeColor);
 					break;
 			}
 
