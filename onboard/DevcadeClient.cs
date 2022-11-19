@@ -61,9 +61,6 @@ namespace onboard
 
         public void GetBanner(DevcadeGame game)
         {
-            // TODO: This function works, now just get the game to draw those images
-            //       Get some clarity on what each image is being used for
-
             // Path to where the banner image will be saved
             // Making this game.name will name the downloaded image have that name, could set it to anything like id etc..
             string path = $"/tmp/{game.id}Banner.png";
