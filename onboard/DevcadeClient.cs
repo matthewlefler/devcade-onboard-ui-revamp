@@ -31,10 +31,9 @@ namespace onboard
 
     public class DevcadeClient
     {
-        private string _apiDomain;
+        private readonly string _apiDomain;
 
-        public DevcadeClient()
-        {
+        public DevcadeClient() {
             _apiDomain = Environment.GetEnvironmentVariable("DEVCADE_API_DOMAIN");
         }
         
@@ -67,25 +66,19 @@ namespace onboard
 
             Console.WriteLine($"Downloading banner for: {game.name}");
 
-            using (var client = new HttpClient())
+            using var client = new HttpClient();
+            try
             {
-                try
-                {
-                    // Download the image from this uri, save it to the path
-                    string uri = $"https://{_apiDomain}/api/games/download/banner/{game.id}";
-                    using (var s = client.GetStreamAsync(uri))
-                    {
-                        using (var fs = new FileStream(path, FileMode.OpenOrCreate))
-                        {
-                            s.Result.CopyTo(fs);
-                        }
-                    }
-                }
-                catch(HttpRequestException e)
-                {
-                    Console.WriteLine("\nException Caught!");
-                    Console.WriteLine("Message :{0} ", e.Message);
-                }
+                // Download the image from this uri, save it to the path
+                string uri = $"https://{_apiDomain}/api/games/download/banner/{game.id}";
+                using Task<Stream> s = client.GetStreamAsync(uri);
+                using var fs = new FileStream(path, FileMode.OpenOrCreate);
+                s.Result.CopyTo(fs);
+            }
+            catch(HttpRequestException e)
+            {
+                Console.WriteLine("\nException Caught!");
+                Console.WriteLine("Message :{0} ", e.Message);
             }
         }
 
@@ -101,25 +94,16 @@ namespace onboard
 
         // Returns true if success and false otherwise
         // permissions can be an int or a string. For example it can also be +x, -x etc..
-        bool Chmod(string filePath, string permissions = "700", bool recursive = false)
+        private static void Chmod(string filePath, string permissions = "700", bool recursive = false)
         {
-            string cmd;
-            if (recursive)
-                cmd = $"chmod -R {permissions} {filePath}";
-            else
-                cmd = $"chmod {permissions} {filePath}";
+            string cmd = recursive ? $"chmod -R {permissions} {filePath}" : $"chmod {permissions} {filePath}";
 
-            try
-            {
-                using (Process proc = Process.Start("/bin/bash", $"-c \"{cmd}\""))
-                {
-                    proc.WaitForExit();
-                    return proc.ExitCode == 0;
-                }
+            try {
+                using Process proc = Process.Start("/bin/bash", $"-c \"{cmd}\"");
+                proc?.WaitForExit();
             }
-            catch
-            {
-                return false;
+            catch {
+                // ignored
             }
         }
 
@@ -128,7 +112,7 @@ namespace onboard
         }
 
         private void DownloadGame(object gameObj) {
-            DevcadeGame game = (DevcadeGame)gameObj;
+            var game = (DevcadeGame)gameObj;
             string gameName = game.name.Replace(' ', '_');
             Console.WriteLine($"Game is: {gameName}");
             string path = $"/tmp/{gameName}.zip";
@@ -142,7 +126,7 @@ namespace onboard
             notifyDownloadComplete(game);
         }
         
-        private void notifyDownloadComplete(DevcadeGame game) {
+        private static void notifyDownloadComplete(DevcadeGame game) {
             string gameName = game.name.Replace(' ', '_');
             string path = $"/tmp/{gameName}.zip";
             try {
@@ -156,78 +140,23 @@ namespace onboard
             try {
                 string execPath = $"/tmp/{gameName}/publish/{gameName.Replace("_", " ")}";
                 Console.WriteLine($"Running {execPath}");
-                Chmod(execPath, "+x", false);
+                Chmod(execPath, "+x");
                 Process proc = new() {
                     StartInfo = new ProcessStartInfo(execPath) {
                         WindowStyle = ProcessWindowStyle.Normal,
-                        WorkingDirectory = Path.GetDirectoryName(execPath),
+                        WorkingDirectory = Path.GetDirectoryName(execPath) ?? string.Empty,
                         RedirectStandardError = true,
                         RedirectStandardOutput = true,
                     }
                 };
                 // Redirect stdout and stderr to the console
-                proc.OutputDataReceived += (sender, args) => Console.WriteLine($"[{game.name}] {args.Data}");
-                proc.ErrorDataReceived += (sender, args) => Console.WriteLine($"[{game.name}] {args.Data}");
+                proc.OutputDataReceived += (_, args) => Console.WriteLine($"[{game.name}] {args.Data}");
+                proc.ErrorDataReceived += (_, args) => Console.WriteLine($"[{game.name}] {args.Data}");
                 proc.Start();
                 Game1.instance.setActiveProcess(proc);
             } catch (System.ComponentModel.Win32Exception e) {
                 Game1.instance.notifyLaunchError(e);
             }
-        }
-
-        public Process runGame(DevcadeGame game)
-        {
-            string gameName = game.name.Replace(' ', '_');
-            Console.WriteLine($"Game is: {gameName}");
-            string path = $"/tmp/{gameName}.zip";
-            string URI = $"https://{_apiDomain}/api/games/download/{game.id}";
-            Console.WriteLine($"Getting {gameName} from {URI}.");
-
-            using (var client = new HttpClient())
-            {
-                using (var s = client.GetStreamAsync(URI))
-                {
-                    using (var fs = new FileStream(path, FileMode.OpenOrCreate))
-                    {
-                        s.Result.CopyTo(fs);
-                    }
-                }
-            }
-
-            try
-            {
-                Console.WriteLine($"Extracting {path}");
-                // Extract the specified path (the zip file) to the specified directory (/tmp/, probably)
-                System.IO.Directory.CreateDirectory($"/tmp/{gameName}");
-                ZipFile.ExtractToDirectory(path, $"/tmp/{gameName}");
-            } catch (System.IO.IOException e) {
-                Console.WriteLine(e);
-            }
-
-            try {
-                string execPath = $"/tmp/{gameName}/publish/{gameName.Replace("_","")}";
-                Console.WriteLine($"Running {execPath}");
-                Chmod(execPath,"+x",false);
-                Process process = new Process()
-                {
-                    StartInfo = new ProcessStartInfo(execPath) // chom
-                    {
-                        WindowStyle = ProcessWindowStyle.Normal,
-                        WorkingDirectory = Path.GetDirectoryName(execPath),
-                        RedirectStandardError = true,
-                        RedirectStandardOutput = true,
-                    }
-                };
-                // Forward stdout and stderr to the console
-                process.OutputDataReceived += (sender, args) => Console.WriteLine($"[{game.name}] {args.Data}");
-                process.ErrorDataReceived += (sender, args) => Console.WriteLine($"[{game.name}] {args.Data}");
-                process.Start();
-                return process;
-            } catch (System.ComponentModel.Win32Exception e) {
-                Console.WriteLine(e);
-            }
-
-            return null;
         }
     }
 }

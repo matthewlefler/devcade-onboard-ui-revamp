@@ -3,16 +3,13 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.IO;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Reflection;
-using System.Threading;
 
 namespace onboard
 {
     public class Menu
     {
-        private GraphicsDeviceManager _device;
+        private readonly GraphicsDeviceManager _device;
 
         public static Menu instance;
 
@@ -30,12 +27,12 @@ namespace onboard
         private int _sHeight;
         private double scalingAmount = 0;
 
-        private float moveTime = 0.15f; // This is the total time the scrolling animation takes
+        private const float moveTime = 0.15f; // This is the total time the scrolling animation takes
         private float timeRemaining = 0f;
 
         private float descX; // The X position of the description box is saved here. Used to animate the box
         private float descOpacity = 0f; // The opacity of the description box
-        private static float descFadeTime = 0.4f; // Time it takes to make the description box fade in/out
+        private const float descFadeTime = 0.4f; // Time it takes to make the description box fade in/out
 
         public bool movingUp;
         public bool movingDown;
@@ -48,9 +45,9 @@ namespace onboard
 
         public void updateDims(GraphicsDeviceManager _graphics) 
         {
-            
-            _sWidth = Int32.Parse(Environment.GetEnvironmentVariable("VIEW_WIDTH"));
-            _sHeight = Int32.Parse(Environment.GetEnvironmentVariable("VIEW_HEIGHT"));
+            // Get the screen width and height. If none are set, set the to the default values
+            _sWidth = Int32.Parse(Environment.GetEnvironmentVariable("VIEW_WIDTH") ?? "1080");
+            _sHeight = Int32.Parse(Environment.GetEnvironmentVariable("VIEW_HEIGHT") ?? "2560");
 
             scalingAmount = Math.Sqrt((_sHeight*_sWidth)/(double)(1920*1080)); // This is a constant value that is used to scale the UI elements
 
@@ -103,11 +100,6 @@ namespace onboard
             Texture2D banner = Texture2D.FromStream(_device.GraphicsDevice, File.OpenRead(bannerPath));
             // set texture
             cards[gameID].setTexture(banner);
-        }
-        
-        private void setCardTexture(string gameName, Texture2D texture)
-        {
-            cards[gameName].setTexture(texture);
         }
 
         public DevcadeGame gameSelected()
@@ -190,7 +182,7 @@ namespace onboard
                 writeString(_spriteBatch,
                     font,
                     line,
-                    new Vector2(_sWidth/2, (int)(500 * scalingAmount) + (instructSize * lineNum)), // 500 is the height of the title, this string goes right beneath that
+                    new Vector2(_sWidth/2.0f, (int)(500 * scalingAmount) + (instructSize * lineNum)), // 500 is the height of the title, this string goes right beneath that
                     1f
                 );
                 lineNum++;
@@ -209,7 +201,7 @@ namespace onboard
             }
 
             // Creates a boundary to get the right spot on the spritesheet to be drawn
-            Rectangle spriteBounds = new Rectangle(
+            Rectangle spriteBounds = new (
                 600 * loadingCol,
                 600 * loadingRow,
                 600,
@@ -218,7 +210,7 @@ namespace onboard
 
             _spriteBatch.Draw(
                 loadingSpin,
-                new Vector2(_sWidth/2, _sHeight/2 + 150),
+                new Vector2(_sWidth/2.0f, _sHeight/2.0f + 150),
                 spriteBounds,
                 new Color(col, col, col),
                 0f,
@@ -232,42 +224,30 @@ namespace onboard
             
         }
 
-        public void descFadeIn(GameTime gameTime)
-        {
+        public void descFadeIn(GameTime gameTime) {
             // This does the slide in animation, starting off screen and moving to the middle over 0.8 seconds
-            if(descOpacity < 1)
-            {
-                descX -= (_sWidth)/descFadeTime*(float)gameTime.ElapsedGameTime.TotalSeconds;
-                descOpacity += (1/descFadeTime)*(float)gameTime.ElapsedGameTime.TotalSeconds;
-            }
+            if (!(descOpacity < 1)) return;
+            descX -= (_sWidth)/descFadeTime*(float)gameTime.ElapsedGameTime.TotalSeconds;
+            descOpacity += (1/descFadeTime)*(float)gameTime.ElapsedGameTime.TotalSeconds;
         }
 
-        public void descFadeOut(GameTime gameTime)
-        {
+        public void descFadeOut(GameTime gameTime) {
             // This does the slide out animation, starting in the middle of the screen and moving it off over 0.8 seconds
-            if(descOpacity > 0)
-            {
-                descX += (_sWidth)/descFadeTime*(float)gameTime.ElapsedGameTime.TotalSeconds;
-                descOpacity -= (1/descFadeTime)*(float)gameTime.ElapsedGameTime.TotalSeconds;
-            }
+            if (!(descOpacity > 0)) return;
+            descX += (_sWidth)/descFadeTime*(float)gameTime.ElapsedGameTime.TotalSeconds;
+            descOpacity -= (1/descFadeTime)*(float)gameTime.ElapsedGameTime.TotalSeconds;
         }
 
-        public void cardFadeIn(GameTime gameTime)
-        {
-            if(MenuCard.cardOpacity < 1)
-            {
-                MenuCard.cardX += (_sWidth)/descFadeTime*(float)gameTime.ElapsedGameTime.TotalSeconds;
-                MenuCard.cardOpacity += (1/descFadeTime)*(float)gameTime.ElapsedGameTime.TotalSeconds;
-            }
+        public void cardFadeIn(GameTime gameTime) {
+            if (!(MenuCard.cardOpacity < 1)) return;
+            MenuCard.cardX += (_sWidth)/descFadeTime*(float)gameTime.ElapsedGameTime.TotalSeconds;
+            MenuCard.cardOpacity += (1/descFadeTime)*(float)gameTime.ElapsedGameTime.TotalSeconds;
         }
 
-        public void cardFadeOut(GameTime gameTime)
-        {
-            if(MenuCard.cardOpacity > 0)
-            {
-                MenuCard.cardX -= (_sWidth)/descFadeTime*(float)gameTime.ElapsedGameTime.TotalSeconds;
-                MenuCard.cardOpacity -= (1/descFadeTime)*(float)gameTime.ElapsedGameTime.TotalSeconds;
-            }
+        public void cardFadeOut(GameTime gameTime) {
+            if (!(MenuCard.cardOpacity > 0)) return;
+            MenuCard.cardX -= (_sWidth)/descFadeTime*(float)gameTime.ElapsedGameTime.TotalSeconds;
+            MenuCard.cardOpacity -= (1/descFadeTime)*(float)gameTime.ElapsedGameTime.TotalSeconds;
         }
 
         public void drawDescription(SpriteBatch _spriteBatch, Texture2D descTexture, SpriteFont titleFont, SpriteFont descFont)
@@ -281,7 +261,7 @@ namespace onboard
                 null,
                 new Color(descOpacity,descOpacity,descOpacity,descOpacity),
                 0f,
-                new Vector2(descTexture.Width/2,descTexture.Height/2),
+                new Vector2(descTexture.Width/2.0f, descTexture.Height/2.0f),
                 (float)(1f*scalingAmount),
                 SpriteEffects.None,
                 0f
@@ -331,24 +311,21 @@ namespace onboard
 
         }
 
-        public List<string> wrapText(string desc, int lineLimit)
+        public static List<string> wrapText(string desc, int lineLimit)
         {
             // This function should take in a description and return a list of lines to print to the screen
             string[] words = desc.Split(' '); // Split the description up by words
-            List<string> lines = new List<string>(); // Create a list to return 
-            
-            lines.Add(' '.ToString()); 
+            List<string> lines = new() { ' '.ToString() }; // Create a list to return 
+
             int currentLine = 0;
             foreach(string word in words)
             {
                 // For each word in the description, we add it to a line. 
                 lines[currentLine] += word+' ';
                 // Once that line is over the limit of  characters, we move to the next line
-                if(lines[currentLine].Length > lineLimit)
-                {
-                    currentLine++;
-                    lines.Add(' '.ToString());
-                }
+                if (lines[currentLine].Length <= lineLimit) continue;
+                currentLine++;
+                lines.Add(' '.ToString());
             }
 
             return lines;
@@ -373,76 +350,45 @@ namespace onboard
         public void drawCards(SpriteBatch _spriteBatch, Texture2D cardTexture, SpriteFont font)
         {
             // I still have no idea why the layerDepth does not work
-            foreach(MenuCard card in cards.Values)
-            {
-                if(Math.Abs(card.listPos) == 4)
-                {
-                   card.DrawSelf(_spriteBatch, cardTexture, font, _sHeight, scalingAmount);
-                }
-                
+            foreach (MenuCard card in cards.Values.Where(card => Math.Abs(card.listPos) == 4)) {
+                card.DrawSelf(_spriteBatch, cardTexture, font, _sHeight, scalingAmount);
             }
-            foreach(MenuCard card in cards.Values)
-            {
-                if(Math.Abs(card.listPos) == 3)
-                {
-                   card.DrawSelf(_spriteBatch, cardTexture, font, _sHeight, scalingAmount);
-                }
-                
+            foreach (MenuCard card in cards.Values.Where(card => Math.Abs(card.listPos) == 3)) {
+                card.DrawSelf(_spriteBatch, cardTexture, font, _sHeight, scalingAmount);
             }
-            foreach(MenuCard card in cards.Values)
-            {
-                if(Math.Abs(card.listPos) == 2)
-                {
-                   card.DrawSelf(_spriteBatch, cardTexture, font, _sHeight, scalingAmount);
-                }
-                
+            foreach (MenuCard card in cards.Values.Where(card => Math.Abs(card.listPos) == 2)) {
+                card.DrawSelf(_spriteBatch, cardTexture, font, _sHeight, scalingAmount);
             }
-            foreach(MenuCard card in cards.Values)
-            {
-                if(Math.Abs(card.listPos) == 1)
-                {
-                   card.DrawSelf(_spriteBatch, cardTexture, font, _sHeight, scalingAmount);
-                }
-                
+            foreach (MenuCard card in cards.Values.Where(card => Math.Abs(card.listPos) == 1)) {
+                card.DrawSelf(_spriteBatch, cardTexture, font, _sHeight, scalingAmount);
             }
-            foreach(MenuCard card in cards.Values)
-            {
-                if(Math.Abs(card.listPos) == 0)
-                {
-                   card.DrawSelf(_spriteBatch, cardTexture, font, _sHeight, scalingAmount);
-                }
-                
+            foreach (MenuCard card in cards.Values.Where(card => Math.Abs(card.listPos) == 0)) {
+                card.DrawSelf(_spriteBatch, cardTexture, font, _sHeight, scalingAmount);
             }
         }
 
-        public void beginAnimUp()
-        {
-            if (!(movingUp || movingDown) && itemSelected < gameTitles.Count()-1) // scrolling beginds only if it is not already moving, and not at bottom of list
-                {
-                    foreach(MenuCard card in cards.Values)
-                    {
-                        card.listPos++;
-                        //card.layer = (float)Math.Abs(card.listPos) / 4;
-                    }
-                    timeRemaining = moveTime; // Time remaining in the animation begins at the total expected move time
-                    movingUp = true;
-                    itemSelected++; // Update which game is currently selected, so the proper one will be launched
-                }
+        public void beginAnimUp() {
+            if (movingUp || movingDown || itemSelected >= gameTitles.Count - 1) return; // scrolling beginds only if it is not already moving, and not at bottom of list
+            foreach(MenuCard card in cards.Values)
+            {
+                card.listPos++;
+                //card.layer = (float)Math.Abs(card.listPos) / 4;
+            }
+            timeRemaining = moveTime; // Time remaining in the animation begins at the total expected move time
+            movingUp = true;
+            itemSelected++; // Update which game is currently selected, so the proper one will be launched
         }
 
-        public void beginAnimDown()
-        {
-            if (!(movingDown || movingUp) && itemSelected > 0) // scrolling begins only if it is not already moving, and not at the top of the list
-                {
-                    foreach (MenuCard card in cards.Values)
-                    {
-                        card.listPos--;
-                        //card.layer = (float)Math.Abs(card.listPos) / 4;
-                    }
-                    timeRemaining = moveTime; // Time remaining in the animation begins at the total expected move time
-                    movingDown = true;
-                    itemSelected--;
-                }
+        public void beginAnimDown() {
+            if (movingDown || movingUp || itemSelected <= 0) return; // scrolling begins only if it is not already moving, and not at the top of the list
+            foreach (MenuCard card in cards.Values)
+            {
+                card.listPos--;
+                //card.layer = (float)Math.Abs(card.listPos) / 4;
+            }
+            timeRemaining = moveTime; // Time remaining in the animation begins at the total expected move time
+            movingDown = true;
+            itemSelected--;
         }
 
         public void animate(GameTime gameTime)
