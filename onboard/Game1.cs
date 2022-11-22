@@ -8,8 +8,9 @@ using Devcade;
 
 namespace onboard
 {
-	public class Game1 : Game
-	{
+	public class Game1 : Game {
+		public static Game1 instance;
+		
 		private GraphicsDeviceManager _graphics;
 		private SpriteBatch _spriteBatch;
 
@@ -21,11 +22,18 @@ namespace onboard
 
 		private bool _loading = false;
 
-		private string state = "launch";
+		private MenuState state = MenuState.Launch;
 		private Process gameProcess;
 		private float fadeColor = 0f;
 
 		KeyboardState lastState;
+
+		private enum MenuState {
+			Launch,
+			Loading,
+			Input,
+			Descritpion,
+		}
 
 		private Texture2D cardTexture;
 		private Texture2D loadingSpin;
@@ -45,6 +53,7 @@ namespace onboard
 			_client = new DevcadeClient();
 			Content.RootDirectory = "Content";
 			IsMouseVisible = false;
+			instance = this;
 		}
 
 		protected override void Initialize()
@@ -95,32 +104,27 @@ namespace onboard
 				Exit();
 			}
 
-			if (lastState == null)
-			{
-				lastState = Keyboard.GetState(); // god i hate video games
-			}
-
 			// If the state is loading, it is still taking input as though it is in the input state..?
 			switch (state)
 			{
 				// Fade in when the app launches
-				case "launch":
+				case MenuState.Launch:
 					if (fadeColor < 1f)
 					{
 						fadeColor += (float)(gameTime.ElapsedGameTime.TotalSeconds);
 					} else
 					{
 						// Once the animation completes, begin tracking input
-						state = "input";
+						state = MenuState.Input;
 					}
 
 					break;
 
-				case "loading":
+				case MenuState.Loading:
                     _errorLoading = false; // Clear error loading if we successfully load.
 					// Check for process that matches last launched game and display loading screen if it's running 
 					// This can be done easier by keeping a reference to the process spawned and .HasExited property...
-					_loading = !gameProcess.HasExited;
+                    _loading = gameProcess is not { HasExited: true };
 
 					if (fadeColor < 1f)
 					{
@@ -130,12 +134,12 @@ namespace onboard
 					if (!_loading)
 					{
 						fadeColor = 0f;
-						state = "launch";
+						state = MenuState.Launch;
 					}
 					break;
 
 				// In this state, the user is able to scroll through the menu and launch games
-				case "input":
+				case MenuState.Input:
 					_mainMenu.descFadeOut(gameTime);
 					_mainMenu.cardFadeIn(gameTime);
 
@@ -157,7 +161,7 @@ namespace onboard
 						Input.GetButtonDown(1, Input.ArcadeButtons.A1) ||                   // or A1 button
 						Input.GetButtonDown(2, Input.ArcadeButtons.A1))                     // of either player
 					{
-						state = "description";
+						state = MenuState.Descritpion;
 					}
 
 					if ((myState.IsKeyDown(Keys.R) && lastState.IsKeyUp(Keys.R)) ||										  // Keyboard R
@@ -168,13 +172,13 @@ namespace onboard
 						_mainMenu.gameTitles = _client.GetGames();
 						_mainMenu.setCards(_client, GraphicsDevice);
 
-						state = "input";
+						state = MenuState.Input;
 					}												  
 
 					_mainMenu.animate(gameTime);
 					break;
 
-				case "description":
+				case MenuState.Descritpion:
 					_mainMenu.descFadeIn(gameTime);
 					_mainMenu.cardFadeOut(gameTime);
 
@@ -183,24 +187,19 @@ namespace onboard
 						Input.GetButtonDown(2, Input.ArcadeButtons.A1))                     // of either player
 					{
 						Console.WriteLine("Running game!!!");
-						gameProcess = _client.runGame(_mainMenu.gameSelected());
-                        // If for some reason we fail to download the game, then, uh, don't.
-                        if (gameProcess == null)
-                        {
-                            Console.WriteLine("Failed to launch game.");
-                            state = "input";
-                            _errorLoading = true;
-                            break;
-                        }
+						gameProcess = null; // Clear the process reference
+						// Start Game will set the game process reference later
+						// If it fails, it will set the error loading flag
+						_client.startGame(_mainMenu.gameSelected());
 						fadeColor = 0f;
 						_loading = true;
-						state = "loading";
+						state = MenuState.Loading;
 
 					} else if ((myState.IsKeyDown(Keys.RightShift) && lastState.IsKeyUp(Keys.RightShift)) || // Keyboard Rshift
 						Input.GetButtonDown(1, Input.ArcadeButtons.A2) ||									 // or A2 button
 						Input.GetButtonDown(2, Input.ArcadeButtons.A2))										 // of either player
 					{
-						state = "input";
+						state = MenuState.Input;
 					}
 
 					break;
@@ -217,9 +216,9 @@ namespace onboard
 
 			switch (state)
 			{
-				case "launch":
-				case "input":
-				case "description":
+				case MenuState.Launch:
+				case MenuState.Input:
+				case MenuState.Descritpion:
 					_mainMenu.drawBackground(_spriteBatch, BGgradient, icon, fadeColor, gameTime);
 					_mainMenu.drawTitle(_spriteBatch, titleTexture, fadeColor);
 					_mainMenu.drawCards(_spriteBatch, cardTexture, _devcadeMenuBig);
@@ -227,7 +226,7 @@ namespace onboard
 					_mainMenu.drawInstructions(_spriteBatch, _devcadeMenuBig);
 					break;
 
-				case "loading":
+				case MenuState.Loading:
 					_mainMenu.drawLoading(_spriteBatch, loadingSpin, fadeColor);
 					_mainMenu.drawTitle(_spriteBatch, titleTextureWhite, fadeColor);
 					break;
@@ -247,6 +246,15 @@ namespace onboard
 			_spriteBatch.End();
 
 			base.Draw(gameTime);
+		}
+
+		public void setActiveProcess(Process proc) {
+			gameProcess = proc;
+		}
+
+		public void notifyLaunchError(Exception e) {
+			_loading = false;
+			_errorLoading = true;
 		}
 	}
 }
