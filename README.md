@@ -22,7 +22,7 @@ Debian >=10
 
 A user named `devcade`
 
-`apt install xterm openbox` and friends (I dont actually know what all is installed)
+`apt install xterm openbox compton` and friends (I dont actually know what all is installed)
 
 ### Daemon
 
