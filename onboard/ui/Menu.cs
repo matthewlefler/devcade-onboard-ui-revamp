@@ -1,16 +1,11 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Security.Policy;
-using System.Threading.Tasks;
 using log4net;
-using log4net.Repository.Hierarchy;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using onboard.devcade;
-using onboard.util;
 
 namespace onboard.ui; 
     
@@ -40,14 +35,18 @@ public class Menu : IMenu {
         for (int i = 0; i < games.Count; i++) {
             MenuCard card = new (i, games[i].name, null);
             cards.Add(games[i].name, card);
-            // Client.DownloadGame(games[i]);
         }
-        Client.DownloadGame(games[0]);
         
-        Container.OnContainerBuilt += (sender, args) => {
-            logger.Info("Running game");
-            Container.runContainer(args);
+        Client.onBannerFinished += (_, game) => {
+            if (cards.ContainsKey(game.name)) {
+                Devcade.instance.loadTextureFromFile($"/tmp/devcade/{game.name}/banner.png");
+            }
         };
+        
+        // Container.OnContainerBuilt += (_, args) => {
+        //     logger.Info("Running game");
+        //     Container.runContainer(args);
+        // };
     }
     
     public void LoadContent(ContentManager contentManager) {

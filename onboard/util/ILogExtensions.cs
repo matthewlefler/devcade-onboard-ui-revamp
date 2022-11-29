@@ -25,4 +25,14 @@ public static class ILogExtentions
         log.Verbose(message, null);
     }
 
+    public static void Log(this ILog log, log4net.Core.Level level, string message, Exception exception)
+    {
+        log.Logger.Log(System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType, 
+            level, message, exception);
+    }
+    
+    public static void Log(this ILog log, log4net.Core.Level level, string message)
+    {
+        log.Log(level, message, null);
+    }
 }

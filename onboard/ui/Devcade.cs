@@ -27,6 +27,19 @@ public class Devcade : Game {
     
     protected override void Initialize() {
         // TODO: Add your initialization logic here
+        var sWidth = Env.get("VIEW_WIDTH");
+        var sHeight = Env.get("VIEW_HEIGHT");
+        if (sWidth.is_none()) {
+            logger.Warn("VIEW_WIDTH not set. Using default 1080");
+        }
+        if (sHeight.is_none()) {
+            logger.Warn("VIEW_HEIGHT not set. Using default 2560");
+        }
+        int width = sWidth.map_or(1080, int.Parse);
+        int height = sHeight.map_or(2560, int.Parse);
+        graphics.PreferredBackBufferWidth = width;
+        graphics.PreferredBackBufferHeight = height;
+        graphics.ApplyChanges();
         
         menu.Initialize();
 
@@ -46,6 +59,8 @@ public class Devcade : Game {
     
     protected override void Update(GameTime gameTime) {
         // TODO: Add your update logic here
+
+        menu.Update(gameTime);
         
         base.Update(gameTime);
     }
@@ -53,6 +68,8 @@ public class Devcade : Game {
     protected override void Draw(GameTime gameTime) {
         // TODO: Add your drawing code here
         GraphicsDevice.Clear(Color.CornflowerBlue);
+
+        menu.Draw(this.spriteBatch, gameTime);
 
         base.Draw(gameTime);
     }

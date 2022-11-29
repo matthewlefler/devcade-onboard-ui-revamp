@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using log4net;
 using log4net.Repository.Hierarchy;
+using Microsoft.Xna.Framework;
 
 namespace onboard.util; 
 
@@ -18,16 +19,13 @@ public static class Container {
     public static event EventHandler<devcade.DevcadeGame> OnContainerBuilt = (_, _) => {
         logger.Trace("OnContainerBuild Invoked");
     };
-    public static event EventHandler<(devcade.DevcadeGame, int)> OnProcessDied = (_, _) => {
-        logger.Trace("OnProcessDied Invoked");
-    };
 
     // Slightly cursed
     private const string gameTemplate = @"
 FROM debian:buster
 
 RUN apt-get update -y
-RUN apt-get install -y wget
+RUN apt-get install -y wget git fonts-liberation fontconfig-config xterm pulseaudio zip unzip
 
 RUN wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod.deb \
     -O packages-microsoft-prod.deb && \
@@ -35,120 +33,40 @@ RUN wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod
     apt-get update -y && \
     apt-get install -y dotnet-runtime-6.0 libgtk-3-0
 
-COPY publish /app
-RUN chmod +x /app/$GAME
-WORKDIR /app";
-
-    // Very cursed
-    private static readonly string launchTemplate = @"
-#!/bin/bash
-
-set -e
-
-# $CONTAINER here will be replaced with the container name by the launcher
-uname=$USER
-container=$CONTAINER
-name=$CONTAINER
-
-while getopts `:u:d:n:` option; do
-    case $option in
-        u) # change uname
-            uname=$OPTARG;;
-        d) # change container
-            container=$OPTARG;;
-        n) # change name
-            name=$OPTARG;;
-    esac
-done
-
-xauth_path=/tmp/xopp-dev-xauth
-
-rm -rf `$xauth_path`
-mkdir -p `$xauth_path`
-cp `$HOME`/.Xauthority `$xauth_path`
-chmod g+rwx `$xauth_path`/.Xauthority
-
-podman run --name=`$name` --rm -it                                    \
-    -e Display=`$DISPLAY`                                             \
-    --network=host                                                    \
-    --cap-add=SYS_PTRACE                                              \
-    --group-add keep-groups                                           \
-    --annotation io.crun.keep_original_groups=1                       \
-    -v `$xauth_path`/.Xauthority:/root/.Xauthority:Z                  \
-    -v ./:/devcade:Z                                                  \
-    -v /tmp/.X11-unix:/tmo/.X11-unix                                  \
-    --env 'PKG_CONFIG_PATH=/usr/local/lob/pkgconfig:$PKG_CONFIG_PATH' \
-    `$container`
-rm -rf `$xauth_path`".Replace("`", "\""); // Using backticks in place of quotes because I can't escape (please free me)
+CMD [ ""/devcade/publish/$GAME"" ]";
 
     public static void createDockerfileFromGame(devcade.DevcadeGame game) {
         logger.Debug("Creating Dockerfile for game " + game.name);
         // Replace the game name in the template and trim starting newline
         string dockerfile = gameTemplate.Replace("$GAME", game.name)[1..];
-        string launchScript = launchTemplate.Replace("$CONTAINER", game.name.ToLower())[1..]; // use lowercase for container name
         try {
             File.WriteAllText($"/tmp/devcade/{game.name}/Dockerfile", dockerfile);
-            File.WriteAllText($"/tmp/devcade/{game.name}/launch.sh", launchScript);
         }
         catch (Exception e) {
             logger.Error($"Failed to create Dockerfile for game {game.name}: {e}");
         }
-        int ret = Cmd.chmod($"/tmp/devcade/{game.name}/launch.sh", "u+x");
         buildImageFromGame(game);
     }
     
     public static void buildImageFromGame(devcade.DevcadeGame game) {
         logger.Debug("Building image for game " + game.name);
-        string command = $"podman build /tmp/devcade/{game.name} --tag={game.name.ToLower()}";
-        try {
-            var process = new System.Diagnostics.Process();
-            process.StartInfo.FileName = "/bin/bash";
-            process.StartInfo.Arguments = $"-c \"{command}\"";
-            process.StartInfo.UseShellExecute = false;
-            process.StartInfo.RedirectStandardOutput = true;
-            process.StartInfo.RedirectStandardError = true;
-            process.Start();
-            process.WaitForExit();
-            logger.Debug(process.StandardOutput.ReadToEnd());
-            string error = process.StandardError.ReadToEnd();
-            if (error != "") {
-                logger.Error(error);
-            }
-        }
-        catch (Exception e) {
-            logger.Error($"Failed to build image for game {game.name}: {e}");
-            return;
-        }
+        string args = $"build /tmp/devcade/{game.name} --tag={game.name.ToLower()}";
+        Cmd.exec("podman", args, logger);
         OnContainerBuilt?.Invoke(null, game);
         runContainer(game);
     }
 
     public static void runContainer(devcade.DevcadeGame game) {
         logger.Debug("Running container for game " + game.name);
-        string command = $"/tmp/devcade/{game.name}/launch.sh";
-        try {
-            var process = new Process();
-            process.StartInfo.FileName = "/bin/bash";
-            process.StartInfo.Arguments = $"-c \"{command}\"";
-            process.StartInfo.UseShellExecute = false;
-            process.StartInfo.RedirectStandardOutput = true;
-            process.StartInfo.RedirectStandardError = true;
-            
-            process.OutputDataReceived += (_, args) => {
-                containerLog.Debug(args.Data);
-            };
-            process.ErrorDataReceived += (_, args) => {
-                containerLog.Error(args.Data);
-            };
-            
-            process.Start();
-            process.WaitForExitAsync().ContinueWith(_ => {
-                OnProcessDied?.Invoke(null, (game, process.ExitCode));
-            });
-        }
-        catch (Exception e) {
-            logger.Error($"Failed to run container for game {game.name}: {e}");
-        }
+        const string xauthPath = "/tmp/xopp-dev-auth";
+        string home = Env.get("HOME").unwrap();
+        string display = Env.get("DISPLAY").unwrap();
+        Cmd.exec("rm", $"-rf {xauthPath}");
+        Cmd.exec("mkdir", $"-p {xauthPath}");
+        Cmd.exec("cp", $"{home}/.Xauthority {xauthPath}");
+        Cmd.exec("chmod", $"g+rwx {xauthPath}/.Xauthority");
+        // There's probably a better way to pass through sound than mounting /dev/snd but this works for now.
+        Cmd.exec("podman", $@"run --name={game.name.ToLower()} --rm -it -u 0 -e DISPLAY={display} --network=host --cap-add=SYS_PTRACE --group-add keep-groups --annotation io.crun.keep_original_groups=1 -v /tmp/xopp-dev-auth/.Xauthority:/root/.Xauthority:Z -v /tmp/devcade/{game.name}:/devcade:Z -v /tmp/.X11-unix:/tmp/.X11-unix -v /dev/snd:/dev/snd --env 'PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH' --net=host {game.name.ToLower()}", containerLog);
     }
     
     public static void killContainers() {

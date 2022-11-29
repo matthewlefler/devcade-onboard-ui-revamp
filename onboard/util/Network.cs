@@ -1,13 +1,9 @@
 using System;
-using System.Diagnostics;
 using System.IO;
-using System.Net;
 using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
-using Amazon.Runtime.Internal;
 using log4net;
-using log4net.Repository.Hierarchy;
 
 namespace onboard.util; 
 
@@ -46,7 +42,7 @@ public static class Network {
     }
 
     public static Result<string, Exception> getResponseString(HttpResponseMessage message) {
-        Result<HttpResponseMessage, int> status = getResultFromResponse(message);
+        var status = getResultFromResponse(message);
         return status.match(
             responseMessage => Result<string, Exception>.Ok(responseMessage.Content.ReadAsStringAsync().Result),
             e => {
@@ -63,7 +59,7 @@ public static class Network {
     }
     
     public static Result<Stream, Exception> getResponseStream(HttpResponseMessage message) {
-        Result<HttpResponseMessage, int> status = getResultFromResponse(message);
+        var status = getResultFromResponse(message);
         return status.match(
             responseMessage => Result<Stream, Exception>.Ok(responseMessage.Content.ReadAsStreamAsync().Result),
             e => {
@@ -80,7 +76,7 @@ public static class Network {
     }
     
     public static Result<byte[], Exception> getResponseBytes(HttpResponseMessage message) {
-        Result<HttpResponseMessage, int> status = getResultFromResponse(message);
+        var status = getResultFromResponse(message);
         return status.match(
             responseMessage => Result<byte[], Exception>.Ok(responseMessage.Content.ReadAsByteArrayAsync().Result),
             e => {
