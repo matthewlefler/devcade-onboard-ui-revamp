@@ -12,9 +12,11 @@ namespace onboard
             // Logging setup
             GlobalContext.Properties["LogFilePath"] = "/tmp/devcade/logs";
             GlobalContext.Properties["LogFileName"] = ".log";
-            GlobalContext.Properties["LogLevel"] = "DEBUG";
             log4net.Config.XmlConfigurator.Configure();
             LogManager.GetLogger(MethodBase.GetCurrentMethod()?.DeclaringType?.FullName).Info("Starting application");
+
+            // Set namespace log levels
+            LogConfig.init();
 
             // Application setup
             Client.start();

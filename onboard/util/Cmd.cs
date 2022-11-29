@@ -6,9 +6,10 @@ using log4net;
 namespace onboard.util; 
 
 public static class Cmd {
-    private static ILog logger = LogManager.GetLogger(MethodBase.GetCurrentMethod()?.DeclaringType?.FullName);
+    private static readonly ILog logger = LogManager.GetLogger(MethodBase.GetCurrentMethod()?.DeclaringType?.FullName);
 
     private static int exec(string cmd, string args) {
+        logger.Trace("executing: " + cmd + " " + args);
         using Process proc = Process.Start(cmd, args);
         proc?.WaitForExit();
         return proc?.ExitCode ?? 1;

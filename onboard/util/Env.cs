@@ -2,11 +2,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using log4net.Repository.Hierarchy;
 
 namespace onboard.util; 
 
 public static class Env {
-    private static readonly Dictionary<string, string> env = new Dictionary<string, string>();
+    private static readonly Dictionary<string, string> env = new();
     
     static Env() {
         foreach (DictionaryEntry entry in Environment.GetEnvironmentVariables()) {

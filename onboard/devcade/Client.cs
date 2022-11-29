@@ -18,20 +18,22 @@ using util;
 
 public static class Client {
 
-    public static event EventHandler<DevcadeGame> onBannerFinished;
-    public static event EventHandler<DevcadeGame> onIconFinished;
-    public static event EventHandler<DevcadeGame> onGameFinished;
+    public static event EventHandler<DevcadeGame> onBannerFinished = (_, _) => {
+        logger.Trace("onBannerFinished Invoked");
+    };
+    public static event EventHandler<DevcadeGame> onIconFinished = (_, _) => {
+        logger.Trace("onIconFinished Invoked");
+    };
+    public static event EventHandler<DevcadeGame> onGameFinished = (_, _) => {
+        logger.Trace("onGameFinished Invoked");
+    };
 
     static Client() {
         logger.Info("Initializing Devcade Client");
         onGameFinished += (_, game) => {
-            logger.Debug("On game finished invoked");
             int ret = Cmd.chmod($"/tmp/devcade/{game.name}/publish/{game.name}", "u+x"); // make executable
-            if (ret != 0) {
-                logger.Error($"Failed to make {game.name} executable");
-                return;
-            }
-            logger.Debug($"Made file {game.name} executable");
+            if (ret == 0) return;
+            logger.Error($"Failed to make {game.name} executable");
         };
         onGameFinished += (_, game) => {
             Container.createDockerfileFromGame(game);
@@ -90,10 +92,9 @@ public static class Client {
         if (!Directory.Exists("/tmp/devcade")) {
             Directory.CreateDirectory("/tmp/devcade");
         }
-        Result<string, Exception> response = DevcadeAPI.getGameList();
+        var response = DevcadeAPI.getGameList();
         if (response.is_ok()) {
-            // logger.Debug(response.unwrap());
-            List<DevcadeGame> gameList = JsonConvert.DeserializeObject<List<DevcadeGame>>(response.unwrap());
+            var gameList = JsonConvert.DeserializeObject<List<DevcadeGame>>(response.unwrap());
             games = (gameList ?? new List<DevcadeGame>()).GroupBy(game => game.name)
                 .Select(group => {
                     group.ToList().Sort((a, b) => a.uploadDate.CompareTo(b.uploadDate));
@@ -118,7 +119,7 @@ public static class Client {
         // Construct a list of games from folders in the tmp directory
         // This is used to get the list of games that have been downloaded
         // and allows a fallback when the API is down or internet is unavailable
-        logger.Info("Checking for cached games in /tmp/devcade/");
+        logger.Verbose("Checking for cached games in /tmp/devcade/");
         string[] gameFolders = Directory.GetDirectories("/tmp/devcade/");
         foreach (string gameFolder in gameFolders) {
             string name = gameFolder.Split('/').Last();
@@ -149,7 +150,7 @@ public static class Client {
         
         // if the game is already downloaded, don't download it again
         if (Directory.Exists($"/tmp/devcade/{game.name}/publish")) {
-            logger.Info($"Game {game.name} is already downloaded");
+            logger.Verbose($"Game {game.name} is already downloaded");
             onGameFinished?.Invoke(null, game);
             return;
         }
@@ -165,7 +166,7 @@ public static class Client {
                 logger.Error($"Failed to download game {game.name}: {t.Result.unwrap()}");
                 return;
             }
-            logger.Info($"Downloaded game {game.name}");
+            logger.Verbose($"Downloaded game {game.name}");
             onGameFinished?.Invoke(null, game);
         });
     }
@@ -213,7 +214,7 @@ public static class Client {
         
         // if the game banner is already downloaded, don't download it again
         if (Directory.EnumerateFiles($"/tmp/devcade/{game.name}").Any(a => a.Split('/').Last().StartsWith("banner"))) {
-            logger.Info($"Found cached banner for game {game.name}");
+            logger.Verbose($"Found cached banner for game {game.name}");
             onBannerFinished?.Invoke(null, game);
             return;
         }
@@ -229,7 +230,7 @@ public static class Client {
                 logger.Error($"Failed to download banner for game {game.name}: {t.Result.unwrap()}");
                 return;
             }
-            logger.Info($"Downloaded banner for game {game.name}");
+            logger.Verbose($"Downloaded banner for game {game.name}");
             onBannerFinished?.Invoke(null, game);
         });
     }
@@ -269,7 +270,7 @@ public static class Client {
         
         // if the game icon is already downloaded, don't download it again
         if (Directory.EnumerateFiles($"/tmp/devcade/{game.name}").Any(a => a.StartsWith("icon."))) {
-            logger.Info("Found cached icon for game {game.name}");
+            logger.Verbose("Found cached icon for game {game.name}");
             onIconFinished?.Invoke(null, game);
             return;
         }
@@ -285,7 +286,7 @@ public static class Client {
                 logger.Error("Failed to download icon for game " + game.name, t.Result.unwrap());
                 return;
             }
-            logger.Info("Downloaded icon for game " + game.name);
+            logger.Verbose("Downloaded icon for game " + game.name);
             onIconFinished?.Invoke(null, game);
         });
     }

@@ -23,7 +23,7 @@ public static class Network {
     }
     
     private static async Task<Result<HttpResponseMessage, Exception>> getResponseAsync(string uri, Option<string> token) {
-        logger.Debug($"Getting response from {uri} Authorization: {token.is_some()}");
+        logger.Trace($"Getting response from {uri} Authorization: {token.is_some()}");
         using var client = new HttpClient();
         if (token.is_some()) {
             client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token.unwrap()}");

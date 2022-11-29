@@ -19,7 +19,7 @@ public static class Zip {
     public static Result<IEnumerable<Entry>, Exception> unzip(byte[] zip) {
         using var inputStream = new MemoryStream(zip);
         List<Entry> entries = new();
-        logger.Info($"Unzipping buffer ({zip.Length} bytes)");
+        logger.Verbose($"Unzipping buffer ({zip.Length} bytes)");
         try {
             var archive = new ZipArchive(inputStream, ZipArchiveMode.Read);
             foreach(ZipArchiveEntry entry in archive.Entries) {

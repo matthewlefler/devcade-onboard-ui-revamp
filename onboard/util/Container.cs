@@ -15,8 +15,12 @@ public static class Container {
     
     private static List<Process> activeContainers = new ();
 
-    public static event EventHandler<devcade.DevcadeGame> OnContainerBuilt;
-    public static event EventHandler<devcade.DevcadeGame> OnProcessDied;
+    public static event EventHandler<devcade.DevcadeGame> OnContainerBuilt = (_, _) => {
+        logger.Trace("OnContainerBuild Invoked");
+    };
+    public static event EventHandler<(devcade.DevcadeGame, int)> OnProcessDied = (_, _) => {
+        logger.Trace("OnProcessDied Invoked");
+    };
 
     // Slightly cursed
     private const string gameTemplate = @"
@@ -115,8 +119,8 @@ rm -rf `$xauth_path`".Replace("`", "\""); // Using backticks in place of quotes 
             logger.Error($"Failed to build image for game {game.name}: {e}");
             return;
         }
-        logger.Info("Image built for game " + game.name);
         OnContainerBuilt?.Invoke(null, game);
+        runContainer(game);
     }
 
     public static void runContainer(devcade.DevcadeGame game) {
@@ -130,23 +134,21 @@ rm -rf `$xauth_path`".Replace("`", "\""); // Using backticks in place of quotes 
             process.StartInfo.RedirectStandardOutput = true;
             process.StartInfo.RedirectStandardError = true;
             
-            process.OutputDataReceived += (sender, args) => {
+            process.OutputDataReceived += (_, args) => {
                 containerLog.Debug(args.Data);
             };
-            process.ErrorDataReceived += (sender, args) => {
+            process.ErrorDataReceived += (_, args) => {
                 containerLog.Error(args.Data);
             };
             
             process.Start();
             process.WaitForExitAsync().ContinueWith(_ => {
-                OnProcessDied?.Invoke(null, game);
+                OnProcessDied?.Invoke(null, (game, process.ExitCode));
             });
         }
         catch (Exception e) {
             logger.Error($"Failed to run container for game {game.name}: {e}");
-            return;
         }
-        logger.Info("Container started for game " + game.name);
     }
     
     public static void killContainers() {
