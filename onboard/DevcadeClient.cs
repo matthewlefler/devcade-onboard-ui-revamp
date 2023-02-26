@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.Collections;
 using System.Collections.Generic;
+using System.Net;
+using System.Net.Sockets;
 
 using Microsoft.Xna.Framework; // FIXME: Is this necessary for the client code?
 
@@ -126,6 +128,27 @@ namespace onboard
             notifyDownloadComplete(game);
         }
         
+        public static void reportToDatadog(DevcadeGame game) {
+            // Create a new UdpClient
+            UdpClient udpClient = new UdpClient();
+
+            // Create a new IPEndPoint for the destination IP address and port number
+            IPAddress ipAddress = IPAddress.Parse("127.0.0.1");
+            int port = 8125;
+            IPEndPoint endPoint = new IPEndPoint(ipAddress, port);
+
+            string gameName = game.name.Replace(' ', '_');
+            // Convert the message to a byte array
+            string message = $"devcade.game_launch.{gameName}:1|c";
+            byte[] bytes = System.Text.Encoding.UTF8.GetBytes(message);
+
+            // Send the message
+            udpClient.Send(bytes, bytes.Length, endPoint);
+
+            // Close the UdpClient
+            udpClient.Close();
+        }
+        
         private static void notifyDownloadComplete(DevcadeGame game) {
             string gameName = game.name.Replace(' ', '_');
             string path = $"/tmp/{gameName}.zip";
@@ -143,6 +166,7 @@ namespace onboard
             try {
                 string execPath = $"/tmp/{gameName}/publish/{gameName.Replace("_", " ")}";
                 Console.WriteLine($"Running {execPath}");
+                reportToDatadog(game);
                 Chmod(execPath, "+x");
                 Process proc = new() {
                     StartInfo = new ProcessStartInfo(execPath) {
