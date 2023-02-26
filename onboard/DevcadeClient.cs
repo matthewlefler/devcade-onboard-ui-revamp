@@ -131,6 +131,9 @@ namespace onboard
             string path = $"/tmp/{gameName}.zip";
             try {
                 Console.WriteLine($"Extracting {path}");
+                if (Directory.Exists($"/tmp/{gameName}")) {
+                    Directory.Delete($"/tmp/{gameName}", true);
+                }
                 Directory.CreateDirectory($"/tmp/{gameName}");
                 ZipFile.ExtractToDirectory(path, $"/tmp/{gameName}");
             } catch (Exception e) {
