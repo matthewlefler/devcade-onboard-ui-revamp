@@ -139,7 +139,7 @@ namespace onboard
 
             string gameName = game.name.Replace(' ', '_');
             // Convert the message to a byte array
-            string message = $"devcade.game_launch.{gameName}:1|c";
+            string message = $"devcade.game_launch:1|c|#game:{gameName}";
             byte[] bytes = System.Text.Encoding.UTF8.GetBytes(message);
 
             // Send the message
