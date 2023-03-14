@@ -164,7 +164,9 @@ namespace onboard
             }
 
             try {
-                string execPath = $"/tmp/{gameName}/publish/{gameName.Replace("_", " ")}";
+                string[] binFiles = System.IO.Directory.GetFiles($"/tmp/{gameName}/publish/", "*.runtimeconfig.json");
+                string execPath = binFiles[0].Split(".")[0] != null ?  binFiles[0].Split(".")[0] : $"/tmp/{gameName}/publish/DevcadeGame";
+                //string execPath = $"{binaryName}";
                 Console.WriteLine($"Running {execPath}");
                 reportToDatadog(game);
                 Chmod(execPath, "+x");
