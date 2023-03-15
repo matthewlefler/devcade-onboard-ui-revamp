@@ -204,7 +204,7 @@ namespace onboard
                         _client.startGame(
                             _mainMenu.gameSelected()
                         );
-                        
+
                         fadeColor = 0f;
                         _loading = true;
                         state = MenuState.Loading;
