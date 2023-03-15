@@ -151,6 +151,7 @@ namespace onboard
         
         private static void notifyDownloadComplete(DevcadeGame game) {
             string gameName = game.name.Replace(' ', '_');
+            // Try extracting the game
             string path = $"/tmp/{gameName}.zip";
             try {
                 Console.WriteLine($"Extracting {path}");
@@ -163,10 +164,15 @@ namespace onboard
                 Console.WriteLine($"Error extracting {path}: {e.Message}");
             }
 
+            // Try running the game
             try {
+                // Infer the name of the executable based off of an automatically generated dotnet publish file
+                // FIXME: This is fucking gross
                 string[] binFiles = System.IO.Directory.GetFiles($"/tmp/{gameName}/publish/", "*.runtimeconfig.json");
-                string execPath = binFiles[0].Split(".")[0] != null ?  binFiles[0].Split(".")[0] : $"/tmp/{gameName}/publish/DevcadeGame";
-                //string execPath = $"{binaryName}";
+                string execPath = binFiles[0].Split(".")[0];
+                // Check if that worked. If it didn't, L plus ratio. 
+                if (!File.Exists(execPath))
+                    throw new System.ComponentModel.Win32Exception();
                 Console.WriteLine($"Running {execPath}");
                 reportToDatadog(game);
                 Chmod(execPath, "+x");
@@ -184,6 +190,7 @@ namespace onboard
                 proc.Start();
                 Game1.instance.setActiveProcess(proc);
             } catch (System.ComponentModel.Win32Exception e) {
+                Console.WriteLine($"Caught Exception while trying to run the game.");
                 Game1.instance.notifyLaunchError(e);
             }
         }
