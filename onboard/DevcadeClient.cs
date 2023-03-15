@@ -35,6 +35,8 @@ namespace onboard
     {
         private readonly string _apiDomain;
 
+        public bool DownloadFailed = false;
+
         public DevcadeClient()
         {
             _apiDomain = Environment.GetEnvironmentVariable("DEVCADE_API_DOMAIN");
@@ -116,25 +118,33 @@ namespace onboard
             }
         }
 
+        
         public void startGame(DevcadeGame game)
         {
+            DownloadFailed = false;
             ThreadPool.QueueUserWorkItem(DownloadGame, game);
         }
 
         private void DownloadGame(object gameObj)
         {
-            var game = (DevcadeGame)gameObj;
-            string gameName = game.name.Replace(' ', '_');
-            Console.WriteLine($"Game is: {gameName}");
-            string path = $"/tmp/{gameName}.zip";
-            string URI = $"https://{_apiDomain}/api/games/download/{game.id}";
-            Console.WriteLine($"Getting {game.name} from {URI}");
+            try {
+                var game = (DevcadeGame)gameObj;
+                string gameName = game.name.Replace(' ', '_');
+                Console.WriteLine($"Game is: {gameName}");
+                string path = $"/tmp/{gameName}.zip";
+                string URI = $"https://{_apiDomain}/api/games/download/{game.id}";
+                Console.WriteLine($"Getting {game.name} from {URI}");
 
-            using var client = new HttpClient();
-            using Task<Stream> s = client.GetStreamAsync(URI);
-            using var fs = new FileStream(path, FileMode.OpenOrCreate);
-            s.Result.CopyTo(fs);
-            notifyDownloadComplete(game);
+                using var client = new HttpClient();
+                using Task<Stream> s = client.GetStreamAsync(URI);
+                using var fs = new FileStream(path, FileMode.OpenOrCreate);
+                s.Result.CopyTo(fs);
+                notifyDownloadComplete(game);
+            } catch(Exception e)
+            {
+                Console.WriteLine(e);
+                DownloadFailed = true; 
+            }
         }
 
         public static void reportToDatadog(DevcadeGame game)
@@ -164,8 +174,6 @@ namespace onboard
             string gameName = game.name.Replace(' ', '_');
             // Try extracting the game
             string path = $"/tmp/{gameName}.zip";
-            try
-            {
                 Console.WriteLine($"Extracting {path}");
                 if (Directory.Exists($"/tmp/{gameName}"))
                 {
@@ -173,15 +181,8 @@ namespace onboard
                 }
                 Directory.CreateDirectory($"/tmp/{gameName}");
                 ZipFile.ExtractToDirectory(path, $"/tmp/{gameName}");
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"Error extracting {path}: {e.Message}");
-            }
 
             // Try running the game
-            try
-            {
                 // Infer the name of the executable based off of an automatically generated dotnet publish file
                 // FIXME: This is fucking gross
                 string[] binFiles = System.IO.Directory.GetFiles($"/tmp/{gameName}/publish/", "*.runtimeconfig.json");
@@ -207,12 +208,6 @@ namespace onboard
                 proc.ErrorDataReceived += (_, args) => Console.WriteLine($"[{game.name}] {args.Data}");
                 proc.Start();
                 Game1.instance.setActiveProcess(proc);
-            }
-            catch (System.ComponentModel.Win32Exception e)
-            {
-                Console.WriteLine($"Caught Exception while trying to run the game.");
-                Game1.instance.notifyLaunchError(e);
-            }
         }
     }
 }

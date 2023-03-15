@@ -2,12 +2,14 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
+using System.Threading.Tasks;
 using System.Diagnostics;
 using Devcade;
 
-
 namespace onboard
 {
+
+
     public class Game1 : Game
     {
         public static Game1 instance;
@@ -129,6 +131,12 @@ namespace onboard
                                            // This can be done easier by keeping a reference to the process spawned and .HasExited property...
                     _loading = gameProcess is not { HasExited: true };
 
+                    if (_client.DownloadFailed)
+                    {
+                        _loading = false;
+                        _client.DownloadFailed = false;
+                    }
+
                     if (fadeColor < 1f)
                     {
                         fadeColor += (float)(gameTime.ElapsedGameTime.TotalSeconds);
@@ -193,11 +201,13 @@ namespace onboard
                         gameProcess = null; // Clear the process reference
                                             // Start Game will set the game process reference later
                                             // If it fails, it will set the error loading flag
-                        _client.startGame(_mainMenu.gameSelected());
+                        _client.startGame(
+                            _mainMenu.gameSelected()
+                        );
+                        
                         fadeColor = 0f;
                         _loading = true;
                         state = MenuState.Loading;
-
                     }
                     else if ((myState.IsKeyDown(Keys.RightShift) && lastState.IsKeyUp(Keys.RightShift)) || // Keyboard Rshift
                         Input.GetButtonDown(1, Input.ArcadeButtons.A2) ||                                    // or A2 button
