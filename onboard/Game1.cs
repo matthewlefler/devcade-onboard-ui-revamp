@@ -155,7 +155,11 @@ namespace onboard
                     _mainMenu.cardFadeIn(gameTime);
 
                     if (myState.IsKeyDown(Keys.Space) || (Input.GetButton(1, Input.ArcadeButtons.Menu) && Input.GetButton(2, Input.ArcadeButtons.Menu)))
+                    {
+                        _mainMenu.clearGames();
                         _mainMenu.gameTitles = _client.GetGames();
+                        _mainMenu.setCards(_client, GraphicsDevice);
+                    }
 
                     if (((myState.IsKeyDown(Keys.Down)) ||                                   // Keyboard down
                         Input.GetButton(1, Input.ArcadeButtons.StickDown) ||             // or joystick down
