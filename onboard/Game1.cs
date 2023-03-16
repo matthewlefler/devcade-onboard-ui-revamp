@@ -50,6 +50,9 @@ namespace onboard
         // To indicate that there was a problem running the game
         private bool _errorLoading = false;
 
+        // If we can't fetch the game list (like if the API is down)
+        private bool _cantFetch = false;
+
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -92,8 +95,16 @@ namespace onboard
             loadingSpin = Content.Load<Texture2D>("loadingSheet");
 
             // TODO: use this.Content to load your game content here
-            _mainMenu.gameTitles = _client.GetGames();
-            _mainMenu.setCards(_client, GraphicsDevice);
+            try 
+            {
+                _mainMenu.gameTitles = _client.GetGames();
+                _mainMenu.setCards(_client, GraphicsDevice);
+            } catch (System.AggregateException e)
+            {
+                Console.WriteLine($"Failed to fetch games: {e}");
+                state = MenuState.Loading;
+                _cantFetch = true;
+            }
         }
 
         protected override void Update(GameTime gameTime)
@@ -126,6 +137,27 @@ namespace onboard
                     break;
 
                 case MenuState.Loading:
+
+                    if (_cantFetch)
+                    {
+                        if (myState.IsKeyDown(Keys.Space) || (Input.GetButton(1, Input.ArcadeButtons.Menu) && Input.GetButton(2, Input.ArcadeButtons.Menu)))
+                        {
+                            try {
+                                _mainMenu.clearGames();
+                                _mainMenu.gameTitles = _client.GetGames();
+                                _mainMenu.setCards(_client, GraphicsDevice);
+                                _cantFetch = false;
+                                state = MenuState.Input;
+                            } catch (System.AggregateException e)
+                            {
+                                Console.WriteLine($"Failed to fetch games: {e}");
+                                state = MenuState.Loading;
+                                _cantFetch = true;
+                            }
+
+                        }
+                    }
+
                     _errorLoading = false; // Clear error loading if we successfully load.
                                            // Check for process that matches last launched game and display loading screen if it's running 
                                            // This can be done easier by keeping a reference to the process spawned and .HasExited property...
@@ -250,6 +282,8 @@ namespace onboard
                 case MenuState.Loading:
                     _mainMenu.drawLoading(_spriteBatch, loadingSpin, fadeColor);
                     _mainMenu.drawTitle(_spriteBatch, titleTextureWhite, fadeColor);
+                    if (_cantFetch)
+                        _mainMenu.drawError(_spriteBatch, _devcadeMenuBig);
                     break;
             }
 

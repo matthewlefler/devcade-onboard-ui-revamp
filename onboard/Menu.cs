@@ -59,9 +59,13 @@ namespace onboard
         // Empties the gameTitles and cards lists. Called when the reload buttons are pressed
         public void clearGames()
         {
+            try {
             gameTitles.Clear();
             cards.Clear();
             itemSelected = 0;
+            } catch (System.NullReferenceException e) {
+                Console.WriteLine($"No game titles or cards yet. {e}");
+            }
         }
 
         public void setCards(DevcadeClient _client, GraphicsDevice graphics)
@@ -187,6 +191,27 @@ namespace onboard
                     line,
                     new Vector2(_sWidth / 2.0f, (int)(500 * scalingAmount) + (instructSize * lineNum)), // 500 is the height of the title, this string goes right beneath that
                     1f
+                );
+                lineNum++;
+            }
+        }
+
+
+        public void drawError(SpriteBatch _spriteBatch, SpriteFont font)
+        {
+            string error = "Error: Could not get game list. Is API Down? Press both black buttons to reload.";
+            List<string> instructions = wrapText(error, 25);
+            float instructSize = font.MeasureString(error).Y;
+            int lineNum = 0;
+
+            foreach (string line in instructions)
+            {
+                writeString(_spriteBatch,
+                    font,
+                    line,
+                    new Vector2(_sWidth / 2.0f, (int)(500 * scalingAmount) + (instructSize * lineNum)), // 500 is the height of the title, this string goes right beneath that
+                    1f,
+                    Color.Red
                 );
                 lineNum++;
             }
@@ -337,6 +362,22 @@ namespace onboard
             }
 
             return lines;
+        }
+
+        public void writeString(SpriteBatch _spriteBatch, SpriteFont font, string str, Vector2 pos, float opacity, Color color)
+        {
+            Vector2 strSize = font.MeasureString(str);
+
+            _spriteBatch.DrawString(font,
+                str,
+                pos,
+                color,
+                0f,
+                new Vector2(strSize.X / 2, strSize.Y / 2),
+                (float)(1f * scalingAmount),
+                SpriteEffects.None,
+                0f
+            );
         }
 
         public void writeString(SpriteBatch _spriteBatch, SpriteFont font, string str, Vector2 pos, float opacity)
