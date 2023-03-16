@@ -189,8 +189,16 @@ namespace onboard
                     if (myState.IsKeyDown(Keys.Space) || (Input.GetButton(1, Input.ArcadeButtons.Menu) && Input.GetButton(2, Input.ArcadeButtons.Menu)))
                     {
                         _mainMenu.clearGames();
-                        _mainMenu.gameTitles = _client.GetGames();
-                        _mainMenu.setCards(_client, GraphicsDevice);
+                        try 
+                        {
+                            _mainMenu.gameTitles = _client.GetGames();
+                            _mainMenu.setCards(_client, GraphicsDevice);
+                        } catch (System.AggregateException e)
+                        {
+                            Console.WriteLine($"Failed to fetch games: {e}");
+                            state = MenuState.Loading;
+                            _cantFetch = true;
+                        }
                     }
 
                     if (((myState.IsKeyDown(Keys.Down)) ||                                   // Keyboard down
