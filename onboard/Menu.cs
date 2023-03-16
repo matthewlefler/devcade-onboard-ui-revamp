@@ -176,8 +176,8 @@ namespace onboard
 
         public void drawInstructions(SpriteBatch _spriteBatch, SpriteFont font)
         {
-            List<string> instructions = wrapText("Press the Red button to play!", 25);
-            float instructSize = font.MeasureString("Press the Red button to play!").Y;
+            List<string> instructions = wrapText("Press the Red button to play! Press both Black Buttons to refresh", 25);
+            float instructSize = font.MeasureString("Press the Red button to play! Press both Black Buttons to refresh").Y;
             int lineNum = 0;
 
             foreach (string line in instructions)
