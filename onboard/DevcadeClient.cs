@@ -35,6 +35,8 @@ namespace onboard
     {
         private readonly string _apiDomain;
 
+        // Basically a semaphore for communicating between the main thread (doing the menu animations)
+        // and the thread that loads the game.
         public bool DownloadFailed = false;
 
         public DevcadeClient()
