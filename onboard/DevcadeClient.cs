@@ -60,7 +60,7 @@ namespace onboard
                 return "Development";
 
             //if (_apiDomain == _apiProdDomain)
-                return "Production";
+            return "Production";
         }
 
         public List<DevcadeGame> GetGames()

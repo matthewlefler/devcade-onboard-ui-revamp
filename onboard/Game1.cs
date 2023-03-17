@@ -94,7 +94,7 @@ namespace onboard
             loadingSpin = Content.Load<Texture2D>("loadingSheet");
 
             // TODO: use this.Content to load your game content here
-            
+
             if (!_mainMenu.reloadGames(GraphicsDevice, _client, false))
             {
                 state = MenuState.Loading;
@@ -137,13 +137,15 @@ namespace onboard
                     {
                         if (myState.IsKeyDown(Keys.Space) || (Input.GetButton(1, Input.ArcadeButtons.Menu) && Input.GetButton(2, Input.ArcadeButtons.Menu)))
                         {
-                            try {
+                            try
+                            {
                                 _mainMenu.clearGames();
                                 _mainMenu.gameTitles = _client.GetGames();
                                 _mainMenu.setCards(_client, GraphicsDevice);
                                 _cantFetch = false;
                                 state = MenuState.Input;
-                            } catch (System.AggregateException e)
+                            }
+                            catch (System.AggregateException e)
                             {
                                 Console.WriteLine($"Failed to fetch games: {e}");
                                 state = MenuState.Loading;
