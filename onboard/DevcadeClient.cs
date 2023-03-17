@@ -53,9 +53,18 @@ namespace onboard
         {
             if (_apiDomain == _apiDevDomain)
                 _apiDomain = _apiProdDomain;
-
-            if (_apiDomain == _apiProdDomain)
+            else if (_apiDomain == _apiProdDomain)
                 _apiDomain = _apiDevDomain;
+            Console.WriteLine($"Switching to: {_apiDomain}");
+        }
+
+        public String GetDomain()
+        {
+            if (_apiDomain == _apiDevDomain)
+                return "Development";
+
+            //if (_apiDomain == _apiProdDomain)
+                return "Production";
         }
 
         public List<DevcadeGame> GetGames()
