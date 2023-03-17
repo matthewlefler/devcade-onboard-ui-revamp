@@ -48,9 +48,6 @@ namespace onboard
         private Texture2D titleTextureWhite;
         private Texture2D descriptionTexture;
 
-        // To indicate that there was a problem running the game
-        private bool _errorLoading = false;
-
         // If we can't fetch the game list (like if the API is down)
         private bool _cantFetch = false;
 
@@ -98,7 +95,7 @@ namespace onboard
 
             // TODO: use this.Content to load your game content here
             
-            if (!_mainMenu.reloadGames(GraphicsDevice, _client))
+            if (!_mainMenu.reloadGames(GraphicsDevice, _client, false))
             {
                 state = MenuState.Loading;
                 _cantFetch = true;
@@ -156,9 +153,8 @@ namespace onboard
                         }
                     }
 
-                    _errorLoading = false; // Clear error loading if we successfully load.
-                                           // Check for process that matches last launched game and display loading screen if it's running 
-                                           // This can be done easier by keeping a reference to the process spawned and .HasExited property...
+                    // Check for process that matches last launched game and display loading screen if it's running 
+                    // This can be done easier by keeping a reference to the process spawned and .HasExited property...
                     _loading = gameProcess is not { HasExited: true };
 
                     if (_client.DownloadFailed)
@@ -304,7 +300,7 @@ namespace onboard
             // Draw a string in the top left showing the current state. Used for debugging. TODO: Use debug tags
             //_spriteBatch.DrawString(_devcadeMenuBig, state, new Vector2(0, 0), Color.White);
 
-            if (_errorLoading)
+            if (_client.DownloadFailed)
                 _spriteBatch.DrawString(
                     _devcadeMenuBig,
                     "There was a problem running the game.",
@@ -325,7 +321,7 @@ namespace onboard
         public void notifyLaunchError(Exception e)
         {
             _loading = false;
-            _errorLoading = true;
+            _client.DownloadFailed = true;
         }
     }
 }

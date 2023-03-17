@@ -4,17 +4,13 @@ using System.IO;
 using System.IO.Compression;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Xml.Linq;
-using System.Collections;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 
-using Microsoft.Xna.Framework; // FIXME: Is this necessary for the client code?
 
 // For making requests to the API
 using System.Net.Http;
-using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json;
 
 namespace onboard

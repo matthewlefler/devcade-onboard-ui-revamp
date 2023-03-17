@@ -68,9 +68,11 @@ namespace onboard
             }
         }
 
-        public bool reloadGames(GraphicsDevice device, DevcadeClient client)
+        public bool reloadGames(GraphicsDevice device, DevcadeClient client, bool clear = true)
         {
-            clearGames();
+            if (clear)
+                clearGames();
+
             try 
             {
                 gameTitles = client.GetGames();
@@ -94,8 +96,13 @@ namespace onboard
                 string bannerPath = $"/tmp/{game.id}Banner.png";
                 if (File.Exists(bannerPath))
                 {
-                    Texture2D banner = Texture2D.FromStream(graphics, File.OpenRead(bannerPath));
-                    cards.Add(game.id, new MenuCard(i * -1, game.name, banner));
+                    try {
+                        Texture2D banner = Texture2D.FromStream(graphics, File.OpenRead(bannerPath));
+                        cards.Add(game.id, new MenuCard(i * -1, game.name, banner));
+                    } catch(System.InvalidOperationException e) {
+                        Console.WriteLine($"Unable to set card.{e}");
+                        cards.Add(game.id, new MenuCard(i * -1, game.name, null));
+                    }
                 }
                 else
                 {
