@@ -68,6 +68,21 @@ namespace onboard
             }
         }
 
+        public bool reloadGames(GraphicsDevice device, DevcadeClient client)
+        {
+            clearGames();
+            try 
+            {
+                gameTitles = client.GetGames();
+                setCards(client, device);
+            } catch (System.AggregateException e)
+            {
+                Console.WriteLine($"Failed to fetch games: {e}");
+                return false;
+            }
+            return true;
+        }
+
         public void setCards(DevcadeClient _client, GraphicsDevice graphics)
         {
             for (int i = 0; i < gameTitles.Count; i++)

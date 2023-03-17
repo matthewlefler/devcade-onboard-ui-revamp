@@ -97,13 +97,9 @@ namespace onboard
             loadingSpin = Content.Load<Texture2D>("loadingSheet");
 
             // TODO: use this.Content to load your game content here
-            try 
+            
+            if (!_mainMenu.reloadGames(GraphicsDevice, _client))
             {
-                _mainMenu.gameTitles = _client.GetGames();
-                _mainMenu.setCards(_client, GraphicsDevice);
-            } catch (System.AggregateException e)
-            {
-                Console.WriteLine($"Failed to fetch games: {e}");
                 state = MenuState.Loading;
                 _cantFetch = true;
             }
@@ -190,14 +186,8 @@ namespace onboard
 
                     if (myState.IsKeyDown(Keys.Space) || (Input.GetButton(1, Input.ArcadeButtons.Menu) && Input.GetButton(2, Input.ArcadeButtons.Menu)))
                     {
-                        _mainMenu.clearGames();
-                        try 
+                        if (!_mainMenu.reloadGames(GraphicsDevice, _client))
                         {
-                            _mainMenu.gameTitles = _client.GetGames();
-                            _mainMenu.setCards(_client, GraphicsDevice);
-                        } catch (System.AggregateException e)
-                        {
-                            Console.WriteLine($"Failed to fetch games: {e}");
                             state = MenuState.Loading;
                             _cantFetch = true;
                         }
@@ -210,14 +200,8 @@ namespace onboard
                         _client.SwapDomains();
 
                         // And reload
-                        _mainMenu.clearGames();
-                        try 
+                        if (!_mainMenu.reloadGames(GraphicsDevice, _client))
                         {
-                            _mainMenu.gameTitles = _client.GetGames();
-                            _mainMenu.setCards(_client, GraphicsDevice);
-                        } catch (System.AggregateException e)
-                        {
-                            Console.WriteLine($"Failed to fetch games: {e}");
                             state = MenuState.Loading;
                             _cantFetch = true;
                         }
