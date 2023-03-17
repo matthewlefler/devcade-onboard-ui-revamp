@@ -201,6 +201,12 @@ namespace onboard
                         }
                     }
 
+
+                    if (myState.IsKeyDown(Keys.Z) || (Input.GetButton(1, Input.ArcadeButtons.B4) && Input.GetButton(2, Input.ArcadeButtons.B4)))
+                    {
+                        _client.SwapDomains();
+                    }
+
                     if (((myState.IsKeyDown(Keys.Down)) ||                                   // Keyboard down
                         Input.GetButton(1, Input.ArcadeButtons.StickDown) ||             // or joystick down
                         Input.GetButton(2, Input.ArcadeButtons.StickDown)))              // of either player

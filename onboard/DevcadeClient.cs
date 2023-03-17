@@ -33,7 +33,9 @@ namespace onboard
 
     public class DevcadeClient
     {
-        private readonly string _apiDomain;
+        private readonly string _apiProdDomain;
+        private readonly string _apiDevDomain;
+        private string _apiDomain;
 
         // Basically a semaphore for communicating between the main thread (doing the menu animations)
         // and the thread that loads the game.
@@ -41,7 +43,19 @@ namespace onboard
 
         public DevcadeClient()
         {
-            _apiDomain = Environment.GetEnvironmentVariable("DEVCADE_API_DOMAIN");
+            _apiProdDomain = Environment.GetEnvironmentVariable("DEVCADE_API_DOMAIN");
+            _apiDevDomain = Environment.GetEnvironmentVariable("DEVCADE_DEV_API_DOMAIN");
+            _apiDomain = _apiProdDomain;
+        }
+
+        // Point at Dev/Prod
+        public void SwapDomains()
+        {
+            if (_apiDomain == _apiDevDomain)
+                _apiDomain = _apiProdDomain;
+
+            if (_apiDomain == _apiProdDomain)
+                _apiDomain = _apiDevDomain;
         }
 
         public List<DevcadeGame> GetGames()
