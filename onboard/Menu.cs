@@ -59,13 +59,34 @@ namespace onboard
         // Empties the gameTitles and cards lists. Called when the reload buttons are pressed
         public void clearGames()
         {
-            try {
-            gameTitles.Clear();
-            cards.Clear();
-            itemSelected = 0;
-            } catch (System.NullReferenceException e) {
+            try
+            {
+                gameTitles.Clear();
+                cards.Clear();
+                itemSelected = 0;
+            }
+            catch (System.NullReferenceException e)
+            {
                 Console.WriteLine($"No game titles or cards yet. {e}");
             }
+        }
+
+        public bool reloadGames(GraphicsDevice device, DevcadeClient client, bool clear = true)
+        {
+            if (clear)
+                clearGames();
+
+            try
+            {
+                gameTitles = client.GetGames();
+                setCards(client, device);
+            }
+            catch (System.AggregateException e)
+            {
+                Console.WriteLine($"Failed to fetch games: {e}");
+                return false;
+            }
+            return true;
         }
 
         public void setCards(DevcadeClient _client, GraphicsDevice graphics)
@@ -79,8 +100,16 @@ namespace onboard
                 string bannerPath = $"/tmp/{game.id}Banner.png";
                 if (File.Exists(bannerPath))
                 {
-                    Texture2D banner = Texture2D.FromStream(graphics, File.OpenRead(bannerPath));
-                    cards.Add(game.id, new MenuCard(i * -1, game.name, banner));
+                    try
+                    {
+                        Texture2D banner = Texture2D.FromStream(graphics, File.OpenRead(bannerPath));
+                        cards.Add(game.id, new MenuCard(i * -1, game.name, banner));
+                    }
+                    catch (System.InvalidOperationException e)
+                    {
+                        Console.WriteLine($"Unable to set card.{e}");
+                        cards.Add(game.id, new MenuCard(i * -1, game.name, null));
+                    }
                 }
                 else
                 {

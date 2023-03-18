@@ -4,17 +4,13 @@ using System.IO;
 using System.IO.Compression;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Xml.Linq;
-using System.Collections;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 
-using Microsoft.Xna.Framework; // FIXME: Is this necessary for the client code?
 
 // For making requests to the API
 using System.Net.Http;
-using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json;
 
 namespace onboard
@@ -33,7 +29,9 @@ namespace onboard
 
     public class DevcadeClient
     {
-        private readonly string _apiDomain;
+        private readonly string _apiProdDomain;
+        private readonly string _apiDevDomain;
+        private string _apiDomain;
 
         // Basically a semaphore for communicating between the main thread (doing the menu animations)
         // and the thread that loads the game.
@@ -41,7 +39,28 @@ namespace onboard
 
         public DevcadeClient()
         {
-            _apiDomain = Environment.GetEnvironmentVariable("DEVCADE_API_DOMAIN");
+            _apiProdDomain = Environment.GetEnvironmentVariable("DEVCADE_API_DOMAIN");
+            _apiDevDomain = Environment.GetEnvironmentVariable("DEVCADE_DEV_API_DOMAIN");
+            _apiDomain = _apiProdDomain;
+        }
+
+        // Point at Dev/Prod
+        public void SwapDomains()
+        {
+            if (_apiDomain == _apiDevDomain)
+                _apiDomain = _apiProdDomain;
+            else if (_apiDomain == _apiProdDomain)
+                _apiDomain = _apiDevDomain;
+            Console.WriteLine($"Switching to: {_apiDomain}");
+        }
+
+        public String GetDomain()
+        {
+            if (_apiDomain == _apiDevDomain)
+                return "Development";
+
+            //if (_apiDomain == _apiProdDomain)
+            return "Production";
         }
 
         public List<DevcadeGame> GetGames()

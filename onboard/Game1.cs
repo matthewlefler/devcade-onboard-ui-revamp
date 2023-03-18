@@ -44,11 +44,9 @@ namespace onboard
         private Texture2D BGgradient;
         private Texture2D icon;
         private Texture2D titleTexture;
+        private Texture2D titleDevTexture;
         private Texture2D titleTextureWhite;
         private Texture2D descriptionTexture;
-
-        // To indicate that there was a problem running the game
-        private bool _errorLoading = false;
 
         // If we can't fetch the game list (like if the API is down)
         private bool _cantFetch = false;
@@ -85,6 +83,7 @@ namespace onboard
 
             cardTexture = Content.Load<Texture2D>("card");
             titleTexture = Content.Load<Texture2D>("transparent-logo");
+            titleDevTexture = Content.Load<Texture2D>("transparent-dev-logo");
             titleTextureWhite = Content.Load<Texture2D>("transparent-logo-white");
 
             descriptionTexture = Content.Load<Texture2D>("description");
@@ -95,13 +94,9 @@ namespace onboard
             loadingSpin = Content.Load<Texture2D>("loadingSheet");
 
             // TODO: use this.Content to load your game content here
-            try 
+
+            if (!_mainMenu.reloadGames(GraphicsDevice, _client, false))
             {
-                _mainMenu.gameTitles = _client.GetGames();
-                _mainMenu.setCards(_client, GraphicsDevice);
-            } catch (System.AggregateException e)
-            {
-                Console.WriteLine($"Failed to fetch games: {e}");
                 state = MenuState.Loading;
                 _cantFetch = true;
             }
@@ -142,13 +137,15 @@ namespace onboard
                     {
                         if (myState.IsKeyDown(Keys.Space) || (Input.GetButton(1, Input.ArcadeButtons.Menu) && Input.GetButton(2, Input.ArcadeButtons.Menu)))
                         {
-                            try {
+                            try
+                            {
                                 _mainMenu.clearGames();
                                 _mainMenu.gameTitles = _client.GetGames();
                                 _mainMenu.setCards(_client, GraphicsDevice);
                                 _cantFetch = false;
                                 state = MenuState.Input;
-                            } catch (System.AggregateException e)
+                            }
+                            catch (System.AggregateException e)
                             {
                                 Console.WriteLine($"Failed to fetch games: {e}");
                                 state = MenuState.Loading;
@@ -158,9 +155,8 @@ namespace onboard
                         }
                     }
 
-                    _errorLoading = false; // Clear error loading if we successfully load.
-                                           // Check for process that matches last launched game and display loading screen if it's running 
-                                           // This can be done easier by keeping a reference to the process spawned and .HasExited property...
+                    // Check for process that matches last launched game and display loading screen if it's running 
+                    // This can be done easier by keeping a reference to the process spawned and .HasExited property...
                     _loading = gameProcess is not { HasExited: true };
 
                     if (_client.DownloadFailed)
@@ -188,14 +184,22 @@ namespace onboard
 
                     if (myState.IsKeyDown(Keys.Space) || (Input.GetButton(1, Input.ArcadeButtons.Menu) && Input.GetButton(2, Input.ArcadeButtons.Menu)))
                     {
-                        _mainMenu.clearGames();
-                        try 
+                        if (!_mainMenu.reloadGames(GraphicsDevice, _client))
                         {
-                            _mainMenu.gameTitles = _client.GetGames();
-                            _mainMenu.setCards(_client, GraphicsDevice);
-                        } catch (System.AggregateException e)
+                            state = MenuState.Loading;
+                            _cantFetch = true;
+                        }
+                    }
+
+
+                    if (myState.IsKeyDown(Keys.Z) || (Input.GetButton(1, Input.ArcadeButtons.B4) && Input.GetButton(2, Input.ArcadeButtons.B4)))
+                    {
+                        // Switch to dev/prod
+                        _client.SwapDomains();
+
+                        // And reload
+                        if (!_mainMenu.reloadGames(GraphicsDevice, _client))
                         {
-                            Console.WriteLine($"Failed to fetch games: {e}");
                             state = MenuState.Loading;
                             _cantFetch = true;
                         }
@@ -281,7 +285,7 @@ namespace onboard
                 case MenuState.Input:
                 case MenuState.Descritpion:
                     _mainMenu.drawBackground(_spriteBatch, BGgradient, icon, fadeColor, gameTime);
-                    _mainMenu.drawTitle(_spriteBatch, titleTexture, fadeColor);
+                    _mainMenu.drawTitle(_spriteBatch, _client.GetDomain() == "Development" ? titleDevTexture : titleTexture, fadeColor);
                     _mainMenu.drawCards(_spriteBatch, cardTexture, _devcadeMenuBig);
                     _mainMenu.drawDescription(_spriteBatch, descriptionTexture, _devcadeMenuTitle, _devcadeMenuBig);
                     _mainMenu.drawInstructions(_spriteBatch, _devcadeMenuBig);
@@ -298,7 +302,7 @@ namespace onboard
             // Draw a string in the top left showing the current state. Used for debugging. TODO: Use debug tags
             //_spriteBatch.DrawString(_devcadeMenuBig, state, new Vector2(0, 0), Color.White);
 
-            if (_errorLoading)
+            if (_client.DownloadFailed)
                 _spriteBatch.DrawString(
                     _devcadeMenuBig,
                     "There was a problem running the game.",
@@ -319,7 +323,7 @@ namespace onboard
         public void notifyLaunchError(Exception e)
         {
             _loading = false;
-            _errorLoading = true;
+            _client.DownloadFailed = true;
         }
     }
 }
