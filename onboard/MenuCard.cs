@@ -19,7 +19,7 @@ namespace onboard
 
         public int listPos; // Tracks the card's current position on the screen
         private string name; // Each game name will taken from gameTitles list in Menu.cs
-        
+
         // Same as rotation variables, but for scale, color
         private float scale = 1f;
         private const float scale_amt = 0.05f;
@@ -37,7 +37,7 @@ namespace onboard
             this.name = theName;
             this.texture = cardTexture;
 
-            while(initialPos > 0)
+            while (initialPos > 0)
             {
                 rotation -= rotation_amt;
                 scale -= scale_amt;
@@ -60,7 +60,7 @@ namespace onboard
             if (listPos > 0)
             {
                 scale -= scaleSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
-                
+
             }
             else
             {
@@ -89,18 +89,19 @@ namespace onboard
         {
             _spriteBatch.Draw(
                 texture ?? cardTexture,
-                new Vector2(cardX, (int)(_sHeight / 2.0 + (cardTexture.Height * scalingAmount) /2)),
+                new Vector2(cardX, (int)(_sHeight / 2.0 + (cardTexture.Height * scalingAmount) / 2)),
                 null,
                 new Color(cardOpacity, cardOpacity, cardOpacity, cardOpacity),
                 rotation,
                 new Vector2(0, cardTexture.Height / 2.0f),
-                (float)(scale * scalingAmount), 
+                (float)(scale * scalingAmount),
                 SpriteEffects.None,
                 0f
             );
         }
 
-        public void setTexture(Texture2D texture) {
+        public void setTexture(Texture2D texture)
+        {
             this.texture = texture;
         }
     }

@@ -22,7 +22,7 @@ Debian >=10
 
 A user named `devcade`
 
-`apt install xterm` and friends (I dont actually know what all is installed)
+`apt install xterm openbox compton` and friends (I dont actually know what all is installed)
 
 ### Daemon
 
@@ -35,6 +35,8 @@ You can find everything(tm) you need to set up the Devcade Idiot in `/idiot`. Th
 1. Run the `update_onboard.sh` script in `HACKING/`
 
 2. `cp idiot/.xinitrc /home/devcade/`
+
+2. `mkdir /home/devcade/.config/openbox && cp idiot/rc.xml /home/devcade/.config/openbox/rc.xml`
 
 3. To install `xlogin`, do the following
 

@@ -30,5 +30,8 @@ xinput | tee -a onboard.log
 
 source /home/devcade/.env
 
+openbox &
+compton &
+
 echo "\nonboard log:\n"
 /home/devcade/publish/onboard | tee -a /home/devcade/onboard.log

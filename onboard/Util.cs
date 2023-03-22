@@ -9,7 +9,8 @@ namespace onboard
         {
             //here we're going to get a list of all running processes on
             //the computer
-            foreach (Process clsProcess in Process.GetProcesses()) {
+            foreach (Process clsProcess in Process.GetProcesses())
+            {
                 //now we're going to see if any of the running processes
                 //match the currently running processes. Be sure to not
                 //add the .exe to the name you provide, i.e: NOTEPAD,
