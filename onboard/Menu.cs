@@ -103,18 +103,18 @@ namespace onboard
                     try
                     {
                         Texture2D banner = Texture2D.FromStream(graphics, File.OpenRead(bannerPath));
-                        cards.Add(game.game_id, new MenuCard(i * -1, game.name, banner));
+                        cards.Add(game.game_id, new MenuCard(i * -1, game.game_name, banner));
                     }
                     catch (System.InvalidOperationException e)
                     {
                         Console.WriteLine($"Unable to set card.{e}");
-                        cards.Add(game.game_id, new MenuCard(i * -1, game.name, null));
+                        cards.Add(game.game_id, new MenuCard(i * -1, game.game_name, null));
                     }
                 }
                 else
                 {
                     // If the banner doesn't exist, use a placeholder until it can be downloaded later.
-                    cards.Add(game.game_id, new MenuCard(i * -1, game.name, null));
+                    cards.Add(game.game_id, new MenuCard(i * -1, game.game_name, null));
                 }
 
             }
@@ -350,7 +350,7 @@ namespace onboard
             // Write the game's title
             writeString(_spriteBatch,
                 titleFont,
-                gameSelected().name,
+                gameSelected().game_name,
                 new Vector2(descPos.X, descPos.Y - (int)((descTexture.Height * scalingAmount) / 2.5f)),
                 descOpacity
             );

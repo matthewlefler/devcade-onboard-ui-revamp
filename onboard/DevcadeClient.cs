@@ -20,7 +20,7 @@ namespace onboard
         public string game_id { get; set; }
         public string author_username { get; set; }
         public DateTime uploadDate { get; set; }
-        public string name { get; set; }
+        public string game_name { get; set; }
         public string hash { get; set; }
         public string description { get; set; }
     }
@@ -87,10 +87,10 @@ namespace onboard
         public void GetBanner(DevcadeGame game)
         {
             // Path to where the banner image will be saved
-            // Making this game.name will name the downloaded image have that name, could set it to anything like id etc..
+            // Making this game.game_name will name the downloaded image have that name, could set it to anything like id etc..
             string path = $"/tmp/{game.game_id}Banner.png";
 
-            Console.WriteLine($"Downloading banner for: {game.name}");
+            Console.WriteLine($"Downloading banner for: {game.game_name}");
 
             using var client = new HttpClient();
             try
@@ -149,11 +149,11 @@ namespace onboard
             try
             {
                 var game = (DevcadeGame)gameObj;
-                string gameName = game.name.Replace(' ', '_');
+                string gameName = game.game_name.Replace(' ', '_');
                 Console.WriteLine($"Game is: {gameName}");
                 string path = $"/tmp/{gameName}.zip";
                 string URI = $"https://{_apiDomain}/games/{game.game_id}/game";
-                Console.WriteLine($"Getting {game.name} from {URI}");
+                Console.WriteLine($"Getting {game.game_name} from {URI}");
 
                 using var client = new HttpClient();
                 using Task<Stream> s = client.GetStreamAsync(URI);
@@ -178,7 +178,7 @@ namespace onboard
             int port = 8125;
             IPEndPoint endPoint = new IPEndPoint(ipAddress, port);
 
-            string gameName = game.name.Replace(' ', '_');
+            string gameName = game.game_name.Replace(' ', '_');
             // Convert the message to a byte array
             string message = $"devcade.game_launch:1|c|#game:{gameName}";
             byte[] bytes = System.Text.Encoding.UTF8.GetBytes(message);
@@ -192,7 +192,7 @@ namespace onboard
 
         private static void notifyDownloadComplete(DevcadeGame game)
         {
-            string gameName = game.name.Replace(' ', '_');
+            string gameName = game.game_name.Replace(' ', '_');
             // Try extracting the game
             string path = $"/tmp/{gameName}.zip";
             Console.WriteLine($"Extracting {path}");
@@ -225,8 +225,8 @@ namespace onboard
                 }
             };
             // Redirect stdout and stderr to the console
-            proc.OutputDataReceived += (_, args) => Console.WriteLine($"[{game.name}] {args.Data}");
-            proc.ErrorDataReceived += (_, args) => Console.WriteLine($"[{game.name}] {args.Data}");
+            proc.OutputDataReceived += (_, args) => Console.WriteLine($"[{game.game_name}] {args.Data}");
+            proc.ErrorDataReceived += (_, args) => Console.WriteLine($"[{game.game_name}] {args.Data}");
             proc.Start();
             Game1.instance.setActiveProcess(proc);
         }
