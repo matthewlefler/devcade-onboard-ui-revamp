@@ -17,14 +17,12 @@ namespace onboard
 {
     public class DevcadeGame
     {
-        public string id { get; set; }
-        public string author { get; set; }
+        public string game_id { get; set; }
+        public string author_username { get; set; }
         public DateTime uploadDate { get; set; }
         public string name { get; set; }
         public string hash { get; set; }
         public string description { get; set; }
-        public string iconLink { get; set; }
-        public string bannerLink { get; set; }
     }
 
     public class DevcadeClient
@@ -68,7 +66,7 @@ namespace onboard
             using var client = new HttpClient();
             try
             {
-                string uri = $"https://{_apiDomain}/api/games/gamelist/"; // TODO: Env variable URI tld 
+                string uri = $"https://{_apiDomain}/games/"; // TODO: Env variable URI tld 
                 using Task<string> responseBody = client.GetStringAsync(uri);
                 List<DevcadeGame> games = JsonConvert.DeserializeObject<List<DevcadeGame>>(responseBody.Result);
                 // TODO: Add error handling if there is no games from the API
@@ -90,7 +88,7 @@ namespace onboard
         {
             // Path to where the banner image will be saved
             // Making this game.name will name the downloaded image have that name, could set it to anything like id etc..
-            string path = $"/tmp/{game.id}Banner.png";
+            string path = $"/tmp/{game.game_id}Banner.png";
 
             Console.WriteLine($"Downloading banner for: {game.name}");
 
@@ -98,7 +96,7 @@ namespace onboard
             try
             {
                 // Download the image from this uri, save it to the path
-                string uri = $"https://{_apiDomain}/api/games/download/banner/{game.id}";
+                string uri = $"https://{_apiDomain}/games/{game.game_id}/banner";
                 using Task<Stream> s = client.GetStreamAsync(uri);
                 using var fs = new FileStream(path, FileMode.OpenOrCreate);
                 s.Result.CopyTo(fs);
@@ -114,7 +112,7 @@ namespace onboard
         {
             var game = (DevcadeGame)callback;
             GetBanner(game);
-            Menu.instance.notifyTextureAvailable(game.id);
+            Menu.instance.notifyTextureAvailable(game.game_id);
         }
 
         public void getBannerAsync(DevcadeGame game)
@@ -154,7 +152,7 @@ namespace onboard
                 string gameName = game.name.Replace(' ', '_');
                 Console.WriteLine($"Game is: {gameName}");
                 string path = $"/tmp/{gameName}.zip";
-                string URI = $"https://{_apiDomain}/api/games/download/{game.id}";
+                string URI = $"https://{_apiDomain}/games/{game.game_id}/game";
                 Console.WriteLine($"Getting {game.name} from {URI}");
 
                 using var client = new HttpClient();
