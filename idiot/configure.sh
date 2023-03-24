@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # Install Dotnet SDK
 cd /home/devcade
 wget https://packages.microsoft.com/config/debian/11/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
@@ -22,7 +24,7 @@ cd ..
 cp idiot/.env /home/devcade; 
 cp idiot/xinitrc ~/.xinitrc;
 git submodule update --init --recursive;
-cd iditot/xlogin;
+cd idiot/xlogin;
 make install;
 systemctl enable xlogin@devcade;
 
