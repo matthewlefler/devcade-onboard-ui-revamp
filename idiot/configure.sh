@@ -22,10 +22,10 @@ cd ..
 
 # TODO: Set up publish.sh? IDK man it should work fine as is.
 
-cp /home/devcade/idiot/.env /home/devcade; 
-cp /home/devcade/idiot/xinitrc ~/.xinitrc;
+cp /home/devcade/devcade-onboard/idiot/.env /home/devcade; 
+cp /home/devcade/devcade-onboard/idiot/xinitrc ~/.xinitrc;
 git submodule update --init --recursive;
-cd /home/devcade/idiot/xlogin;
+cd /home/devcade/devcade-onboard/idiot/xlogin;
 sudo make install;
 sudo systemctl enable xlogin@devcade;
 
