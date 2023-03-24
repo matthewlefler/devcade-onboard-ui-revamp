@@ -22,6 +22,7 @@ cd ..
 
 # TODO: Set up publish.sh? IDK man it should work fine as is.
 
+mkdir -p /home/devcade/.config/openbox/; cp /home/devcade/devcade-onboard/idiot/rc.xml /home/devcade/.config/openbox/;
 cp /home/devcade/devcade-onboard/idiot/.env /home/devcade; 
 cp /home/devcade/devcade-onboard/idiot/xinitrc ~/.xinitrc;
 git submodule update --init --recursive;
