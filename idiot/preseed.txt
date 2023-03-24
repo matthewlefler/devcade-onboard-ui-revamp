@@ -266,4 +266,4 @@ d-i finish-install/reboot_in_progress note
 # directly, or use the apt-install and in-target commands to easily install
 # packages and run commands in the target system.
 # TODO
-d-i preseed/late_command string apt-install zsh; in-target chsh -s /bin/zsh; cd /home/devcade; git clone https://github.com/computersciencehouse/devcade-onboard; bash devcade-onboard/idiot/configure.sh;
+d-i preseed/late_command string apt-install zsh; in-target chsh -s /bin/zsh; cd /home/devcade; git clone https://github.com/computersciencehouse/devcade-onboard; cd devcade-onboard; git checkout willnilges/preseed; cd ..; bash devcade-onboard/idiot/configure.sh;
