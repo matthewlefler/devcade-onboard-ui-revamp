@@ -27,14 +27,13 @@ cp $idiot_dir/.env /home/devcade;
 # Set up xinitrc
 cp $idiot_dir/xinitrc /home/devcade/.xinitrc
 
+# Copy openbox config
+mkdir -p /home/devcade/.config/openbox
+cp $idiot_dir/rc.xml /home/devcade/.config/openbox
+
 # Auto-login (scuffed)
 sudo mkdir -p /etc/systemd/system/getty@tty1.service.d/
-cat << EOF > /etc/systemd/system/getty@tty1.service.d/override.conf
-[Service]
-Type=Simple
-ExecStart=
-ExecStart=-/sbin/agetty --autologin devcade --noclear %I 38400 linux
-EOF
+sudo cp $idiot_dir/tty1_service_override.conf /etc/systemd/system/getty@tty1.service.d/override.conf
 
 # Add a thingy to the bashrc
 until ! grep 'DEVCADE_AUTOLOGIN_INSTALLED' /home/devcade/.bashrc  ; do {

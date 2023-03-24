@@ -59,8 +59,8 @@ d-i passwd/root-login boolean false
 d-i passwd/user-fullname string devcade
 d-i passwd/username string devcade
 # Normal user's password, either in clear text
-d-i passwd/user-password password devcade_changeme
-d-i passwd/user-password-again password devcade_changeme
+#d-i passwd/user-password password devcade_changeme
+#d-i passwd/user-password-again password devcade_changeme
 # or encrypted using a crypt(3) hash.
 #d-i passwd/user-password-crypted password [crypt(3) hash]
 # Create the first user with the specified UID instead of the default.
