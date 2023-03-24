@@ -94,7 +94,7 @@ d-i clock-setup/ntp boolean true
 # name must be given in traditional, non-devfs format (so e.g. /dev/sda
 # and not e.g. /dev/discs/disc0/disc).
 # For example, to use the first SCSI/SATA hard disk:
-d-i partman-auto/disk string /dev/sda
+#d-i partman-auto/disk string /dev/sda
 # In addition, you'll need to specify the method to use.
 # The presently available methods are:
 # - regular: use the usual partition types for your architecture
@@ -191,10 +191,10 @@ d-i apt-setup/cdrom/set-first boolean false
 #d-i apt-setup/multiarch string i386
 
 ### Package selection
-tasksel tasksel/first multiselect ssh-server openbox compton pulseaudio
+tasksel tasksel/first multiselect ssh-server
 
 # Individual additional packages to install
-d-i pkgsel/include string xinit xterm git build-essential
+d-i pkgsel/include string xinit xterm git build-essential wget openbox compton pulseaudio x11-xserver-utils
 
 # Whether to upgrade packages after debootstrap.
 # Allowed values: none, safe-upgrade, full-upgrade
@@ -266,4 +266,8 @@ d-i finish-install/reboot_in_progress note
 # directly, or use the apt-install and in-target commands to easily install
 # packages and run commands in the target system.
 # TODO
-d-i preseed/late_command string apt-install zsh; in-target chsh -s /bin/zsh; cd /home/devcade; git clone https://github.com/computersciencehouse/devcade-onboard; cd devcade-onboard; git checkout willnilges/preseed; cd ..; bash devcade-onboard/idiot/configure.sh;
+#d-i preseed/late_command string apt-install zsh; in-target chsh -s /bin/zsh; cd /home/devcade; git clone https://github.com/computersciencehouse/devcade-onboard; cd devcade-onboard; git checkout willnilges/preseed; cd ..; bash devcade-onboard/idiot/configure.sh;
+
+#d-i preseed/late_command string apt-install git; git clone https://github.com/computersciencehouse/devcade-onboard; cd devcade-onboard; git checkout willnilges/preseed; cp idiot/configure.sh /target/root/; chmod +x /target/root/configure.sh; in-target /bin/bash /root/configure.sh;
+
+d-i preseed/late_command string in-target /bin/bash -c 'cd /home/devcade; git clone https://github.com/computersciencehouse/devcade-onboard; cd devcade-onboard; git checkout willnilges/preseed; cd ..; chown -R devcade:devcade /home/devcade/;' # Not gonna run the script (yet)
