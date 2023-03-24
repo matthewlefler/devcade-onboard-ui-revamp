@@ -97,24 +97,24 @@ namespace onboard
                 // Start downloading the textures
                 _client.getBannerAsync(game);
                 // check if /tmp/ has the banner
-                string bannerPath = $"/tmp/{game.id}Banner.png";
+                string bannerPath = $"/tmp/{game.game_id}Banner.png";
                 if (File.Exists(bannerPath))
                 {
                     try
                     {
                         Texture2D banner = Texture2D.FromStream(graphics, File.OpenRead(bannerPath));
-                        cards.Add(game.id, new MenuCard(i * -1, game.name, banner));
+                        cards.Add(game.game_id, new MenuCard(i * -1, game.game_name, banner));
                     }
                     catch (System.InvalidOperationException e)
                     {
                         Console.WriteLine($"Unable to set card.{e}");
-                        cards.Add(game.id, new MenuCard(i * -1, game.name, null));
+                        cards.Add(game.game_id, new MenuCard(i * -1, game.game_name, null));
                     }
                 }
                 else
                 {
                     // If the banner doesn't exist, use a placeholder until it can be downloaded later.
-                    cards.Add(game.id, new MenuCard(i * -1, game.name, null));
+                    cards.Add(game.game_id, new MenuCard(i * -1, game.game_name, null));
                 }
 
             }
@@ -350,7 +350,7 @@ namespace onboard
             // Write the game's title
             writeString(_spriteBatch,
                 titleFont,
-                gameSelected().name,
+                gameSelected().game_name,
                 new Vector2(descPos.X, descPos.Y - (int)((descTexture.Height * scalingAmount) / 2.5f)),
                 descOpacity
             );
@@ -358,7 +358,7 @@ namespace onboard
             // Write the game's author
             writeString(_spriteBatch,
                 descFont,
-                "By: " + gameSelected().author,
+                "By: " + gameSelected().author_username,
                 new Vector2(descPos.X, descPos.Y - (int)((descTexture.Height * scalingAmount) / 3)),
                 descOpacity
             );
