@@ -4,6 +4,43 @@ use serde::{Deserialize, Serialize};
 pub mod api;
 pub mod command;
 
+pub mod env {
+    use std::env;
+    use log::{Level, log};
+
+    /**
+     * Get the path to the devcade directory. This is where games are installed.
+     * If the value is not set in the environment, it will default to /tmp/devcade.
+     */
+    pub fn devcade_path() -> String {
+        let path = env::var("DEVCADE_PATH");
+
+        match path {
+            Ok(path) => path,
+            Err(e) => {
+                log!(Level::Warn, "Error getting DEVCADE_PATH falling back to '/tmp/devcade': {}", e);
+                String::from("/tmp/devcade")
+            }
+        }
+    }
+
+    /**
+     * Get the URL of the API. This is where games are downloaded from.
+     * If the value is not set in the environment, it will throw a fatal error and panic.
+     */
+    pub fn api_url() -> String {
+        let url = env::var("DEVCADE_API_URL");
+
+        match url {
+            Ok(url) => url,
+            Err(e) => {
+                log!(Level::Error, "Error getting DEVCADE_API_URL: {}", e);
+                panic!();
+            }
+        }
+    }
+}
+
 /**
  * A game from the Devcade API
  */

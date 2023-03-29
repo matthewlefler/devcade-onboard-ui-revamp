@@ -1,5 +1,6 @@
 use std::error::Error;
 use std::path::Path;
+use crate::env::{api_url, devcade_path};
 use crate::DevcadeGame;
 
 /**
@@ -37,14 +38,33 @@ mod network {
     }
 }
 
-const API_URL: &str = "https://devcade-api.apps.okd4.csh.rit.edu/api"; // TODO: Get from ENV
-const FILE_PATH: &str = "/tmp/devcade"; // TODO: Get from ENV
+mod route {
+    pub fn game_list() -> String {
+        String::from("/games/")
+    }
+
+    pub fn game(id: &str) -> String {
+        format!("/games/{}", id)
+    }
+
+    pub fn game_icon(id: &str) -> String {
+        format!("/games/{}/icon", id)
+    }
+
+    pub fn game_banner(id: &str) -> String {
+        format!("/games/{}/banner", id)
+    }
+
+    pub fn game_download(id: &str) -> String {
+        format!("/games/{}/game", id)
+    }
+}
 
 /**
  * Get a list of games from the API. This is the preferred method of getting games.
  */
 pub async fn game_list() -> Result<Vec<DevcadeGame>, Box<dyn Error>> {
-    let games = network::request_json(format!("{}/games", API_URL).as_str()).await?;
+    let games = network::request_json(format!("{}/{}", api_url(), route::game_list()).as_str()).await?;
     Ok(games)
 }
 
@@ -54,7 +74,7 @@ pub async fn game_list() -> Result<Vec<DevcadeGame>, Box<dyn Error>> {
  */
 pub fn game_list_from_fs() -> Result<Vec<DevcadeGame>, Box<dyn Error>> {
     let mut games = Vec::new();
-    for entry in std::fs::read_dir(FILE_PATH)? {
+    for entry in std::fs::read_dir(devcade_path())? {
         let entry = entry?;
         let path = entry.path();
         if !path.is_dir() {
@@ -81,11 +101,12 @@ pub fn game_list_from_fs() -> Result<Vec<DevcadeGame>, Box<dyn Error>> {
  * Download's a game's banner from the API.
  */
 pub async fn download_banner(game_id: String) -> Result<(), Box<dyn Error>> {
-    let path = Path::new(FILE_PATH).join(game_id.clone()).join("banner.png");
+
+    let path = Path::new(devcade_path().as_str()).join(game_id.clone()).join("banner.png");
     if path.exists() {
         return Ok(());
     }
-    let bytes = network::request_bytes(format!("{}/games/download/banner/{}", API_URL, game_id).as_str()).await?;
+    let bytes = network::request_bytes(format!("{}/{}", api_url(), route::game_banner(game_id.as_str())).as_str()).await?;
     std::fs::write(path, bytes)?;
     Ok(())
 }
@@ -94,11 +115,14 @@ pub async fn download_banner(game_id: String) -> Result<(), Box<dyn Error>> {
  * Download's a game's icon from the API.
  */
 pub async fn download_icon(game_id: String) -> Result<(), Box<dyn Error>> {
-    let path = Path::new(FILE_PATH).join(game_id.clone()).join("icon.png");
+    let api_url = api_url();
+    let file_path = devcade_path();
+
+    let path = Path::new(file_path.as_str()).join(game_id.clone()).join("icon.png");
     if path.exists() {
         return Ok(());
     }
-    let bytes = network::request_bytes(format!("{}/games/download/icon/{}", API_URL, game_id).as_str()).await?;
+    let bytes = network::request_bytes(format!("{}/{}", api_url, route::game_icon(game_id.as_str())).as_str()).await?;
     std::fs::write(path, bytes)?;
     Ok(())
 }
@@ -109,7 +133,7 @@ pub async fn download_icon(game_id: String) -> Result<(), Box<dyn Error>> {
  * again.
  */
 pub async fn download_game(game_id: String) -> Result<(), Box<dyn Error>> {
-    let path = Path::new(FILE_PATH).join(game_id.clone()).join("game.json");
+    let path = Path::new(devcade_path().as_str()).join(game_id.clone()).join("game.json");
 
     let games = game_list().await?;
     let game = match games.iter().find(|g| g.id == game_id) {
@@ -125,13 +149,13 @@ pub async fn download_game(game_id: String) -> Result<(), Box<dyn Error>> {
         }
     }
 
-    let bytes = network::request_bytes(format!("{}/games/download/game", API_URL).as_str()).await?;
+    let bytes = network::request_bytes(format!("{}/{}", api_url(), route::game_download(game_id.as_str())).as_str()).await?;
 
     // Unzip the game into the game's directory
     let mut zip = zip::ZipArchive::new(std::io::Cursor::new(bytes))?;
     for i in 0..zip.len() {
         let mut file = zip.by_index(i)?;
-        let outpath = Path::new(FILE_PATH).join(game.id.clone()).join(file.name());
+        let outpath = Path::new(devcade_path().as_str()).join(game.id.clone()).join(file.name());
         if file.name().ends_with('/') {
             std::fs::create_dir_all(&outpath)?;
         } else {
@@ -149,6 +173,58 @@ pub async fn download_game(game_id: String) -> Result<(), Box<dyn Error>> {
     // the filesystem)
     let json = serde_json::to_string(game)?;
     std::fs::write(path.join("game.json"), json)?;
+    Ok(())
+}
+
+/**
+ * Launch a game by its ID. This will check if the game is downloaded, and if it is, it will launch
+ * the game. This will block until the game is closed.
+ */
+pub async fn launch_game(game_id: String) -> Result<(), Box<dyn Error>> {
+    let path = Path::new(devcade_path().as_str()).join(game_id.clone()).join("/publish");
+
+    if !path.exists() {
+        return Err("Game not downloaded".into());
+    }
+
+    // Infer executable name from *.runtimeconfig.json
+    let mut executable = String::new();
+
+    for entry in std::fs::read_dir(path.clone())? {
+        let entry = entry?;
+        let path = entry.path();
+        if !path.is_file() {
+            continue;
+        }
+        if let Some(extension) = path.extension() {
+            if extension != "runtimeconfig.json" {
+                continue;
+            }
+            executable = path.file_stem().unwrap().to_str().unwrap().to_string();
+            break;
+        }
+    }
+
+    // If no *.runtimeconfig.json file is found, look for a file with the same name as the game
+    // (this is the case for games that don't use .NET)
+    // TODO: Some better way to find executable name?
+    if executable.is_empty() {
+        let game = game_from_path(path.clone().parent().unwrap().join("game.json").to_str().unwrap())?;
+        executable = game.name;
+    }
+
+    let path = path.join(executable);
+
+    if !path.exists() {
+        return Err("Game executable not found".into());
+    }
+
+    let mut child = std::process::Command::new(path)
+        .spawn()
+        .expect("failed to execute process");
+
+    child.wait().expect("failed to wait on child");
+
     Ok(())
 }
 
