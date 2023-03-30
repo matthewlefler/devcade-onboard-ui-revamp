@@ -36,7 +36,7 @@ sudo mkdir -p /etc/systemd/system/getty@tty1.service.d/
 sudo cp $idiot_dir/tty1_service_override.conf /etc/systemd/system/getty@tty1.service.d/override.conf
 
 # Add a thingy to the bashrc
-until ! grep 'DEVCADE_AUTOLOGIN_INSTALLED' /home/devcade/.bashrc  ; do {
+until ! grep 'DEVCADE_AUTOLOGIN_INSTALLED' /home/devcade/.bashrc ; do {
   cat bashrc-check.sh >> /home/devcade/.bashrc
 }
 

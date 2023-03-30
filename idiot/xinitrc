@@ -1,18 +1,19 @@
 #!/bin/sh
 
 configure_display() {
+	RESOLUTION="$VIEW_WIDTH"'x'"$VIEW_HEIGHT"'_75.00'
 	xrandr -q >> ~/onboard.log 2>&1
 	DEVCADE_OUTPUT=$(xrandr -q | grep ' connected ' | awk '{print $1}')
 	echo "using output: $DEVCADE_OUTPUT" >> ~/onboard.log 2>&1
 	#DEVCADE_OUTPUT=DP-2
 
-	xrandr --newmode "2560x1080_75.00" 294.00 2560 2744 3016 3472 1080 1083 1093 1130 -hsync +vsync --verbose
-	xrandr --addmode $DEVCADE_OUTPUT 2560x1080_75.00 --verbose
-	xrandr --output $DEVCADE_OUTPUT --mode 2560x1080_75.00 --rotate left  --verbose
+	xrandr --newmode "$RESOLUTION" 294.00 2560 2744 3016 3472 1080 1083 1093 1130 -hsync +vsync --verbose
+	xrandr --addmode $DEVCADE_OUTPUT "$RESOLUTION" --verbose
+	xrandr --output $DEVCADE_OUTPUT --mode "$RESOLUTION" --rotate left --verbose
 }
 
+. ~/.env
 configure_display
 
-. ~/.env
 openbox & compton & $(pulseaudio || echo "pulseaudio already started") &
 ~/publish/onboard >> ~/onboard.log 2>&1
