@@ -5,11 +5,8 @@ configure_display() {
 	xrandr -q >> ~/onboard.log 2>&1
 	DEVCADE_OUTPUT=$(xrandr -q | grep ' connected ' | awk '{print $1}')
 	echo "using output: $DEVCADE_OUTPUT" >> ~/onboard.log 2>&1
-	#DEVCADE_OUTPUT=DP-2
 
-	xrandr --newmode "$RESOLUTION" 294.00 2560 2744 3016 3472 1080 1083 1093 1130 -hsync +vsync --verbose
-	xrandr --addmode $DEVCADE_OUTPUT "$RESOLUTION" --verbose
-	xrandr --output $DEVCADE_OUTPUT --mode "$RESOLUTION" --rotate left --verbose
+	xrandr --output $DEVCADE_OUTPUT --rotate left
 }
 
 . ~/.env
