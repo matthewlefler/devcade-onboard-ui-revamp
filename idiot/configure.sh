@@ -18,6 +18,7 @@ cd onboard
 dotnet publish -c release -r linux-x64 --self-contained
 rm -rf /home/devcade/publish
 mv bin/Release/net6.0/linux-x64/publish /home/devcade
+
 cd ..
 idiot_dir="/home/devcade/devcade-onboard/idiot"
 
@@ -42,3 +43,6 @@ done
 
 # Enable auto-login
 sudo systemctl enable getty@tty1
+
+# Also, disable root
+sudo chsh root -s /usr/sbin/nologin

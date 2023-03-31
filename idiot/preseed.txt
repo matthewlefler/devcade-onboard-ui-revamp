@@ -270,4 +270,4 @@ d-i finish-install/reboot_in_progress note
 
 #d-i preseed/late_command string apt-install git; git clone https://github.com/computersciencehouse/devcade-onboard; cd devcade-onboard; git checkout willnilges/preseed; cp idiot/configure.sh /target/root/; chmod +x /target/root/configure.sh; in-target /bin/bash /root/configure.sh;
 
-d-i preseed/late_command string in-target /bin/bash -c 'cd /home/devcade; git clone https://github.com/computersciencehouse/devcade-onboard; cd devcade-onboard; git checkout willnilges/preseed; cd ..; chown -R devcade:devcade /home/devcade/;' # Not gonna run the script (yet)
+d-i preseed/late_command string in-target /bin/bash -c 'cd /home/devcade; git clone https://github.com/computersciencehouse/devcade-onboard; cd devcade-onboard; cd ..; chown -R devcade:devcade /home/devcade/; cp /home/devcade/devcade-onboard/idiot/configure.sh /home/devcade;' # Not gonna run the script (yet)
