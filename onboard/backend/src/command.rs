@@ -1,7 +1,8 @@
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
+use anyhow::Error;
 
-use crate::api::{download_banner, download_game, download_icon, game_list, game_list_from_fs};
+use crate::api::{download_banner, download_game, download_icon, game_list, game_list_from_fs, launch_game};
 use crate::DevcadeGame;
 
 /**
@@ -20,6 +21,24 @@ pub enum Request {
     LaunchGame(u32, String), // String is the game ID
 }
 
+impl Request {
+    /**
+     * Return a list of all request variants.
+     */
+    pub fn all() -> Vec<Request> {
+        let mut requests = Vec::new();
+        requests.push(Request::GetGameList(0));
+        requests.push(Request::GetGameListFromFs(0));
+        requests.push(Request::GetGame(0, String::from("abc123")));
+        requests.push(Request::DownloadGame(0, String::from("abc123")));
+        requests.push(Request::DownloadIcon(0, String::from("abc123")));
+        requests.push(Request::DownloadBanner(0, String::from("abc123")));
+        requests.push(Request::LaunchGame(0, String::from("abc123")));
+
+        requests
+    }
+}
+
 /**
  * A response sent by the backend to the frontend. The u32 is the request ID, which is used to
  * identify the request in the response to the frontend.
@@ -34,24 +53,49 @@ pub enum Response {
 }
 
 impl Response {
+    /**
+     * Create a new `Response::Ok` from a request ID.
+     */
     fn ok_from_id(id: u32) -> Self {
         Response::Ok(id)
     }
 
+    /**
+     * Create a new `Response::Err` from a request ID and an error message.
+     */
     fn err_from_id(id: u32, err: String) -> Self {
         Response::Err(id, err)
     }
 
-    fn err_from_id_and_err(id: u32, err: Box<dyn std::error::Error>) -> Self {
+    /**
+     * Create a new `Response::Err` from a request ID and an error.
+     */
+    fn err_from_id_and_err(id: u32, err: Error) -> Self {
         Response::Err(id, err.to_string())
     }
 
+    /**
+     * Create a new `Response::GameList` from a request ID and a list of games.
+     */
     fn game_list_from_id(id: u32, games: Vec<DevcadeGame>) -> Self {
         Response::GameList(id, games)
     }
 
+    /**
+     * Create a new `Response::Game` from a request ID and a game.
+     */
     fn game_from_id(id: u32, game: DevcadeGame) -> Self {
         Response::Game(id, game)
+    }
+
+    fn all() -> Vec<Response> {
+        let mut responses = Vec::new();
+        responses.push(Response::ok_from_id(0));
+        responses.push(Response::err_from_id(0, String::from("Error")));
+        responses.push(Response::game_list_from_id(0, Vec::new()));
+        responses.push(Response::game_from_id(0, DevcadeGame::default()));
+
+        responses
     }
 }
 
@@ -87,9 +131,9 @@ pub async fn handle(req: Request) -> Response {
             Ok(_) => Response::ok_from_id(id),
             Err(err) => Response::err_from_id_and_err(id, err),
         },
-        Request::LaunchGame(id, game_id) => {
-            // TODO: Implement
-            Response::ok_from_id(id)
+        Request::LaunchGame(id, game_id) => match launch_game(game_id).await {
+            Ok(_) => Response::ok_from_id(id),
+            Err(err) => Response::err_from_id_and_err(id, err),
         }
     }
 }
