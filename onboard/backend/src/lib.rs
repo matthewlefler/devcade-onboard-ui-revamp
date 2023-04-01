@@ -3,7 +3,19 @@ use log::{log, Level};
 use serde::{Deserialize, Serialize};
 use tokio::net::unix::pipe::{OpenOptions, Receiver, Sender};
 
+/**
+ * All the servers run by the backend that communicate with other processes on devcade
+ */
+pub mod servers;
+
+/**
+ * Module for managing the API and routes
+ */
 pub mod api;
+
+/**
+ * Module for defining and handling commands sent to the backend and responses sent from the backend
+ */
 pub mod command;
 
 /**
@@ -11,6 +23,7 @@ pub mod command;
  * default values.
  */
 pub mod env {
+    // TODO Cache env vars?
     use std::env;
     use log::{Level, log};
 
@@ -36,12 +49,12 @@ pub mod env {
      * If the value is not set in the environment, it will throw a fatal error and panic.
      */
     pub fn api_url() -> String {
-        let url = env::var("DEVCADE_API_URL");
+        let url = env::var("DEVCADE_API_DOMAIN");
 
         match url {
-            Ok(url) => url,
+            Ok(url) => format!("https://{}", url),
             Err(e) => {
-                log!(Level::Error, "Error getting DEVCADE_API_URL: {}", e);
+                log!(Level::Error, "Error getting DEVCADE_API_DOMAIN: {}", e);
                 panic!();
             }
         }
@@ -52,29 +65,28 @@ pub mod env {
  * A game from the Devcade API
  */
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
+// TODO Update struct to match new schema
 pub struct DevcadeGame {
-    pub id: String,
     pub author: String,
-    pub upload_date: String,
-    pub name: String,
-    pub hash: String,
+    pub authrequired: bool,
     pub description: String,
-    pub icon_link: String,
-    pub banner_link: String,
+    pub hash: String,
+    pub id: String,
+    pub name: String,
+    pub upload_date: String,
 }
 
 impl Default for DevcadeGame {
     fn default() -> Self {
         DevcadeGame {
-            id: String::new(),
-            author: String::new(),
-            upload_date: String::from("1970-01-01T00:00:00.000Z"),
-            name: String::new(),
-            hash: String::new(),
-            description: String::new(),
-            icon_link: String::new(),
-            banner_link: String::new(),
+            author: String::from(""),
+            authrequired: false,
+            description: String::from(""),
+            hash: String::from(""),
+            id: String::from(""),
+            name: String::from(""),
+            // default upload date is unix epoch
+            upload_date: String::from("1970-01-01T00:00:00Z"),
         }
     }
 }

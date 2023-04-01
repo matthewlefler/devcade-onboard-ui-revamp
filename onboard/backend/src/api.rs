@@ -1,5 +1,9 @@
+use std::os::unix::fs::PermissionsExt;
 use anyhow::{anyhow, Error};
 use std::path::Path;
+use std::thread;
+use std::time::Duration;
+use log::{log, Level};
 use crate::env::{api_url, devcade_path};
 use crate::DevcadeGame;
 
@@ -8,12 +12,14 @@ use crate::DevcadeGame;
  */
 mod network {
     use anyhow::Error;
+    use log::{log, Level};
     use serde::Deserialize;
 
     /**
      * Request JSON from a URL and serialize it into a struct
      */
     pub async fn request_json<T: for<'de> Deserialize<'de>>(url: &str) -> Result<T, Error> {
+        log!(Level::Trace, "Requesting JSON from {}", url);
         let response = reqwest::get(url).await?;
         let json = response.json().await?;
         Ok(json)
@@ -23,6 +29,7 @@ mod network {
      * Request binary data from a URL
      */
     pub async fn request_bytes(url: &str) -> Result<Vec<u8>, Error> {
+        log!(Level::Trace, "Requesting binary from {}", url);
         let response = reqwest::get(url).await?;
         let bytes = response.bytes().await?;
         Ok(bytes.to_vec())
@@ -40,35 +47,35 @@ mod route {
      * Get the list of games
      */
     pub fn game_list() -> String {
-        String::from("/games/")
+        String::from("games/")
     }
 
     /**
      * Get a specific game by ID
      */
     pub fn game(id: &str) -> String {
-        format!("/games/{}", id)
+        format!("games/{}", id)
     }
 
     /**
      * Get a specific game's icon by ID
      */
     pub fn game_icon(id: &str) -> String {
-        format!("/games/{}/icon", id)
+        format!("games/{}/icon", id)
     }
 
     /**
      * Get a specific game's banner by ID
      */
     pub fn game_banner(id: &str) -> String {
-        format!("/games/{}/banner", id)
+        format!("games/{}/banner", id)
     }
 
     /**
      * Get a specific game's binary by ID
      */
     pub fn game_download(id: &str) -> String {
-        format!("/games/{}/game", id)
+        format!("games/{}/game", id)
     }
 }
 
@@ -78,6 +85,11 @@ mod route {
 pub async fn game_list() -> Result<Vec<DevcadeGame>, Error> {
     let games = network::request_json(format!("{}/{}", api_url(), route::game_list()).as_str()).await?;
     Ok(games)
+}
+
+pub async fn get_game(id: &str) -> Result<DevcadeGame, Error> {
+    let game = network::request_json(format!("{}/{}", api_url(), route::game(id)).as_str()).await?;
+    Ok(game)
 }
 
 /**
@@ -147,44 +159,83 @@ pub async fn download_icon(game_id: String) -> Result<(), Error> {
 pub async fn download_game(game_id: String) -> Result<(), Error> {
     let path = Path::new(devcade_path().as_str()).join(game_id.clone()).join("game.json");
 
-    let games = game_list().await?;
-    let game = match games.iter().find(|g| g.id == game_id) {
-        Some(game) => game,
-        None => return Err(anyhow!("Game not found")),
-    };
+    let game = get_game(game_id.as_str()).await?;
 
     // Check if the game is already downloaded, and if it is, check if the hash is the same
     if path.exists() {
-        let game_ = game_from_path(path.to_str().unwrap())?;
-        if game_.hash == game.hash {
-            return Ok(());
+        if let Some(game_) = game_from_path(path.to_str().unwrap()).ok() {
+            if game_.hash == game.hash {
+                return Ok(());
+            }
         }
     }
 
+    log!(Level::Info, "Downloading game {}...", game.name);
+
     let bytes = network::request_bytes(format!("{}/{}", api_url(), route::game_download(game_id.as_str())).as_str()).await?;
+
+    log!(Level::Info, "Unzipping game {}...", game.name);
+    log!(Level::Trace, "Zip file size: {} bytes", bytes.len());
 
     // Unzip the game into the game's directory
     let mut zip = zip::ZipArchive::new(std::io::Cursor::new(bytes))?;
+
     for i in 0..zip.len() {
-        let mut file = zip.by_index(i)?;
-        let outpath = Path::new(devcade_path().as_str()).join(game.id.clone()).join(file.name());
+        let mut file = match zip.by_index(i) {
+            Ok(f) => f,
+            Err(e) => {
+                log!(Level::Warn, "Error getting file from zip: {}", e);
+                continue;
+            }
+        };
+        let out_path = Path::new(devcade_path().as_str()).join(game.id.clone()).join(file.name());
+        log!(Level::Trace, "Unzipping file {} to {}", file.name(), out_path.to_str().unwrap());
         if file.name().ends_with('/') {
-            std::fs::create_dir_all(&outpath)?;
-        } else {
-            if let Some(p) = outpath.parent() {
-                if !p.exists() {
-                    std::fs::create_dir_all(&p)?;
+            match std::fs::create_dir_all(&out_path) {
+                Ok(_) => {}
+                Err(e) => {
+                    log!(Level::Warn, "Error creating directory {}: {}", out_path.to_str().unwrap(), e);
                 }
             }
-            let mut outfile = std::fs::File::create(&outpath)?;
-            std::io::copy(&mut file, &mut outfile)?;
+        } else {
+            if let Some(p) = out_path.parent() {
+                if !p.exists() {
+                    match std::fs::create_dir_all(&p) {
+                        Ok(_) => {}
+                        Err(e) => {
+                            log!(Level::Warn, "Error creating directory {}: {}", p.to_str().unwrap(), e);
+                        }
+                    };
+                }
+            }
+            let mut outfile = match std::fs::File::create(&out_path) {
+                Ok(f) => f,
+                Err(e) => {
+                    log!(Level::Warn, "Error creating file {}: {}", out_path.to_str().unwrap(), e);
+                    continue;
+                }
+            };
+            match std::io::copy(&mut file, &mut outfile) {
+                Ok(_) => {}
+                Err(e) => {
+                    log!(Level::Warn, "Error copying file {}: {}", out_path.to_str().unwrap(), e);
+                }
+            };
         }
     }
 
     // Write the game's JSON file to the game's directory (this is used later to get the games from
     // the filesystem)
-    let json = serde_json::to_string(game)?;
-    std::fs::write(path.join("game.json"), json)?;
+    log!(Level::Debug, "Writing game.json file for game {}...", game.name);
+    log!(Level::Trace, "Game json path: {}", path.to_str().unwrap());
+    let json = serde_json::to_string(&game)?;
+    std::fs::create_dir_all(path.parent().unwrap()).unwrap();
+    match std::fs::write(path, json) {
+        Ok(_) => {}
+        Err(e) => {
+            log!(Level::Warn, "Error writing game.json file: {}", e);
+        }
+    };
     Ok(())
 }
 
@@ -193,27 +244,36 @@ pub async fn download_game(game_id: String) -> Result<(), Error> {
  * the game. This will run until the game is closed.
  */
 pub async fn launch_game(game_id: String) -> Result<(), Error> {
-    let path = Path::new(devcade_path().as_str()).join(game_id.clone()).join("/publish");
+    let path = Path::new(devcade_path().as_str()).join(game_id.clone()).join("publish");
+
+    log!(Level::Info, "Launching game {}...", game_id);
+    log!(Level::Trace, "Game path: {}", path.to_str().unwrap());
 
     if !path.exists() {
-        return Err(anyhow!("Game not downloaded"));
+        download_game(game_id.clone()).await?;
     }
 
     // Infer executable name from *.runtimeconfig.json
     let mut executable = String::new();
 
     for entry in std::fs::read_dir(path.clone())? {
-        let entry = entry?;
+        let entry = match entry {
+            Ok(entry) => entry,
+            Err(_) => continue,
+        };
         let path = entry.path();
+        log!(Level::Trace, "Found file: {}", path.to_str().unwrap());
         if !path.is_file() {
             continue;
         }
-        if let Some(extension) = path.extension() {
+
+        if let Some(extension) = path.extension().map(|s| s.to_str().unwrap()) {
             if extension != "runtimeconfig.json" {
                 continue;
             }
             executable = path.file_stem().unwrap().to_str().unwrap().to_string();
-            break;
+            break;    let path = path.join("game.json");
+
         }
     }
 
@@ -231,19 +291,42 @@ pub async fn launch_game(game_id: String) -> Result<(), Error> {
         return Err(anyhow!("Game executable not found"));
     }
 
-    let mut child = std::process::Command::new(path)
-        .spawn()
-        .expect("failed to execute process");
+    // Chmod +x the executable
+    let mut perms = path.metadata()?.permissions();
+    perms.set_mode(0o755);
+    std::fs::set_permissions(path.clone(), perms)?;
 
-    child.wait().expect("failed to wait on child");
+    // Launch the game and silence stdout (allow the game to print to stderr)
+    let mut child = std::process::Command::new(path.clone());
+
+    child.stdout(std::process::Stdio::null());
+    child.stderr(std::process::Stdio::inherit());
+    child.current_dir(path.parent().unwrap());
+
+    let handle = thread::spawn(move || {
+        child.spawn().expect("failed to execute child");
+    });
+
+    tokio::time::sleep(Duration::from_millis(200)).await;
+
+    if handle.is_finished() {
+        let e = handle.join();
+        match e {
+            Ok(_) => {}
+            Err(e) => {
+                log!(Level::Error, "Error launching game: {:?}", e);
+            }
+        }
+    }
 
     Ok(())
 }
 
 /**
- * Returns a devcade game if the file at the path is a JSON file contianing a devcade game
+ * Returns a devcade game if the file at the path is a JSON file containing a devcade game
  */
 fn game_from_path(path: &str) -> Result<DevcadeGame, Error> {
+    log!(Level::Trace, "Reading game from path {}", path);
     let path = Path::new(path);
     if !path.exists() {
         return Err(anyhow!("Path does not exist"));

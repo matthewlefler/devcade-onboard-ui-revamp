@@ -87,16 +87,6 @@ impl Response {
     fn game_from_id(id: u32, game: DevcadeGame) -> Self {
         Response::Game(id, game)
     }
-
-    fn all() -> Vec<Response> {
-        let mut responses = Vec::new();
-        responses.push(Response::ok_from_id(0));
-        responses.push(Response::err_from_id(0, String::from("Error")));
-        responses.push(Response::game_list_from_id(0, Vec::new()));
-        responses.push(Response::game_from_id(0, DevcadeGame::default()));
-
-        responses
-    }
 }
 
 /**
