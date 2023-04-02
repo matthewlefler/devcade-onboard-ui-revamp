@@ -1,6 +1,6 @@
 using System;
 
-namespace onboard.util; 
+namespace onboard.util;
 
 public class Option<T> {
     private T value;
@@ -13,7 +13,7 @@ public class Option<T> {
     public static Option<T> None() {
         return new Option<T>();
     }
-    
+
     private Option(T value) {
         this.value = value;
         hasValue = true;
@@ -69,6 +69,7 @@ public class Option<T> {
         if (hasValue) {
             return value;
         }
+
         throw new Exception("Called Unwrap on a None value");
     }
 
@@ -80,7 +81,7 @@ public class Option<T> {
     public T unwrap_or(T def) {
         return is_some() ? value : def;
     }
-    
+
     /// <summary>
     /// Returns the contained value or the result of the function if the option is None.
     /// </summary>
@@ -125,6 +126,7 @@ public class Option<T> {
         if (is_some()) {
             inspect(value);
         }
+
         return this;
     }
 
@@ -169,7 +171,7 @@ public class Option<T> {
     public Result<T, E> ok_or_else<E>(Func<E> f) {
         return is_some() ? Result<T, E>.Ok(value) : Result<T, E>.Err(f());
     }
-    
+
     /// <summary>
     /// Returns the other option if this option is Some, otherwise returns None.
     /// </summary>
@@ -179,7 +181,7 @@ public class Option<T> {
     public Option<U> and<U>(Option<U> other) {
         return is_some() ? other : Option<U>.None();
     }
-    
+
     /// <summary>
     /// Returns the result of the given function if this option is Some, otherwise returns None.
     /// </summary>
@@ -189,7 +191,7 @@ public class Option<T> {
     public Option<U> and_then<U>(Func<T, Option<U>> f) {
         return is_some() ? f(value) : Option<U>.None();
     }
-    
+
     /// <summary>
     /// Returns an option containing the contained value if the option is Some and the given predicate returns true, otherwise returns None.
     /// </summary>
@@ -198,7 +200,7 @@ public class Option<T> {
     public Option<T> filter(Func<T, bool> predicate) {
         return is_some() && predicate(value) ? this : None();
     }
-    
+
     /// <summary>
     /// Returns the other option if this option is None, otherwise returns this.
     /// </summary>
@@ -207,7 +209,7 @@ public class Option<T> {
     public Option<T> or(Option<T> other) {
         return is_some() ? this : other;
     }
-    
+
     /// <summary>
     /// Returns the result of the given function if this option is None, otherwise returns this.
     /// </summary>
@@ -216,7 +218,7 @@ public class Option<T> {
     public Option<T> or_else(Func<Option<T>> f) {
         return is_some() ? this : f();
     }
-    
+
     /// <summary>
     /// Returns None if this and the other option are both Some or both None, otherwise returns this.
     /// </summary>
@@ -261,7 +263,7 @@ public class Option<T> {
         hasValue = true;
         return this.value;
     }
-    
+
     /// <summary>
     /// Sets the value of this option to the result of the function if the option is None,
     /// then returns the value of the option.
@@ -296,7 +298,7 @@ public class Option<T> {
         hasValue = true;
         return old;
     }
-    
+
     /// <summary>
     /// Returns true if the option is Some and contains the given value.
     /// </summary>
@@ -306,7 +308,7 @@ public class Option<T> {
     public Option<U> contains<U>(U value) {
         return is_some() && this.value.Equals(value) ? Option<U>.Some(value) : Option<U>.None();
     }
-    
+
     /// <summary>
     /// Returns an option tuple containing both contained values if both are Some, otherwise None
     /// </summary>
@@ -316,7 +318,7 @@ public class Option<T> {
     public Option<(T, U)> zip<U>(Option<U> other) {
         return is_some() && other.is_some() ? Option<(T, U)>.Some((value, other.value)) : Option<(T, U)>.None();
     }
-    
+
     /// <summary>
     /// Returns an option containing a new type as the result of the given function if both options are Some, otherwise returns None.
     /// </summary>
@@ -328,7 +330,7 @@ public class Option<T> {
     public Option<R> zip_with<U, R>(Option<U> other, Func<T, U, R> f) {
         return is_some() && other.is_some() ? Option<R>.Some(f(value, other.value)) : Option<R>.None();
     }
-    
+
     /// <summary>
     /// Unzips an option tuple into a tuple of options.
     /// </summary>
@@ -336,9 +338,11 @@ public class Option<T> {
     /// <typeparam name="U"></typeparam>
     /// <returns></returns>
     public static (Option<T>, Option<U>) unzip<U>(Option<(T, U)> other) {
-        return other.is_some() ? (Option<T>.Some(other.value.Item1), Option<U>.Some(other.value.Item2)) : (None(), Option<U>.None());
+        return other.is_some()
+            ? (Option<T>.Some(other.value.Item1), Option<U>.Some(other.value.Item2))
+            : (None(), Option<U>.None());
     }
-    
+
     /// <summary>
     /// Flattens an option of an option into an option.
     /// </summary>
@@ -347,7 +351,7 @@ public class Option<T> {
     public static Option<T> flatten(Option<Option<T>> other) {
         return other.is_some() ? other.value : None();
     }
-    
+
     /// <summary>
     /// Match the option and return a value
     /// </summary>

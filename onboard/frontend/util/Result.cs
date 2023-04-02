@@ -1,19 +1,19 @@
 using System;
 using System.Threading.Tasks;
 
-namespace onboard.util; 
+namespace onboard.util;
 
 public class Result<T, E> {
     private T value { get; }
     private E error { get; }
     private bool _ok { get; }
-    
+
     private Result(T value) {
         this.value = value;
         this.error = default(E);
         this._ok = true;
     }
-    
+
     private Result(E error) {
         this.value = default(T);
         this.error = error;
@@ -27,7 +27,7 @@ public class Result<T, E> {
     public bool is_ok() {
         return this._ok;
     }
-    
+
     /// <summary>
     /// Returns true if the result is ok and matches the predicate, false otherwise.
     /// </summary>
@@ -44,7 +44,7 @@ public class Result<T, E> {
     public bool is_err() {
         return !this._ok;
     }
-    
+
     /// <summary>
     /// Returns true if the result is an error and matches the predicate, false otherwise.
     /// </summary>
@@ -61,7 +61,7 @@ public class Result<T, E> {
     public Option<T> ok() {
         return this.is_ok() ? Option<T>.Some(value) : Option<T>.None();
     }
-    
+
     /// <summary>
     /// Returns some E if the result is Err, otherwise returns None
     /// </summary>
@@ -91,7 +91,7 @@ public class Result<T, E> {
     public Result<U, F> map_or<U, F>(Func<E, F> def, Func<T, U> map) {
         return this.is_ok() ? new Result<U, F>(map(this.value)) : new Result<U, F>(def(this.error));
     }
-    
+
     /// <summary>
     /// Returns an object of Type U regardless of Ok or Err
     /// </summary>
@@ -102,7 +102,7 @@ public class Result<T, E> {
     public U map_or_else<U>(Func<E, U> def, Func<T, U> map) {
         return this.is_ok() ? map(this.value) : def(this.error);
     }
-    
+
     /// <summary>
     /// Returns a new result with Err Type F, leaving Ok values unchanged
     /// </summary>
@@ -112,7 +112,7 @@ public class Result<T, E> {
     public Result<T, F> map_err<F>(Func<E, F> map) {
         return this.is_ok() ? new Result<T, F>(this.value) : new Result<T, F>(map(this.error));
     }
-    
+
     /// <summary>
     /// Performs an action on an Ok result iff the Result is Ok
     /// </summary>
@@ -122,9 +122,10 @@ public class Result<T, E> {
         if (this.is_ok()) {
             inspect(this.value);
         }
+
         return this;
     }
-    
+
     /// <summary>
     /// Performs an action on an Err result iff the Result is Err
     /// </summary>
@@ -134,9 +135,10 @@ public class Result<T, E> {
         if (this.is_err()) {
             inspect(this.error);
         }
+
         return this;
     }
-    
+
     /// <summary>
     /// Returns the Ok value and throws an exception otherwise
     /// Differs from unwrap in that you can add an exception message
@@ -148,6 +150,7 @@ public class Result<T, E> {
         if (this.is_ok()) {
             return this.value;
         }
+
         throw new Exception(message);
     }
 
@@ -161,9 +164,10 @@ public class Result<T, E> {
         if (this.is_ok()) {
             return this.value;
         }
+
         throw new Exception("called Result.unwrap() on an error value");
     }
-    
+
     /// <summary>
     /// Returns the Ok value of the Result or the default value for the Result's type
     /// </summary>
@@ -171,7 +175,7 @@ public class Result<T, E> {
     public T unwrap_or_default() {
         return this.is_ok() ? this.value : default;
     }
-    
+
     /// <summary>
     /// Returns the Err value of the Result or throws an exception if the Result is Ok
     /// Differs from unwrap_err in that you can add an exception message
@@ -183,9 +187,10 @@ public class Result<T, E> {
         if (this.is_err()) {
             return this.error;
         }
+
         throw new Exception(message);
     }
-    
+
     /// <summary>
     /// Returns the Err value of the Result or throws an exception if the Result is Ok
     /// </summary>
@@ -195,9 +200,10 @@ public class Result<T, E> {
         if (this.is_err()) {
             return this.error;
         }
+
         throw new Exception("called Result.unwrap_err() on an ok value");
     }
-    
+
     /// <summary>
     /// Returns the other result if this is Ok, otherwise return this
     /// </summary>
@@ -207,7 +213,7 @@ public class Result<T, E> {
     public Result<U, E> and<U>(Result<U, E> res) {
         return this.is_ok() ? res : new Result<U, E>(this.error);
     }
-    
+
     /// <summary>
     /// Returns the output of the map function if this is Ok, otherwise return a new Result with this's Err
     /// </summary>
@@ -217,7 +223,7 @@ public class Result<T, E> {
     public Result<U, E> and_then<U>(Func<T, Result<U, E>> map) {
         return this.is_ok() ? map(this.value) : new Result<U, E>(this.error);
     }
-    
+
     /// <summary>
     /// Returns this result if it is Ok, otherwise return the other result
     /// </summary>
@@ -227,7 +233,7 @@ public class Result<T, E> {
     public Result<T, F> or<F>(Result<T, F> res) {
         return this.is_ok() ? new Result<T, F>(this.value) : res;
     }
-    
+
     /// <summary>
     /// Returns the output of the map function if this is Err, otherwise return this.
     /// </summary>
@@ -237,7 +243,7 @@ public class Result<T, E> {
     public Result<T, F> or_else<F>(Func<E, Result<T, F>> map) {
         return this.is_ok() ? new Result<T, F>(this.value) : map(this.error);
     }
-    
+
     /// <summary>
     /// Returns the result if this is Ok, otherwise return the default
     /// </summary>
@@ -246,7 +252,7 @@ public class Result<T, E> {
     public T unwrap_or(T def) {
         return this.is_ok() ? this.value : def;
     }
-    
+
     /// <summary>
     /// Returns the result if this is Ok, otherwise returns the output of the map
     /// </summary>
@@ -264,7 +270,7 @@ public class Result<T, E> {
     public T unwrap_unchecked() {
         return this.value;
     }
-    
+
     /// <summary>
     /// Returns the Err value whether or not it is valid, this causes undefined
     /// behavior if the Result is Ok
@@ -281,7 +287,7 @@ public class Result<T, E> {
     public Option<Result<T, E>> transpose() {
         return this.is_ok() ? Option<Result<T, E>>.Some(new Result<T, E>(this.value)) : Option<Result<T, E>>.None();
     }
-    
+
     /// <summary>
     /// Match the Result and return a value
     /// </summary>
@@ -292,7 +298,7 @@ public class Result<T, E> {
     public U match<U>(Func<T, U> if_ok, Func<E, U> if_err) {
         return this.is_ok() ? if_ok(this.value) : if_err(this.error);
     }
-    
+
     /// <summary>
     /// Match the Result and execute a function
     /// </summary>
@@ -303,7 +309,8 @@ public class Result<T, E> {
     public void match_void<U, V>(Func<T, U> if_ok, Func<E, V> if_err) {
         if (this.is_ok()) {
             if_ok(this.value);
-        } else {
+        }
+        else {
             if_err(this.error);
         }
     }
@@ -325,13 +332,15 @@ public class Result<T, E> {
     public static Result<T, E> Err(E err) {
         return new Result<T, E>(err);
     }
-    
+
     /// <summary>
     /// Awaits a task contained in a Result and returns a new Result with the awaited value
     /// </summary>
     /// <param name="res"></param>
     /// <returns></returns>
     public static Result<T, Exception> await(Result<Task<T>, Exception> res) {
-        return res.is_ok() && res.value.IsCompletedSuccessfully ? new Result<T, Exception>(res.value.Result) : new Result<T, Exception>(res.is_err() ? res.error : new Exception("Task did not complete successfully"));
+        return res.is_ok() && res.value.IsCompletedSuccessfully
+            ? new Result<T, Exception>(res.value.Result)
+            : new Result<T, Exception>(res.is_err() ? res.error : new Exception("Task did not complete successfully"));
     }
 }

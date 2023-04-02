@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace onboard.util; 
+namespace onboard.util;
 
 public class Response {
     // Deserialized response. Equivalent to the following Rust enum:
@@ -14,7 +14,7 @@ public class Response {
      *   Game(u32, DevcadeGame),
      * }
      */
-    
+
     // Trying to get C# to deserialize something that serde serialized is actual hell
     // This is probably the best I can do in this fucked up language
 
@@ -23,10 +23,10 @@ public class Response {
         Err,
         GameList,
         Game,
-        
+
         Unknown,
     }
-    
+
     private readonly Dictionary<string, object> data;
 
     public ResponseType type {
@@ -43,16 +43,17 @@ public class Response {
         get {
             switch (type) {
                 case ResponseType.Ok:
-                    return (uint)(long) data["Ok"];
+                    return (uint)(long)data["Ok"];
                 case ResponseType.Err:
                     object[]? a = JsonConvert.DeserializeObject<object[]>(JsonConvert.SerializeObject(data["Err"]));
-                    return (uint)(long) a[0];
+                    return (uint)(long)a[0];
                 case ResponseType.GameList:
-                    object[]? b = JsonConvert.DeserializeObject<object[]>(JsonConvert.SerializeObject(data["GameList"]));
-                    return (uint)(long) b[0];
+                    object[]? b =
+                        JsonConvert.DeserializeObject<object[]>(JsonConvert.SerializeObject(data["GameList"]));
+                    return (uint)(long)b[0];
                 case ResponseType.Game:
                     object[]? c = JsonConvert.DeserializeObject<object[]>(JsonConvert.SerializeObject(data["Game"]));
-                    return (uint)(long) c[0];
+                    return (uint)(long)c[0];
                 default:
                     return null;
             }
@@ -88,6 +89,7 @@ public class Response {
     }
 
     public static Response deserialize(string json) {
-        return new Response(JsonConvert.DeserializeObject<Dictionary<string, object>>(json) ?? new Dictionary<string, object>());
+        return new Response(JsonConvert.DeserializeObject<Dictionary<string, object>>(json) ??
+                            new Dictionary<string, object>());
     }
 }
