@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using log4net;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
@@ -22,25 +23,26 @@ public class Menu : IMenu {
     public List<devcade.DevcadeGame> gameTitles { get; set; }
     public int itemSelected { get; set; }
     private Dictionary<string, MenuCard> cards { get; } = new();
-    private int selected;
 
-    private int loadingCol = 0;
-    private int loadingRow = 0;
-    private float offset = 0;
+    private int loadingCol;
+    private int loadingRow;
+    private float offset;
 
     private int _sWidth;
     private int _sHeight;
-    private double scalingAmount = 0;
+    private double scalingAmount;
     
     private const float moveTime = 0.15f;
-    private float timeRemaining = 0f;
+    private float timeRemaining;
 
     private float descX;
-    private float descOpacity = 0f;
+    private float descOpacity;
     private const float descFadeTime = 0.4f;
 
-    public bool movingUp;
-    public bool movingDown;
+    private bool movingUp;
+    private bool movingDown;
+
+    private string devcadePath;
 
     public Menu(GraphicsDeviceManager _device) {
         instance = this;
@@ -52,13 +54,14 @@ public class Menu : IMenu {
         //     logger.Info("Running game");
         //     Container.runContainer(args);
         // };
+        devcadePath = Env.get("DEVCADE_PATH").unwrap_or("/tmp/devcade");
         updateDims(_device);
     }
     
     public void LoadContent(ContentManager contentManager) {
         // Setup banner finished callback
-        Client.onBannerFinished += (_, game) => {
-            Devcade.instance.loadTextureFromFile($"/tmp/devcade/{game.id}/banner.png").ContinueWith(t => {
+        Client.onBannerFinished += (_, game) => {   
+            Devcade.instance.loadTextureFromFile($"{devcadePath}/{game.id}/banner.png").ContinueWith(t => {
                 if (t.IsCompletedSuccessfully && t.Result.is_ok() && cards.ContainsKey(game.id)) {
                     cards[game.name].setTexture(t.Result.unwrap());
                     return;
@@ -78,15 +81,15 @@ public class Menu : IMenu {
     }
     
     public void Update(GameTime gameTime) {
-        // TODO
+        // Comment to make the linter happy
     }
     
     public void Draw(SpriteBatch spriteBatch, GameTime gameTime) {
-        // TODO
+        // Comment to make the linter happy
     }
     
     public void Unload() {
-        // TODO
+        // Comment to make the linter happy
     }
     
     public void updateDims(GraphicsDeviceManager _graphics)
@@ -95,7 +98,7 @@ public class Menu : IMenu {
             _sWidth = Env.get("VIEW_WIDTH").map_or_else(() => 1920, int.Parse);
             _sHeight = Env.get("VIEW_HEIGHT").map_or_else(() => 1080, int.Parse);
 
-            scalingAmount = Math.Sqrt((_sHeight * _sWidth) / (double)(1920 * 1080)); // This is a constant value that is used to scale the UI elements
+            scalingAmount = Math.Sqrt(_sHeight * _sWidth / (double)(1920 * 1080)); // This is a constant value that is used to scale the UI elements
 
             _graphics.PreferredBackBufferHeight = _sHeight;
             _graphics.PreferredBackBufferWidth = _sWidth;
@@ -105,16 +108,9 @@ public class Menu : IMenu {
         // Empties the gameTitles and cards lists. Called when the reload buttons are pressed
         public void clearGames()
         {
-            try
-            {
-                gameTitles.Clear();
-                cards.Clear();
-                itemSelected = 0;
-            }
-            catch (NullReferenceException e)
-            {
-                Console.WriteLine($"No game titles or cards yet. {e}");
-            }
+            gameTitles?.Clear();
+            cards?.Clear();
+            itemSelected = 0;
         }
 
         public bool reloadGames(GraphicsDevice device, bool clear = true)
@@ -129,7 +125,7 @@ public class Menu : IMenu {
             }
             catch (AggregateException e)
             {
-                Console.WriteLine($"Failed to fetch games: {e}");
+                logger.Error($"Failed to fetch game list: {e}");
                 return false;
             }
             return true;
@@ -149,18 +145,18 @@ public class Menu : IMenu {
                     try
                     {
                         Texture2D banner = Texture2D.FromStream(graphics, File.OpenRead(bannerPath));
-                        cards.Add(game.id, new MenuCard(i * -1, game.name, banner));
+                        cards.Add(game.id, new MenuCard(i * -1, banner));
                     }
-                    catch (System.InvalidOperationException e)
+                    catch (InvalidOperationException e)
                     {
                         logger.Warn($"Unable to set card.{e}");
-                        cards.Add(game.id, new MenuCard(i * -1, game.name, null));
+                        cards.Add(game.id, new MenuCard(i * -1, null));
                     }
                 }
                 else
                 {
                     // If the banner doesn't exist, use a placeholder until it can be downloaded later.
-                    cards.Add(game.id, new MenuCard(i * -1, game.name, null));
+                    cards.Add(game.id, new MenuCard(i * -1, null));
                 }
 
             }
@@ -193,14 +189,14 @@ public class Menu : IMenu {
             // Added to the X and Y values will be it's offset, which is calculated by 150 * time elapsed. Making it move 150 px in one second
             // Once offset reaches 150, it goes back to zero. 
 
-            offset += (150 * (float)gameTime.ElapsedGameTime.TotalSeconds) / 2; // Divided by two to make the animation a little slower
+            offset += 150 * (float)gameTime.ElapsedGameTime.TotalSeconds / 2; // Divided by two to make the animation a little slower
             if (offset > 150)
             {
                 offset = 0;
             }
 
-            int numColumns = (_sWidth / 150) + 1;
-            int numRows = (_sHeight / 150) + 1;
+            int numColumns = _sWidth / 150 + 1;
+            int numRows = _sHeight / 150 + 1;
 
             for (int row = -150; row <= numRows * 150; row += 150) // Starts at -150 to draw an extra row above the screen
             {
@@ -224,7 +220,9 @@ public class Menu : IMenu {
 
         public void drawTitle(SpriteBatch _spriteBatch, Texture2D titleTexture, float col)
         {
-            float scaling = (float)_sWidth / titleTexture.Width; // The title will always be scaled to fit the width of the screen. The height follows scaling based on how much the title was stretched horizontally
+            // The title will always be scaled to fit the width of the screen. The height follows scaling based on how
+            // much the title was stretched horizontally
+            float scaling = (float)_sWidth / titleTexture.Width;
             _spriteBatch.Draw(
                 titleTexture,
                 new Rectangle(0, 0, _sWidth, (int)(titleTexture.Height * scaling)),
@@ -248,7 +246,7 @@ public class Menu : IMenu {
                 writeString(_spriteBatch,
                     font,
                     line,
-                    new Vector2(_sWidth / 2.0f, (int)(500 * scalingAmount) + (instructSize * lineNum)), // 500 is the height of the title, this string goes right beneath that
+                    new Vector2(_sWidth / 2.0f, (int)(500 * scalingAmount) + instructSize * lineNum), // 500 is the height of the title, this string goes right beneath that
                     1f
                 );
                 lineNum++;
@@ -258,8 +256,8 @@ public class Menu : IMenu {
 
         public void drawError(SpriteBatch _spriteBatch, SpriteFont font)
         {
-            string error = "Error: Could not get game list. Is API Down? Press both black buttons to reload.";
-            List<string> instructions = wrapText(error, 25);
+        const string error = "Error: Could not get game list. Is API Down? Press both black buttons to reload.";
+        var instructions = wrapText(error, 25);
             float instructSize = font.MeasureString(error).Y;
             int lineNum = 0;
 
@@ -268,7 +266,7 @@ public class Menu : IMenu {
                 writeString(_spriteBatch,
                     font,
                     line,
-                    new Vector2(_sWidth / 2.0f, (int)(500 * scalingAmount) + (instructSize * lineNum)), // 500 is the height of the title, this string goes right beneath that
+                    new Vector2(_sWidth / 2.0f, (int)(500 * scalingAmount) + instructSize * lineNum), // 500 is the height of the title, this string goes right beneath that
                     1f,
                     Color.Red
                 );
@@ -315,38 +313,38 @@ public class Menu : IMenu {
         public void descFadeIn(GameTime gameTime)
         {
             // This does the slide in animation, starting off screen and moving to the middle over 0.8 seconds
-            if (!(descOpacity < 1)) return;
-            descX -= (_sWidth) / descFadeTime * (float)gameTime.ElapsedGameTime.TotalSeconds;
-            descOpacity += (1 / descFadeTime) * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            if (descOpacity >= 1) return;
+            descX -= _sWidth / descFadeTime * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            descOpacity += 1 / descFadeTime * (float)gameTime.ElapsedGameTime.TotalSeconds;
         }
 
         public void descFadeOut(GameTime gameTime)
         {
             // This does the slide out animation, starting in the middle of the screen and moving it off over 0.8 seconds
-            if (!(descOpacity > 0)) return;
-            descX += (_sWidth) / descFadeTime * (float)gameTime.ElapsedGameTime.TotalSeconds;
-            descOpacity -= (1 / descFadeTime) * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            if (descOpacity <= 0) return;
+            descX += _sWidth / descFadeTime * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            descOpacity -= 1 / descFadeTime * (float)gameTime.ElapsedGameTime.TotalSeconds;
         }
 
         public void cardFadeIn(GameTime gameTime)
         {
-            if (!(MenuCard.cardOpacity < 1)) return;
-            MenuCard.cardX += (_sWidth) / descFadeTime * (float)gameTime.ElapsedGameTime.TotalSeconds;
-            MenuCard.cardOpacity += (1 / descFadeTime) * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            if (MenuCard.cardOpacity >= 1) return;
+            MenuCard.cardX += _sWidth / descFadeTime * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            MenuCard.cardOpacity += 1 / descFadeTime * (float)gameTime.ElapsedGameTime.TotalSeconds;
         }
 
         public void cardFadeOut(GameTime gameTime)
         {
-            if (!(MenuCard.cardOpacity > 0)) return;
-            MenuCard.cardX -= (_sWidth) / descFadeTime * (float)gameTime.ElapsedGameTime.TotalSeconds;
-            MenuCard.cardOpacity -= (1 / descFadeTime) * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            if (MenuCard.cardOpacity <= 0) return;
+            MenuCard.cardX -= _sWidth / descFadeTime * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            MenuCard.cardOpacity -= 1 / descFadeTime * (float)gameTime.ElapsedGameTime.TotalSeconds;
         }
 
         public void drawDescription(SpriteBatch _spriteBatch, Texture2D descTexture, SpriteFont titleFont, SpriteFont descFont)
         {
             // First, draw the backdrop of the description
             // I'm not sure why I added descTexture.Height/6 to the position. It is to make the image draw slightly below the center of the screen, but there is probably a better way to do this?
-            Vector2 descPos = new Vector2(descX, _sHeight / 2 + (int)((descTexture.Height * scalingAmount) / 6));
+            Vector2 descPos = new Vector2(descX, _sHeight / 2 + (int)(descTexture.Height * scalingAmount / 6));
 
             _spriteBatch.Draw(descTexture,
                 descPos,
@@ -370,7 +368,7 @@ public class Menu : IMenu {
                 writeString(_spriteBatch,
                 descFont,
                 line,
-                new Vector2(descPos.X, (float)(descPos.Y - (descTexture.Height * scalingAmount) / 5 +
+                new Vector2(descPos.X, (float)(descPos.Y - descTexture.Height * scalingAmount / 5 +
                                                 descHeight * lineNum)),
                 descOpacity
                 );
@@ -381,7 +379,7 @@ public class Menu : IMenu {
             writeString(_spriteBatch,
                 titleFont,
                 gameSelected().name,
-                new Vector2(descPos.X, descPos.Y - (int)((descTexture.Height * scalingAmount) / 2.5f)),
+                new Vector2(descPos.X, descPos.Y - (int)(descTexture.Height * scalingAmount / 2.5f)),
                 descOpacity
             );
 
@@ -389,7 +387,7 @@ public class Menu : IMenu {
             writeString(_spriteBatch,
                 descFont,
                 "By: " + gameSelected().author,
-                new Vector2(descPos.X, descPos.Y - (int)((descTexture.Height * scalingAmount) / 3)),
+                new Vector2(descPos.X, descPos.Y - (int)(descTexture.Height * scalingAmount / 3)),
                 descOpacity
             );
 
@@ -397,7 +395,7 @@ public class Menu : IMenu {
             writeString(_spriteBatch,
                 descFont,
                 "Press the Blue button to return",
-                new Vector2(descPos.X, descPos.Y + (int)((descTexture.Height * scalingAmount) / 2 - descHeight)),
+                new Vector2(descPos.X, descPos.Y + (int)(descTexture.Height * scalingAmount / 2 - descHeight)),
                 descOpacity
             );
 
@@ -410,12 +408,17 @@ public class Menu : IMenu {
             List<string> lines = new() { ' '.ToString() }; // Create a list to return 
 
             int currentLine = 0;
+            StringBuilder currentLineStr = new();
             foreach (string word in words)
             {
                 // For each word in the description, we add it to a line. 
-                lines[currentLine] += word + ' ';
+                currentLineStr.Append(word + ' ');
                 // Once that line is over the limit of  characters, we move to the next line
-                if (lines[currentLine].Length <= lineLimit) continue;
+                if (currentLineStr.Length <= lineLimit) {
+                    lines[currentLine] = currentLineStr.ToString();
+                    currentLineStr = new();
+                    continue;
+                }
                 currentLine++;
                 lines.Add(' '.ToString());
             }

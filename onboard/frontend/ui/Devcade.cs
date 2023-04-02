@@ -8,14 +8,13 @@ using Microsoft.Xna.Framework.Input;
 using onboard.devcade;
 using onboard.util;
 
-namespace onboard.ui; 
+namespace onboard.ui;
 
 public class Devcade : Game {
-
     private static ILog logger = LogManager.GetLogger("onboard.ui.Devcade");
-    
+
     public static Devcade instance { get; set; }
-    
+
     private readonly GraphicsDeviceManager graphics;
     private SpriteBatch spriteBatch;
 
@@ -23,7 +22,7 @@ public class Devcade : Game {
 
     private SpriteFont _devcadeMenuBig;
     private SpriteFont _devcadeMenuTitle;
-    
+
     private bool _loading;
 
     private MenuState state = MenuState.Launch;
@@ -31,8 +30,7 @@ public class Devcade : Game {
 
     private KeyboardState lastState;
 
-    private enum MenuState
-    {
+    private enum MenuState {
         Launch,
         Loading,
         Input,
@@ -50,42 +48,44 @@ public class Devcade : Game {
 
     // If we can't fetch the game list (like if the API is down)
     private bool _cantFetch;
-    
+
     public Devcade() {
         this.graphics = new GraphicsDeviceManager(this);
     }
-    
+
     protected override void Initialize() {
         var sWidth = Env.get("VIEW_WIDTH");
         var sHeight = Env.get("VIEW_HEIGHT");
         if (sWidth.is_none()) {
             logger.Warn("VIEW_WIDTH not set. Using default 1080");
         }
+
         if (sHeight.is_none()) {
             logger.Warn("VIEW_HEIGHT not set. Using default 2560");
         }
+
         int width = sWidth.map_or(1080, int.Parse);
         int height = sHeight.map_or(2560, int.Parse);
-        
+
         this.menu = new Menu(this.graphics);
-        
+
         graphics.PreferredBackBufferWidth = width;
         graphics.PreferredBackBufferHeight = height;
         graphics.ApplyChanges();
-        
+
         menu.Initialize();
 
         instance = this;
 
         base.Initialize();
     }
-    
+
     protected override void LoadContent() {
         Content.RootDirectory = "Content";
         menu.LoadContent(Content);
-        
+
         this.spriteBatch = new SpriteBatch(this.graphics.GraphicsDevice);
-        
+
         _devcadeMenuBig = Content.Load<SpriteFont>("devcade-menu-big");
         _devcadeMenuTitle = Content.Load<SpriteFont>("devcade-menu-title");
 
@@ -103,194 +103,183 @@ public class Devcade : Game {
 
         // TODO: use this.Content to load your game content here
 
-        if (!menu.reloadGames(GraphicsDevice, false))
-        {
+        if (!menu.reloadGames(GraphicsDevice, false)) {
             state = MenuState.Loading;
             _cantFetch = true;
         }
+
         base.LoadContent();
     }
-    
+
     protected override void Update(GameTime gameTime) {
         menu.Update(gameTime);
-            // Update inputs
-            KeyboardState myState = Keyboard.GetState();
-            Input.Update(); // Controller update
+        // Update inputs
+        KeyboardState myState = Keyboard.GetState();
+        Input.Update(); // Controller update
 
-            // Keyboard only to exit menu as it should never exit in prod
-            if (Keyboard.GetState().IsKeyDown(Keys.Tab))
-            {
-                Exit();
-            }
+        // Keyboard only to exit menu as it should never exit in prod
+        if (Keyboard.GetState().IsKeyDown(Keys.Tab)) {
+            Exit();
+        }
 
-            // If the state is loading, it is still taking input as though it is in the input state..?
-            switch (state)
-            {
-                // Fade in when the app launches
-                case MenuState.Launch:
-                    if (fadeColor < 1f)
-                    {
-                        fadeColor += (float)(gameTime.ElapsedGameTime.TotalSeconds);
-                    }
-                    else
-                    {
-                        // Once the animation completes, begin tracking input
-                        state = MenuState.Input;
-                    }
+        // If the state is loading, it is still taking input as though it is in the input state..?
+        switch (state) {
+            // Fade in when the app launches
+            case MenuState.Launch:
+                if (fadeColor < 1f) {
+                    fadeColor += (float)(gameTime.ElapsedGameTime.TotalSeconds);
+                }
+                else {
+                    // Once the animation completes, begin tracking input
+                    state = MenuState.Input;
+                }
 
-                    break;
+                break;
 
-                case MenuState.Loading:
+            case MenuState.Loading:
 
-                    if (_cantFetch)
-                    {
-                        if (myState.IsKeyDown(Keys.Space) || (Input.GetButton(1, Input.ArcadeButtons.Menu) && Input.GetButton(2, Input.ArcadeButtons.Menu)))
-                        {
-                            try
-                            {
-                                menu.clearGames();
-                                menu.gameTitles = Client.getGameList().Result.game_list;
-                                menu.setCards(GraphicsDevice);
-                                _cantFetch = false;
-                                state = MenuState.Input;
-                            }
-                            catch (System.AggregateException e)
-                            {
-                                Console.WriteLine($"Failed to fetch games: {e}");
-                                state = MenuState.Loading;
-                                _cantFetch = true;
-                            }
-
-                        }
-                    }
-
-                    // TODO - Fix this to work with new client
-                    // if (_client.DownloadFailed)
-                    // {
-                    //     _loading = false;
-                    //     _client.DownloadFailed = false;
-                    // }
-
-                    if (fadeColor < 1f)
-                    {
-                        fadeColor += (float)(gameTime.ElapsedGameTime.TotalSeconds);
-                    }
-
-                    if (!_loading)
-                    {
-                        fadeColor = 0f;
-                        state = MenuState.Launch;
-                    }
-                    break;
-
-                // In this state, the user is able to scroll through the menu and launch games
-                case MenuState.Input:
-                    menu.descFadeOut(gameTime);
-                    menu.cardFadeIn(gameTime);
-
-                    if (myState.IsKeyDown(Keys.Space) || (Input.GetButton(1, Input.ArcadeButtons.Menu) && Input.GetButton(2, Input.ArcadeButtons.Menu)))
-                    {
-                        if (!menu.reloadGames(GraphicsDevice))
-                        {
-                            state = MenuState.Loading;
-                            _cantFetch = true;
-                        }
-                    }
-
-
-                    if (myState.IsKeyDown(Keys.Z) || (Input.GetButton(1, Input.ArcadeButtons.B4) && Input.GetButton(2, Input.ArcadeButtons.B4)))
-                    {
-                        // Switch to dev/prod
-                        Client.setProduction(!Client.isProduction).Wait();
-
-                        // And reload
-                        if (!menu.reloadGames(GraphicsDevice))
-                        {
-                            state = MenuState.Loading;
-                            _cantFetch = true;
-                        }
-                    }
-
-                    if (((myState.IsKeyDown(Keys.Down)) ||                                   // Keyboard down
-                        Input.GetButton(1, Input.ArcadeButtons.StickDown) ||             // or joystick down
-                        Input.GetButton(2, Input.ArcadeButtons.StickDown)))              // of either player
-                    {
-                        menu.beginAnimUp();
-                    }
-
-                    if (((myState.IsKeyDown(Keys.Up)) ||                                      // Keyboard up
-                        Input.GetButton(1, Input.ArcadeButtons.StickUp) ||                // or joystick up
-                        Input.GetButton(2, Input.ArcadeButtons.StickUp)))                 // of either player																			 // and not at top of list
-                    {
-                        menu.beginAnimDown();
-                    }
-
-                    if ((myState.IsKeyDown(Keys.Enter) && lastState.IsKeyUp(Keys.Enter)) || // Keyboard Enter
-                        Input.GetButtonDown(1, Input.ArcadeButtons.A1) ||                   // or A1 button
-                        Input.GetButtonDown(2, Input.ArcadeButtons.A1))                     // of either player
-                    {
-                        state = MenuState.Descritpion;
-                    }
-
-                    if ((myState.IsKeyDown(Keys.R) && lastState.IsKeyUp(Keys.R)) ||                                       // Keyboard R
-                        (Input.GetButton(1, Input.ArcadeButtons.Menu) && Input.GetButton(2, Input.ArcadeButtons.Menu) &&  // OR Both Menu Buttons
-                        Input.GetButton(1, Input.ArcadeButtons.B4)))                                                      // and Player 1 B4
-                    {
+                if (_cantFetch && (myState.IsKeyDown(Keys.Space) || (Input.GetButton(1, Input.ArcadeButtons.Menu) &&
+                                                                     Input.GetButton(2, Input.ArcadeButtons.Menu)))) {
+                    try {
                         menu.clearGames();
                         menu.gameTitles = Client.getGameList().Result.game_list;
                         menu.setCards(GraphicsDevice);
-
+                        _cantFetch = false;
                         state = MenuState.Input;
                     }
-
-                    menu.animate(gameTime);
-                    break;
-
-                case MenuState.Descritpion:
-                    menu.descFadeIn(gameTime);
-                    menu.cardFadeOut(gameTime);
-
-                    if ((myState.IsKeyDown(Keys.Enter) && lastState.IsKeyUp(Keys.Enter)) || // Keyboard Enter
-                        Input.GetButtonDown(1, Input.ArcadeButtons.A1) ||                   // or A1 button
-                        Input.GetButtonDown(2, Input.ArcadeButtons.A1))                     // of either player
-                    {
-                        logger.Info("Launching game: " + menu.gameSelected().id + " - " + menu.gameSelected().name);
-                        Client.launchGame(
-                            menu.gameSelected().id
-                        ).ContinueWith(res => {
-                            if (res.IsCompletedSuccessfully) {
-                                state = MenuState.Input;
-                            } else {
-                                logger.Error("Failed to launch game: " + res.Exception);
-                                state = MenuState.Input;
-                            }
-                        });
-
-                        fadeColor = 0f;
-                        _loading = true;
+                    catch (AggregateException e) {
+                        logger.Error($"Failed to fetch games: {e}");
                         state = MenuState.Loading;
+                        _cantFetch = true;
                     }
-                    else if ((myState.IsKeyDown(Keys.RightShift) && lastState.IsKeyUp(Keys.RightShift)) || // Keyboard Rshift
-                        Input.GetButtonDown(1, Input.ArcadeButtons.A2) ||                                    // or A2 button
-                        Input.GetButtonDown(2, Input.ArcadeButtons.A2))                                      // of either player
-                    {
-                        state = MenuState.Input;
+                }
+
+                // TODO - Fix this to work with new client
+                // if (_client.DownloadFailed)
+                // {
+                //     _loading = false;
+                //     _client.DownloadFailed = false;
+                // }
+
+                if (fadeColor < 1f) {
+                    fadeColor += (float)(gameTime.ElapsedGameTime.TotalSeconds);
+                }
+
+                if (!_loading) {
+                    fadeColor = 0f;
+                    state = MenuState.Launch;
+                }
+
+                break;
+
+            // In this state, the user is able to scroll through the menu and launch games
+            case MenuState.Input:
+                menu.descFadeOut(gameTime);
+                menu.cardFadeIn(gameTime);
+
+                if ((myState.IsKeyDown(Keys.Space) || (Input.GetButton(1, Input.ArcadeButtons.Menu) &&
+                                                       Input.GetButton(2, Input.ArcadeButtons.Menu))) &&
+                    !menu.reloadGames(GraphicsDevice)) {
+                    state = MenuState.Loading;
+                    _cantFetch = true;
+                }
+
+
+                if (myState.IsKeyDown(Keys.Z) || (Input.GetButton(1, Input.ArcadeButtons.B4) &&
+                                                  Input.GetButton(2, Input.ArcadeButtons.B4))) {
+                    // Switch to dev/prod
+                    Client.setProduction(!Client.isProduction).Wait();
+
+                    // And reload
+                    if (!menu.reloadGames(GraphicsDevice)) {
+                        state = MenuState.Loading;
+                        _cantFetch = true;
                     }
+                }
 
-                    break;
-            }
+                if (((myState.IsKeyDown(Keys.Down)) || // Keyboard down
+                     Input.GetButton(1, Input.ArcadeButtons.StickDown) || // or joystick down
+                     Input.GetButton(2, Input.ArcadeButtons.StickDown))) // of either player
+                {
+                    menu.beginAnimUp();
+                }
 
-            lastState = Keyboard.GetState();
-        
+                if (((myState.IsKeyDown(Keys.Up)) || // Keyboard up
+                     Input.GetButton(1, Input.ArcadeButtons.StickUp) || // or joystick up
+                     Input.GetButton(2,
+                         Input.ArcadeButtons.StickUp))) // of either player																			 // and not at top of list
+                {
+                    menu.beginAnimDown();
+                }
+
+                if ((myState.IsKeyDown(Keys.Enter) && lastState.IsKeyUp(Keys.Enter)) || // Keyboard Enter
+                    Input.GetButtonDown(1, Input.ArcadeButtons.A1) || // or A1 button
+                    Input.GetButtonDown(2, Input.ArcadeButtons.A1)) // of either player
+                {
+                    state = MenuState.Descritpion;
+                }
+
+                if ((myState.IsKeyDown(Keys.R) && lastState.IsKeyUp(Keys.R)) || // Keyboard R
+                    (Input.GetButton(1, Input.ArcadeButtons.Menu) &&
+                     Input.GetButton(2, Input.ArcadeButtons.Menu) && // OR Both Menu Buttons
+                     Input.GetButton(1, Input.ArcadeButtons.B4))) // and Player 1 B4
+                {
+                    menu.clearGames();
+                    menu.gameTitles = Client.getGameList().Result.game_list;
+                    menu.setCards(GraphicsDevice);
+
+                    state = MenuState.Input;
+                }
+
+                menu.animate(gameTime);
+                break;
+
+            case MenuState.Descritpion:
+                menu.descFadeIn(gameTime);
+                menu.cardFadeOut(gameTime);
+
+                if ((myState.IsKeyDown(Keys.Enter) && lastState.IsKeyUp(Keys.Enter)) || // Keyboard Enter
+                    Input.GetButtonDown(1, Input.ArcadeButtons.A1) || // or A1 button
+                    Input.GetButtonDown(2, Input.ArcadeButtons.A1)) // of either player
+                {
+                    logger.Info("Launching game: " + menu.gameSelected().id + " - " + menu.gameSelected().name);
+                    Client.launchGame(
+                        menu.gameSelected().id
+                    ).ContinueWith(res => {
+                        if (res.IsCompletedSuccessfully) {
+                            state = MenuState.Input;
+                        }
+                        else {
+                            logger.Error("Failed to launch game: " + res.Exception);
+                            state = MenuState.Input;
+                        }
+                    });
+
+                    fadeColor = 0f;
+                    _loading = true;
+                    state = MenuState.Loading;
+                }
+                else if ((myState.IsKeyDown(Keys.RightShift) &&
+                          lastState.IsKeyUp(Keys.RightShift)) || // Keyboard Rshift
+                         Input.GetButtonDown(1, Input.ArcadeButtons.A2) || // or A2 button
+                         Input.GetButtonDown(2, Input.ArcadeButtons.A2)) // of either player
+                {
+                    state = MenuState.Input;
+                }
+
+                break;
+        }
+
+        lastState = Keyboard.GetState();
+
         base.Update(gameTime);
     }
-    
+
     protected override void Draw(GameTime gameTime) {
         this.spriteBatch.Begin();
         GraphicsDevice.Clear(Color.Black);
 
-        switch (state)
-        {
+        switch (state) {
             case MenuState.Launch:
             case MenuState.Input:
             case MenuState.Descritpion:
@@ -328,8 +317,10 @@ public class Devcade : Game {
 
     public Task<Result<Texture2D, Exception>> loadTextureFromFile(string path) {
         if (!System.IO.File.Exists(path)) {
-            return Task.FromResult(Result<Texture2D, Exception>.Err(new System.IO.FileNotFoundException("File not found", path)));
+            return Task.FromResult(
+                Result<Texture2D, Exception>.Err(new System.IO.FileNotFoundException("File not found", path)));
         }
+
         return Task.Run(() => {
             try {
                 Texture2D tex = Texture2D.FromFile(this.graphics.GraphicsDevice, path);

@@ -1,20 +1,19 @@
 using System;
 
-namespace onboard.devcade; 
+namespace onboard.devcade;
 
-public class DevcadeGame
-{
-    public string id { get; set; }
-    public string author { get; set; }
-    public DateTime uploadDate { get; set; }
-    public string name { get; set; }
-    public string hash { get; set; }
-    public string description { get; set; }
-    public string iconLink { get; set; }
-    public string bannerLink { get; set; }
-    
-    public DevcadeGame(string id, string author, DateTime uploadDate, string name, string hash, string description, string iconLink, string bannerLink)
-    {
+public class DevcadeGame {
+    public string id { get; }
+    public string author { get; }
+    public DateTime uploadDate { get; }
+    public string name { get; }
+    public string hash { get; }
+    public string description { get; }
+    public string iconLink { get; }
+    public string bannerLink { get; }
+
+    public DevcadeGame(string id, string author, DateTime uploadDate, string name, string hash, string description,
+        string iconLink, string bannerLink) {
         this.id = id;
         this.author = author;
         this.uploadDate = uploadDate;
@@ -35,9 +34,8 @@ public class DevcadeGame
         this.iconLink = "";
         this.bannerLink = "";
     }
-    
-    public DevcadeGame()
-    {
+
+    public DevcadeGame() {
         this.id = "";
         this.author = "";
         this.uploadDate = DateTime.Now;
