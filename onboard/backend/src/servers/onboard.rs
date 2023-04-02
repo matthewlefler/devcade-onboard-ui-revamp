@@ -1,3 +1,5 @@
+use std::process::ExitStatus;
+use std::thread::JoinHandle;
 use log::{log, Level};
 use tokio::io::AsyncWriteExt;
 use crate::{open_read_pipe, open_write_pipe};
@@ -52,30 +54,21 @@ pub async fn onboard_main(command_pipe: &str, response_pipe: &str) -> ! {
 
     log!(Level::Debug, "Opened response pipe at {}", response_pipe_path);
 
+    let mut game_handle: Option<(u32, JoinHandle<ExitStatus>)> = None;
+
     // Main command handling loop
     loop {
-        log!(Level::Trace, "Waiting for command");
-
-        match command_pipe.readable().await {
-            Ok(_) => {},
-            Err(e) => {
-                log!(Level::Error, "Error waiting for command pipe to be readable: {}", e);
-                continue; // TODO: Should we panic here? Or do some kind of recovery?
-            }
-        }
-
         let mut buffer = [0; 4096];
         match command_pipe.try_read(&mut buffer) {
             Ok(_) => {
-                log!(Level::Trace, "Read from command pipe: {}", String::from_utf8_lossy(&buffer));
+                log!(Level::Trace, "Read from command pipe: {}", String::from_utf8_lossy(&buffer).trim());
             }
             Err(e) => {
                 match e.kind() {
                     std::io::ErrorKind::WouldBlock => {
-                        // For some reason, the pipe is readable but we can't read from it.
-                        // This happens after every loop exactly once, so we just ignore it.
-                        log!(Level::Trace, "Command pipe not readable");
-                        continue;
+                        // This happens when the pipe is empty, no handling needed
+                        // allow the loop to continue with buffer as an empty slice
+                        // TODO: Check if allowing this without pipe.readable() will cause a read while the pipe is being written to
                     }
                     _ => {
                         log!(Level::Error, "Error reading from command pipe: {}", e);
@@ -85,10 +78,31 @@ pub async fn onboard_main(command_pipe: &str, response_pipe: &str) -> ! {
             }
         }
 
-        let buffer = String::from_utf8_lossy(&buffer);
+        let mut buffer = String::from_utf8_lossy(&buffer).to_string();
+        buffer = buffer.trim().to_string();
+        buffer = buffer.trim_end_matches('\0').to_string(); // Rust doesn't treat NUL as whitespace or end of string
+
+        if let Some((id, handle)) = game_handle.take() {
+            if handle.is_finished() {
+                log!(Level::Info, "Game with Request ID {} has finished", id);
+                let response = Response::Ok(id);
+                let mut response = serde_json::to_string(&response).unwrap();
+                log!(Level::Trace, "Writing response to pipe: {}", response);
+                response.push('\n');
+                match response_pipe.write_all(response.as_bytes()).await {
+                    Ok(_) => {},
+                    Err(e) => {
+                        log!(Level::Error, "Error writing to response pipe: {}", e);
+                    }
+                }
+            } else {
+                // Game is still running, put it back in the option
+                let _ = game_handle.insert((id, handle));
+            }
+        }
 
         if buffer.is_empty() {
-            tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+            tokio::time::sleep(tokio::time::Duration::from_millis(200)).await;
             continue;
         }
 
@@ -103,7 +117,7 @@ pub async fn onboard_main(command_pipe: &str, response_pipe: &str) -> ! {
             .collect::<Vec<Request>>();
 
         if commands.is_empty() {
-            log!(Level::Warn, "Read from command pipe, but no valid commands were found");
+            log!(Level::Warn, "Read from command pipe, but no valid commands were found (read {})", buffer);
             continue;
         }
 
@@ -120,8 +134,17 @@ pub async fn onboard_main(command_pipe: &str, response_pipe: &str) -> ! {
                 }
                 _ => {}
             }
-            let response = serde_json::to_string(&response).unwrap();
+            let response = match response {
+                Response::InternalGame(id, handle) => {
+                    let _ = game_handle.insert((id, handle));
+                    continue;
+                }
+                _ => response
+            };
+
+            let mut response = serde_json::to_string(&response).unwrap();
             log!(Level::Trace, "Writing response to pipe: {}", response);
+            response.push('\n');
             match response_pipe.write_all(response.as_bytes()).await {
                 Ok(_) => {},
                 Err(e) => {

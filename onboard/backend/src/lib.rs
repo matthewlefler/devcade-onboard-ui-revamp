@@ -1,3 +1,5 @@
+#![feature(is_some_and)]
+
 use anyhow::{anyhow, Error};
 use log::{log, Level};
 use serde::{Deserialize, Serialize};
@@ -23,9 +25,11 @@ pub mod command;
  * default values.
  */
 pub mod env {
-    // TODO Cache env vars?
+    // TODO Cache env vars? Probably not necessary
     use std::env;
     use log::{Level, log};
+
+    static mut PRODUCTION: bool = true;
 
     /**
      * Get the path to the devcade directory. This is where games are installed.
@@ -49,14 +53,34 @@ pub mod env {
      * If the value is not set in the environment, it will throw a fatal error and panic.
      */
     pub fn api_url() -> String {
-        let url = env::var("DEVCADE_API_DOMAIN");
+        let url = if unsafe { PRODUCTION } {
+            env::var("DEVCADE_API_DOMAIN")
+        } else {
+            env::var("DEVCADE_DEV_API_DOMAIN")
+        };
 
         match url {
             Ok(url) => format!("https://{}", url),
             Err(e) => {
-                log!(Level::Error, "Error getting DEVCADE_API_DOMAIN: {}", e);
+                if unsafe { PRODUCTION } {
+                    log!(Level::Error, "Error getting DEVCADE_API_DOMAIN: {}", e);
+                } else {
+                    log!(Level::Error, "Error getting DEVCADE_DEV_API_DOMAIN: {}", e);
+                }
                 panic!();
             }
+        }
+    }
+
+    /**
+     * Sets whether the API will interact with the production or development API.
+     */
+    // This is thread safe because this is the only place that PRODUCTION can be modified
+    // so there is no way for a race condition to occur.
+    pub fn set_production(prod: bool) {
+        log!(Level::Info, "Setting production to {}", prod);
+        unsafe {
+            PRODUCTION = prod;
         }
     }
 }
@@ -86,7 +110,7 @@ impl Default for DevcadeGame {
             id: String::from(""),
             name: String::from(""),
             // default upload date is unix epoch
-            upload_date: String::from("1970-01-01T00:00:00Z"),
+            upload_date: String::from("1970-01-01"),
         }
     }
 }

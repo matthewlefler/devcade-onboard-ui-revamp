@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
+use std::process::ExitStatus;
 use anyhow::Error;
+use std::thread::JoinHandle;
 
 use crate::api::{download_banner, download_game, download_icon, game_list, game_list_from_fs, launch_game};
 use crate::DevcadeGame;
@@ -17,6 +19,8 @@ pub enum Request {
     DownloadGame(u32, String),   // String is the game ID
     DownloadIcon(u32, String),   // String is the game ID
     DownloadBanner(u32, String), // String is the game ID
+
+    SetProduction(u32, bool), // Sets prod / dev api url
 
     LaunchGame(u32, String), // String is the game ID
 }
@@ -43,13 +47,16 @@ impl Request {
  * A response sent by the backend to the frontend. The u32 is the request ID, which is used to
  * identify the request in the response to the frontend.
  */
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub enum Response {
     Ok(u32),
     Err(u32, String),
 
     GameList(u32, Vec<DevcadeGame>),
     Game(u32, DevcadeGame),
+
+    #[serde(skip)]
+    InternalGame(u32, JoinHandle<ExitStatus>),
 }
 
 impl Response {
@@ -60,7 +67,7 @@ impl Response {
         Response::Ok(id)
     }
 
-    /**
+    /**ew
      * Create a new `Response::Err` from a request ID and an error message.
      */
     fn err_from_id(id: u32, err: String) -> Self {
@@ -86,6 +93,13 @@ impl Response {
      */
     fn game_from_id(id: u32, game: DevcadeGame) -> Self {
         Response::Game(id, game)
+    }
+
+    /**
+     * Create a new `Response::InternalGame` from a request ID and a game.
+     */
+    fn internal_game_from_id(id: u32, game: JoinHandle<ExitStatus>) -> Self {
+        Response::InternalGame(id, game)
     }
 }
 
@@ -122,8 +136,12 @@ pub async fn handle(req: Request) -> Response {
             Err(err) => Response::err_from_id_and_err(id, err),
         },
         Request::LaunchGame(id, game_id) => match launch_game(game_id).await {
-            Ok(_) => Response::ok_from_id(id),
+            Ok(handle) => Response::internal_game_from_id(id, handle),
             Err(err) => Response::err_from_id_and_err(id, err),
+        }
+        Request::SetProduction(id, prod) => {
+            crate::env::set_production(prod);
+            Response::ok_from_id(id)
         }
     }
 }
@@ -148,6 +166,9 @@ impl Display for Request {
             Request::LaunchGame(id, game_id) => {
                 write!(f, "[{:9}] Launch game with id ({})", id, game_id)
             }
+            Request::SetProduction(id, prod) => {
+                write!(f, "[{:9}] Set API to {}", id, if *prod { "production" } else { "development" })
+            }
         }
     }
 }
@@ -162,6 +183,7 @@ impl Display for Response {
                 write!(f, "[{:9}] Got game list with {} games", id, games.len())
             }
             Response::Game(id, game) => write!(f, "[{:9}] Downloaded game with id {}", id, game.id),
+            Response::InternalGame(id, _) => write!(f, "[{:9}] Launched game", id),
         }
     }
 }

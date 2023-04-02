@@ -2,7 +2,6 @@ use env_logger;
 use log::{log, Level};
 use tokio;
 
-use backend::command::{Request};
 use backend::servers::path::{onboard_command_pipe, onboard_response_pipe};
 use backend::servers::ThreadHandles;
 
@@ -22,13 +21,6 @@ async fn main() -> ! {
     // TODO Game Save / Load
 
     // TODO Gatekeeper / Authentication
-
-    let all_requests = Request::all();
-
-    for request in all_requests {
-        let json = serde_json::to_string(&request).unwrap();
-        log!(Level::Debug, "Example json for request '{}': {}", request, json);
-    }
 
     // Main loop
     loop {

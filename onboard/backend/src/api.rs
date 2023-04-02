@@ -1,9 +1,11 @@
 use std::os::unix::fs::PermissionsExt;
 use anyhow::{anyhow, Error};
 use std::path::Path;
+use std::process::ExitStatus;
 use std::thread;
 use std::time::Duration;
 use log::{log, Level};
+use std::thread::JoinHandle;
 use crate::env::{api_url, devcade_path};
 use crate::DevcadeGame;
 
@@ -130,6 +132,10 @@ pub async fn download_banner(game_id: String) -> Result<(), Error> {
     if path.exists() {
         return Ok(());
     }
+    if !path.parent().unwrap().exists() {
+        std::fs::create_dir_all(path.parent().unwrap())?;
+    }
+
     let bytes = network::request_bytes(format!("{}/{}", api_url(), route::game_banner(game_id.as_str())).as_str()).await?;
     std::fs::write(path, bytes)?;
     Ok(())
@@ -146,6 +152,10 @@ pub async fn download_icon(game_id: String) -> Result<(), Error> {
     if path.exists() {
         return Ok(());
     }
+    if !path.parent().unwrap().exists() {
+        std::fs::create_dir_all(path.parent().unwrap())?;
+    }
+
     let bytes = network::request_bytes(format!("{}/{}", api_url, route::game_icon(game_id.as_str())).as_str()).await?;
     std::fs::write(path, bytes)?;
     Ok(())
@@ -241,9 +251,10 @@ pub async fn download_game(game_id: String) -> Result<(), Error> {
 
 /**
  * Launch a game by its ID. This will check if the game is downloaded, and if it is, it will launch
- * the game. This will run until the game is closed.
+ * the game. This returns a JoinHandle, which should be used to check for game exit and notify the
+ * backend.
  */
-pub async fn launch_game(game_id: String) -> Result<(), Error> {
+pub async fn launch_game(game_id: String) -> Result<JoinHandle<ExitStatus>, Error> {
     let path = Path::new(devcade_path().as_str()).join(game_id.clone()).join("publish");
 
     log!(Level::Info, "Launching game {}...", game_id);
@@ -262,7 +273,6 @@ pub async fn launch_game(game_id: String) -> Result<(), Error> {
             Err(_) => continue,
         };
         let path = entry.path();
-        log!(Level::Trace, "Found file: {}", path.to_str().unwrap());
         if !path.is_file() {
             continue;
         }
@@ -272,7 +282,7 @@ pub async fn launch_game(game_id: String) -> Result<(), Error> {
                 continue;
             }
             executable = path.file_stem().unwrap().to_str().unwrap().to_string();
-            break;    let path = path.join("game.json");
+            break;
 
         }
     }
@@ -294,32 +304,31 @@ pub async fn launch_game(game_id: String) -> Result<(), Error> {
     // Chmod +x the executable
     let mut perms = path.metadata()?.permissions();
     perms.set_mode(0o755);
+
     std::fs::set_permissions(path.clone(), perms)?;
 
     // Launch the game and silence stdout (allow the game to print to stderr)
     let mut child = std::process::Command::new(path.clone());
 
     child.stdout(std::process::Stdio::null());
+    // Unfortunately this will bypass the log crate, so no pretty logging for games
     child.stderr(std::process::Stdio::inherit());
     child.current_dir(path.parent().unwrap());
 
     let handle = thread::spawn(move || {
-        child.spawn().expect("failed to execute child");
+        let mut child_handle = child.spawn().expect("failed to execute child");
+        return child_handle.wait().expect("failed to wait on child");
     });
 
     tokio::time::sleep(Duration::from_millis(200)).await;
 
     if handle.is_finished() {
         let e = handle.join();
-        match e {
-            Ok(_) => {}
-            Err(e) => {
-                log!(Level::Error, "Error launching game: {:?}", e);
-            }
-        }
+        // Even if the game exited successfully, if it exited after 200ms, something went wrong
+        return Err(anyhow!("Error launching game: {:?}", e));
     }
 
-    Ok(())
+    Ok(handle)
 }
 
 /**

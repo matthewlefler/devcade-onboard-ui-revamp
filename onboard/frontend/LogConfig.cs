@@ -19,8 +19,8 @@ public static class LogConfig {
     
     private class NS {
         public string fullName { get; init; }
-        public Level level { get; set; }
-        public NS[] children { get; init; }
+        public Level level { get; private set; }
+        private NS[] children { get; init; }
         
         public NS(string fullName, Level level, params NS[] children) {
             this.fullName = fullName;
@@ -83,7 +83,7 @@ public static class LogConfig {
     // The log level of the root namespace is the default log level for all namespaces.
     private static readonly NS root = new(
         "onboard",
-        Level.TRACE,
+        Level.DEBUG,
         new NS(
             "onboard.devcade",
             Level.INHERIT,
