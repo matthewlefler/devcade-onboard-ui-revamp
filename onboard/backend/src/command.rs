@@ -30,16 +30,15 @@ impl Request {
      * Return a list of all request variants.
      */
     pub fn all() -> Vec<Request> {
-        let mut requests = Vec::new();
-        requests.push(Request::GetGameList(0));
-        requests.push(Request::GetGameListFromFs(0));
-        requests.push(Request::GetGame(0, String::from("abc123")));
-        requests.push(Request::DownloadGame(0, String::from("abc123")));
-        requests.push(Request::DownloadIcon(0, String::from("abc123")));
-        requests.push(Request::DownloadBanner(0, String::from("abc123")));
-        requests.push(Request::LaunchGame(0, String::from("abc123")));
-
-        requests
+        vec![
+            Request::GetGameList(0),
+            Request::GetGameListFromFs(0),
+            Request::GetGame(0, String::from("abc123")),
+            Request::DownloadGame(0, String::from("abc123")),
+            Request::DownloadIcon(0, String::from("abc123")),
+            Request::DownloadBanner(0, String::from("abc123")),
+            Request::LaunchGame(0, String::from("abc123")),
+        ]
     }
 }
 

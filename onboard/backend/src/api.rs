@@ -114,9 +114,8 @@ pub fn game_list_from_fs() -> Result<Vec<DevcadeGame>, Error> {
                 continue;
             }
 
-            let game = game_from_path(path_.to_str().unwrap());
-            if game.is_ok() {
-                games.push(game.unwrap());
+            if let Ok(game) = game_from_path(path_.to_str().unwrap()) {
+                games.push(game);
             }
         }
     }
@@ -173,7 +172,7 @@ pub async fn download_game(game_id: String) -> Result<(), Error> {
 
     // Check if the game is already downloaded, and if it is, check if the hash is the same
     if path.exists() {
-        if let Some(game_) = game_from_path(path.to_str().unwrap()).ok() {
+        if let Ok(game_) = game_from_path(path.to_str().unwrap()) {
             if game_.hash == game.hash {
                 return Ok(());
             }
@@ -210,7 +209,7 @@ pub async fn download_game(game_id: String) -> Result<(), Error> {
         } else {
             if let Some(p) = out_path.parent() {
                 if !p.exists() {
-                    match std::fs::create_dir_all(&p) {
+                    match std::fs::create_dir_all(p) {
                         Ok(_) => {}
                         Err(e) => {
                             log!(Level::Warn, "Error creating directory {}: {}", p.to_str().unwrap(), e);
@@ -317,7 +316,7 @@ pub async fn launch_game(game_id: String) -> Result<JoinHandle<ExitStatus>, Erro
 
     let handle = thread::spawn(move || {
         let mut child_handle = child.spawn().expect("failed to execute child");
-        return child_handle.wait().expect("failed to wait on child");
+        child_handle.wait().expect("failed to wait on child")
     });
 
     tokio::time::sleep(Duration::from_millis(200)).await;

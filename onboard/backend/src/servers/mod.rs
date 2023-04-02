@@ -120,3 +120,9 @@ impl ThreadHandles {
         None
     }
 }
+
+impl Default for ThreadHandles {
+    fn default() -> Self {
+        Self::new()
+    }
+}

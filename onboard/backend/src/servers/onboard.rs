@@ -22,10 +22,8 @@ pub async fn onboard_main(command_pipe: &str, response_pipe: &str) -> ! {
         match open_read_pipe(command_pipe) {
             Ok(pipe) => break pipe,
             Err(e) => {
-                match e {
-                    _ => {
-                        log!(Level::Error, "Error opening command pipe: {}", e);
-                    }
+                {
+                    log!(Level::Error, "Error opening command pipe: {}", e);
                 }
                 tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
             }
@@ -123,17 +121,16 @@ pub async fn onboard_main(command_pipe: &str, response_pipe: &str) -> ! {
 
         let command_futures = commands
             .into_iter()
-            .map(|command| handle(command))
+            .map(handle)
             .collect::<Vec<_>>();
 
         for res in command_futures {
             let response = res.await;
-            match &response {
-                Response::Err(id, e) => {
-                    log!(Level::Warn, "Error handling command {}: {}", id, e);
-                }
-                _ => {}
+
+            if let Response::Err(id, e) = &response {
+                log!(Level::Warn, "Error handling command {}: {}", id, e);
             }
+            
             let response = match response {
                 Response::InternalGame(id, handle) => {
                     let _ = game_handle.insert((id, handle));
