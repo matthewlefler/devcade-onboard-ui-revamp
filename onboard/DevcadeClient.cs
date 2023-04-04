@@ -23,6 +23,25 @@ namespace onboard
         public string name { get; set; }
         public string hash { get; set; }
         public string description { get; set; }
+        public DevcadeUser user { get; set; }
+        public DevcadeTag[] tags { get; set; }
+    }
+
+    public class DevcadeUser
+    {
+        public string id { get; set; }
+        public string user_type { get; set; }
+        public string first_name { get; set; }
+        public string last_name { get; set; }
+        public string email { get; set; }
+        public string picture { get; set; }
+        public bool admin { get; set; }
+    }
+
+    public class DevcadeTag
+    {
+        public string name { get; set; }
+        public string description { get; set; }
     }
 
     public class DevcadeClient

@@ -355,10 +355,11 @@ namespace onboard
                 descOpacity
             );
 
+            String author = (gameSelected().user.user_type == "CSH") ? gameSelected().user.id : gameSelected().user.email.Remove(gameSelected().user.email.IndexOf('@'));
             // Write the game's author
             writeString(_spriteBatch,
                 descFont,
-                "By: " + gameSelected().author,
+                "By: " + author,
                 new Vector2(descPos.X, descPos.Y - (int)((descTexture.Height * scalingAmount) / 3)),
                 descOpacity
             );
