@@ -26,7 +26,7 @@ idiot_dir="/home/devcade/devcade-onboard/idiot"
 cp $idiot_dir/.env /home/devcade; 
 
 # Set up xinitrc
-cp $idiot_dir/xinitrc /home/devcade/.xinitrc
+cp $idiot_dir/.xinitrc /home/devcade/.xinitrc
 
 # Copy openbox config
 mkdir -p /home/devcade/.config/openbox
