@@ -1,24 +1,34 @@
+use std::ffi::OsStr;
 use std::os::unix::fs::PermissionsExt;
 use anyhow::{anyhow, Error};
 use std::path::Path;
 use std::process::ExitStatus;
 use std::thread;
 use std::time::Duration;
-use log::{log, Level};
+use log::{Level, log};
 use std::thread::JoinHandle;
 use crate::env::{api_url, devcade_path};
-use crate::DevcadeGame;
+use crate::api::schema::DevcadeGame;
+
+/**
+ * Module for defining the database schema, these are the same schema that the API uses, so they are
+ * defined here as well to deserialize the responses from the API.
+ */
+pub mod schema;
 
 /**
  * Internal module for network requests and JSON serialization
  */
 mod network {
     use anyhow::Error;
-    use log::{log, Level};
+    use log::{Level, log};
     use serde::Deserialize;
 
     /**
      * Request JSON from a URL and serialize it into a struct
+     *
+     * # Errors
+     * This function will return an error if the request fails, or if the JSON cannot be deserialized
      */
     pub async fn request_json<T: for<'de> Deserialize<'de>>(url: &str) -> Result<T, Error> {
         log!(Level::Trace, "Requesting JSON from {}", url);
@@ -29,6 +39,9 @@ mod network {
 
     /**
      * Request binary data from a URL
+     *
+     * # Errors
+     * This function will return an error if the request fails.
      */
     pub async fn request_bytes(url: &str) -> Result<Vec<u8>, Error> {
         log!(Level::Trace, "Requesting binary from {}", url);
@@ -56,39 +69,48 @@ mod route {
      * Get a specific game by ID
      */
     pub fn game(id: &str) -> String {
-        format!("games/{}", id)
+        format!("games/{id}")
     }
 
     /**
      * Get a specific game's icon by ID
      */
     pub fn game_icon(id: &str) -> String {
-        format!("games/{}/icon", id)
+        format!("games/{id}/icon")
     }
 
     /**
      * Get a specific game's banner by ID
      */
     pub fn game_banner(id: &str) -> String {
-        format!("games/{}/banner", id)
+        format!("games/{id}/banner")
     }
 
     /**
      * Get a specific game's binary by ID
      */
     pub fn game_download(id: &str) -> String {
-        format!("games/{}/game", id)
+        format!("games/{id}/game")
     }
 }
 
 /**
  * Get a list of games from the API. This is the preferred method of getting games.
+ *
+ * # Errors
+ * This function will return an error if the request fails, or if the JSON cannot be deserialized
  */
 pub async fn game_list() -> Result<Vec<DevcadeGame>, Error> {
     let games = network::request_json(format!("{}/{}", api_url(), route::game_list()).as_str()).await?;
     Ok(games)
 }
 
+/**
+ * Get a specific game from the API. This is the preferred method of getting games.
+ *
+ * # Errors
+ * This function will return an error if the request fails, or if the JSON cannot be deserialized
+ */
 pub async fn get_game(id: &str) -> Result<DevcadeGame, Error> {
     let game = network::request_json(format!("{}/{}", api_url(), route::game(id)).as_str()).await?;
     Ok(game)
@@ -97,6 +119,9 @@ pub async fn get_game(id: &str) -> Result<DevcadeGame, Error> {
 /**
  * Get the list of games currently installed on the filesystem. This can be used if the API is down.
  * This is not the preferred method of getting games.
+ *
+ * # Errors
+ * This function will return an error if the filesystem cannot be read at the DEVCADE_PATH location.
  */
 pub fn game_list_from_fs() -> Result<Vec<DevcadeGame>, Error> {
     let mut games = Vec::new();
@@ -124,6 +149,9 @@ pub fn game_list_from_fs() -> Result<Vec<DevcadeGame>, Error> {
 
 /**
  * Download's a game's banner from the API.
+ *
+ * # Errors
+ * This function will return an error if the request fails, or if the filesystem cannot be written to.
  */
 pub async fn download_banner(game_id: String) -> Result<(), Error> {
 
@@ -142,6 +170,9 @@ pub async fn download_banner(game_id: String) -> Result<(), Error> {
 
 /**
  * Download's a game's icon from the API.
+ *
+ * # Errors
+ * This function will return an error if the request fails, or if the filesystem cannot be written to.
  */
 pub async fn download_icon(game_id: String) -> Result<(), Error> {
     let api_url = api_url();
@@ -164,6 +195,9 @@ pub async fn download_icon(game_id: String) -> Result<(), Error> {
  * Download's a game's zip file from the API and unzips it into the game's directory. If the game is
  * already downloaded, it will check if the hash is the same. If it is, it will not download the game
  * again.
+ *
+ * # Errors
+ * This function will return an error if the request fails, or if the filesystem cannot be written to.
  */
 pub async fn download_game(game_id: String) -> Result<(), Error> {
     let path = Path::new(devcade_path().as_str()).join(game_id.clone()).join("game.json");
@@ -250,8 +284,16 @@ pub async fn download_game(game_id: String) -> Result<(), Error> {
 
 /**
  * Launch a game by its ID. This will check if the game is downloaded, and if it is, it will launch
- * the game. This returns a JoinHandle, which should be used to check for game exit and notify the
+ * the game. This returns a `JoinHandle`, which should be used to check for game exit and notify the
  * backend.
+ *
+ * # Errors
+ * This function will return an error if the filesystem cannot be read from,
+ * or if the game cannot be launched.
+ *
+ * # Panics
+ * This function will never panic, but contains an `unwrap` call that will never fail. This section
+ * is here to make clippy happy.
  */
 pub async fn launch_game(game_id: String) -> Result<JoinHandle<ExitStatus>, Error> {
     let path = Path::new(devcade_path().as_str()).join(game_id.clone()).join("publish");
@@ -276,11 +318,11 @@ pub async fn launch_game(game_id: String) -> Result<JoinHandle<ExitStatus>, Erro
             continue;
         }
 
-        if let Some(extension) = path.extension().map(|s| s.to_str().unwrap()) {
+        if let Some(extension) = path.extension().map(|s| s.to_str().unwrap_or("")) {
             if extension != "runtimeconfig.json" {
                 continue;
             }
-            executable = path.file_stem().unwrap().to_str().unwrap().to_string();
+            executable = path.file_stem().unwrap_or(OsStr::new("")).to_str().unwrap_or("").to_string();
             break;
 
         }
@@ -290,7 +332,8 @@ pub async fn launch_game(game_id: String) -> Result<JoinHandle<ExitStatus>, Erro
     // (this is the case for games that don't use .NET)
     // TODO: Some better way to find executable name?
     if executable.is_empty() {
-        let game = game_from_path(path.clone().parent().unwrap().join("game.json").to_str().unwrap())?;
+        // This parent().unwrap() is safe because the path is guaranteed to have a parent
+        let game = game_from_path(path.clone().parent().unwrap().join("game.json").to_str().unwrap_or(""))?;
         executable = game.name;
     }
 
@@ -312,7 +355,7 @@ pub async fn launch_game(game_id: String) -> Result<JoinHandle<ExitStatus>, Erro
     child.stdout(std::process::Stdio::null());
     // Unfortunately this will bypass the log crate, so no pretty logging for games
     child.stderr(std::process::Stdio::inherit());
-    child.current_dir(path.parent().unwrap());
+    child.current_dir(path.parent().unwrap()); // This unwrap is safe because it is guaranteed to have a parent
 
     let handle = thread::spawn(move || {
         let mut child_handle = child.spawn().expect("failed to execute child");
@@ -332,6 +375,10 @@ pub async fn launch_game(game_id: String) -> Result<JoinHandle<ExitStatus>, Erro
 
 /**
  * Returns a devcade game if the file at the path is a JSON file containing a devcade game
+ *
+ * # Errors
+ * This function will return an error if the file does not exist, is a directory, or if the file
+ * cannot be read.
  */
 fn game_from_path(path: &str) -> Result<DevcadeGame, Error> {
     log!(Level::Trace, "Reading game from path {}", path);

@@ -1,7 +1,7 @@
 #![feature(is_some_and)]
 
 use anyhow::{anyhow, Error};
-use log::{log, Level};
+use log::{Level, log};
 use serde::{Deserialize, Serialize};
 use tokio::net::unix::pipe::{OpenOptions, Receiver, Sender};
 
@@ -20,6 +20,7 @@ pub mod api;
  */
 pub mod command;
 
+
 /**
  * Module for safely getting environment variables, logging any errors that occur and providing
  * default values.
@@ -35,7 +36,7 @@ pub mod env {
      * Get the path to the devcade directory. This is where games are installed.
      * If the value is not set in the environment, it will default to /tmp/devcade.
      */
-    pub fn devcade_path() -> String {
+    #[must_use] pub fn devcade_path() -> String {
         let path = env::var("DEVCADE_PATH");
 
         match path {
@@ -52,7 +53,7 @@ pub mod env {
      * Get the URL of the API. This is where games are downloaded from.
      * If the value is not set in the environment, it will throw a fatal error and panic.
      */
-    pub fn api_url() -> String {
+    #[must_use] pub fn api_url() -> String {
         let url = if unsafe { PRODUCTION } {
             env::var("DEVCADE_API_DOMAIN")
         } else {
@@ -60,7 +61,7 @@ pub mod env {
         };
 
         match url {
-            Ok(url) => format!("https://{}", url),
+            Ok(url) => format!("https://{url}"),
             Err(e) => {
                 if unsafe { PRODUCTION } {
                     log!(Level::Error, "Error getting DEVCADE_API_DOMAIN: {}", e);
@@ -103,12 +104,12 @@ pub struct DevcadeGame {
 impl Default for DevcadeGame {
     fn default() -> Self {
         DevcadeGame {
-            author: String::from(""),
+            author: String::new(),
             authrequired: false,
-            description: String::from(""),
-            hash: String::from(""),
-            id: String::from(""),
-            name: String::from(""),
+            description: String::new(),
+            hash: String::new(),
+            id: String::new(),
+            name: String::new(),
             // default upload date is unix epoch
             upload_date: String::from("1970-01-01"),
         }
@@ -117,7 +118,7 @@ impl Default for DevcadeGame {
 
 
 /**
- * Make a FIFO at the given path. Uses an unsafe call to libc::mkfifo.
+ * Make a FIFO at the given path. Uses an unsafe call to `libc::mkfifo`.
  */
 fn mkfifo(path: &str) -> Result<(), Error> {
     log!(Level::Info, "Creating FIFO at {}", path);
@@ -135,7 +136,7 @@ fn mkfifo(path: &str) -> Result<(), Error> {
         let exit_code = libc::mkfifo(path.as_ptr(), 0o644);
         match exit_code {
             0 => Ok(()),
-            c => Err(anyhow!(format!("mkfifo exited with code {}", c))),
+            c => Err(anyhow!(format!("mkfifo exited with code {c}"))),
         }
     }
 }

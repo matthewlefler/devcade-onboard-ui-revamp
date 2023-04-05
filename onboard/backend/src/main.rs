@@ -1,7 +1,6 @@
 
 use log::{log, Level};
 
-
 use backend::servers::path::{onboard_command_pipe, onboard_response_pipe};
 use backend::servers::ThreadHandles;
 
@@ -26,15 +25,15 @@ async fn main() -> ! {
     loop {
         tokio::time::sleep(tokio::time::Duration::from_millis(1000)).await;
         // Check if any of the handles have finished
-        if let Some(err) = handles.onboard_error().await {
+        if let Some(err) = handles.onboard_error() {
             log!(Level::Error, "Onboard thread has errored: {}", err);
             handles.restart_onboard(onboard_command_pipe(), onboard_response_pipe());
         }
-        if let Some(err) = handles._game_error().await {
+        if let Some(err) = handles._game_error() {
             log!(Level::Error, "Game thread has errored: {}", err);
             // TODO Restart game thread
         }
-        if let Some(err) = handles._gatekeeper_error().await {
+        if let Some(err) = handles._gatekeeper_error() {
             log!(Level::Error, "Gatekeeper thread has errored: {}", err);
             // TODO Restart gatekeeper thread
         }

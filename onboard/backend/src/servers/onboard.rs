@@ -11,7 +11,7 @@ use crate::command::{handle, Request, Response};
  *
  * This function will never return unless it panics and should be spawned as a thread.
  */
-pub async fn onboard_main(command_pipe: &str, response_pipe: &str) -> ! {
+pub async fn main(command_pipe: &str, response_pipe: &str) -> ! {
     // Vector for holding all the response futures so we can continue to read from the command pipe
     // while we wait for handle to finish.
 
@@ -62,16 +62,13 @@ pub async fn onboard_main(command_pipe: &str, response_pipe: &str) -> ! {
                 log!(Level::Trace, "Read from command pipe: {}", String::from_utf8_lossy(&buffer).trim());
             }
             Err(e) => {
-                match e.kind() {
-                    std::io::ErrorKind::WouldBlock => {
-                        // This happens when the pipe is empty, no handling needed
-                        // allow the loop to continue with buffer as an empty slice
-                        // TODO: Check if allowing this without pipe.readable() will cause a read while the pipe is being written to
-                    }
-                    _ => {
-                        log!(Level::Error, "Error reading from command pipe: {}", e);
-                        continue; // TODO: Should we panic here? Or do some kind of recovery?
-                    }
+                if e.kind() == std::io::ErrorKind::WouldBlock {
+                    // This happens when the pipe is empty, no handling needed
+                    // allow the loop to continue with the buffer as an empty slice
+                    // TODO: Check if allowing try_read without pipe.readable() will cause a read while the pipe is being written to
+                } else {
+                    log!(Level::Error, "Error reading from command pipe: {}", e);
+                    continue; // TODO: Should we panic here? Or do some kind of recovery?
                 }
             }
         }
@@ -84,7 +81,13 @@ pub async fn onboard_main(command_pipe: &str, response_pipe: &str) -> ! {
             if handle.is_finished() {
                 log!(Level::Info, "Game with Request ID {} has finished", id);
                 let response = Response::Ok(id);
-                let mut response = serde_json::to_string(&response).unwrap();
+                let mut response = match serde_json::to_string(&response) {
+                    Ok(r) => r,
+                    Err(e) => {
+                        log!(Level::Error, "Error serializing response: {}", e);
+                        continue;
+                    }
+                };
                 log!(Level::Trace, "Writing response to pipe: {}", response);
                 response.push('\n');
                 match response_pipe.write_all(response.as_bytes()).await {
@@ -95,7 +98,7 @@ pub async fn onboard_main(command_pipe: &str, response_pipe: &str) -> ! {
                 }
             } else {
                 // Game is still running, put it back in the option
-                let _ = game_handle.insert((id, handle));
+                let _: &mut (u32, JoinHandle<ExitStatus>) = game_handle.insert((id, handle));
             }
         }
 
@@ -133,13 +136,19 @@ pub async fn onboard_main(command_pipe: &str, response_pipe: &str) -> ! {
             
             let response = match response {
                 Response::InternalGame(id, handle) => {
-                    let _ = game_handle.insert((id, handle));
+                    let _: &mut (u32, JoinHandle<ExitStatus>) = game_handle.insert((id, handle));
                     continue;
                 }
                 _ => response
             };
 
-            let mut response = serde_json::to_string(&response).unwrap();
+            let mut response = match serde_json::to_string(&response) {
+                Ok(r) => r,
+                Err(e) => {
+                    log!(Level::Error, "Error serializing response: {}", e);
+                    continue;
+                }
+            };
             log!(Level::Trace, "Writing response to pipe: {}", response);
             response.push('\n');
             match response_pipe.write_all(response.as_bytes()).await {

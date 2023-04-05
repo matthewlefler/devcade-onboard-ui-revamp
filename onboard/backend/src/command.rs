@@ -5,7 +5,7 @@ use anyhow::Error;
 use std::thread::JoinHandle;
 
 use crate::api::{download_banner, download_game, download_icon, game_list, game_list_from_fs, launch_game};
-use crate::DevcadeGame;
+use crate::api::schema::DevcadeGame;
 
 /**
  * A request received by the backend from the frontend. The u32 is the request ID, which is used to
@@ -29,7 +29,7 @@ impl Request {
     /**
      * Return a list of all request variants.
      */
-    pub fn all() -> Vec<Request> {
+    #[must_use] pub fn all() -> Vec<Request> {
         vec![
             Request::GetGameList(0),
             Request::GetGameListFromFs(0),
@@ -118,7 +118,7 @@ pub async fn handle(req: Request) -> Response {
         Request::GetGame(id, game_id) => match game_list().await {
             Ok(game) => match game.into_iter().find(|g| g.id == game_id) {
                 Some(game) => Response::game_from_id(id, game),
-                None => Response::err_from_id(id, format!("Game with ID {} not found", game_id)),
+                None => Response::err_from_id(id, format!("Game with ID {game_id} not found")),
             },
             Err(err) => Response::err_from_id_and_err(id, err),
         },
@@ -148,22 +148,22 @@ pub async fn handle(req: Request) -> Response {
 impl Display for Request {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Request::GetGameList(id) => write!(f, "[{:9}] Get Game List", id),
-            Request::GetGameListFromFs(id) => write!(f, "[{:9}] Get Game List From Filesystem", id),
+            Request::GetGameList(id) => write!(f, "[{id:9}] Get Game List"),
+            Request::GetGameListFromFs(id) => write!(f, "[{id:9}] Get Game List From Filesystem"),
             Request::GetGame(id, game_id) => {
-                write!(f, "[{:9}] Get Game object with id ({})", id, game_id)
+                write!(f, "[{id:9}] Get Game object with id ({game_id})")
             }
             Request::DownloadGame(id, game_id) => {
-                write!(f, "[{:9}] Download game with id ({})", id, game_id)
+                write!(f, "[{id:9}] Download game with id ({game_id})")
             }
             Request::DownloadIcon(id, game_id) => {
-                write!(f, "[{:9}] Download icon with id ({})", id, game_id)
+                write!(f, "[{id:9}] Download icon with id ({game_id})")
             }
             Request::DownloadBanner(id, game_id) => {
-                write!(f, "[{:9}] Download banner with id ({})", id, game_id)
+                write!(f, "[{id:9}] Download banner with id ({game_id})")
             }
             Request::LaunchGame(id, game_id) => {
-                write!(f, "[{:9}] Launch game with id ({})", id, game_id)
+                write!(f, "[{id:9}] Launch game with id ({game_id})")
             }
             Request::SetProduction(id, prod) => {
                 write!(f, "[{:9}] Set API to {}", id, if *prod { "production" } else { "development" })
@@ -176,13 +176,13 @@ impl Display for Request {
 impl Display for Response {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Response::Ok(id) => write!(f, "[{:9}] Ok", id),
-            Response::Err(id, err) => write!(f, "[{:9}] Err: {}", id, err),
+            Response::Ok(id) => write!(f, "[{id:9}] Ok"),
+            Response::Err(id, err) => write!(f, "[{id:9}] Err: {err}"),
             Response::GameList(id, games) => {
                 write!(f, "[{:9}] Got game list with {} games", id, games.len())
             }
             Response::Game(id, game) => write!(f, "[{:9}] Downloaded game with id {}", id, game.id),
-            Response::InternalGame(id, _) => write!(f, "[{:9}] Launched game", id),
+            Response::InternalGame(id, _) => write!(f, "[{id:9}] Launched game"),
         }
     }
 }
