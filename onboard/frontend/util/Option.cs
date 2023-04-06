@@ -3,6 +3,10 @@ using System;
 namespace onboard.util;
 
 public class Option<T> {
+    private class OptionException : Exception {
+        public OptionException(string message) : base(message) { }
+    }
+    
     private T value;
     private bool hasValue;
 
@@ -57,7 +61,7 @@ public class Option<T> {
     /// <exception cref="Exception"></exception>
     public T expect(string message) {
         if (is_some()) return value;
-        throw new Exception(message);
+        throw new OptionException(message);
     }
 
     /// <summary>
@@ -70,7 +74,7 @@ public class Option<T> {
             return value;
         }
 
-        throw new Exception("Called Unwrap on a None value");
+        throw new OptionException("Called Unwrap on a None value");
     }
 
     /// <summary>

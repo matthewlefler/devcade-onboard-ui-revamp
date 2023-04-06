@@ -8,6 +8,8 @@ public class Request {
     private static uint _id;
 
     public enum RequestType {
+        Ping,
+        
         GetGameList,
         GetGameListFromFs,
         GetGame,
@@ -34,7 +36,7 @@ public class Request {
 
     public string serialize() {
         return this.type switch {
-            RequestType.GetGameList or RequestType.GetGameListFromFs => $"{{\"{this.type}\":{this.id}}}",
+            RequestType.GetGameList or RequestType.GetGameListFromFs or RequestType.Ping => $"{{\"{this.type}\":{this.id}}}",
             RequestType.SetProduction => $"{{\"{this.type}\":[{this.id}, {(this.prod ?? true).ToString().ToLower()}]}}",
             _ => $"{{\"{this.type}\":[{this.id},\"{this.game_id}\"]}}"
         };
@@ -70,5 +72,9 @@ public class Request {
 
     public static Request SetProduction(bool prod) {
         return new Request(RequestType.SetProduction, null, prod);
+    }
+    
+    public static Request Ping() {
+        return new Request(RequestType.Ping);
     }
 }

@@ -50,6 +50,7 @@ dependencies = [
  "env",
  "env_logger",
  "futures-util",
+ "lazy_static",
  "libc",
  "log",
  "reqwest",

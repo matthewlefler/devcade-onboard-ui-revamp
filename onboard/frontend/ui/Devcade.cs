@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Devcade;
 using log4net;
@@ -142,7 +143,7 @@ public class Devcade : Game {
                                                                      Input.GetButton(2, Input.ArcadeButtons.Menu)))) {
                     try {
                         menu.clearGames();
-                        menu.gameTitles = Client.getGameList().Result.game_list;
+                        menu.gameTitles = Client.getGameList().Result.into_result<List<DevcadeGame>>().unwrap_or(new List<DevcadeGame>());
                         menu.setCards(GraphicsDevice);
                         _cantFetch = false;
                         state = MenuState.Input;
@@ -225,7 +226,7 @@ public class Devcade : Game {
                      Input.GetButton(1, Input.ArcadeButtons.B4))) // and Player 1 B4
                 {
                     menu.clearGames();
-                    menu.gameTitles = Client.getGameList().Result.game_list;
+                    menu.gameTitles = Client.getGameList().Result.into_result<List<DevcadeGame>>().unwrap();
                     menu.setCards(GraphicsDevice);
 
                     state = MenuState.Input;

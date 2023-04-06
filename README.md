@@ -7,12 +7,17 @@ Run the `update_onboard.sh` script located in HACKING
 
 ## Building (manual)
 
-To build and run on the Idiot, do the following from `/onboard`:
+To build and run on the Idiot, do the following from `./onboard/frontend`:
 ```
 dotnet publish -c Release -r linux-x64 --no-self-contained
 ```
+And the following fron `./onboard/backend`:
+```
+cargo build --release --target x86_64-unknown-linux-gnu
+```
 
-To put it on the Idiot, compress the `publish` folder located at `\Devcade-onboard\onboard\bin\Release\netcoreapp3.1\linux-x64` and `scp` that to the Idiot.
+To put it on the Idiot, compress the `publish` folder located at `./onboard/frontend/bin/Release/netcoreapp3.1/linux-x64` and `scp` that to the Idiot.
+You'll also want to `scp` `./onboard/backend/target/release` to the Idiot. 
 
 ## The Idiot
 

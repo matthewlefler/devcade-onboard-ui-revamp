@@ -6,6 +6,11 @@ use backend::servers::ThreadHandles;
 
 #[tokio::main]
 async fn main() -> ! {
+    #[cfg(not(target_os = "linux"))]
+    {
+        compile_error!("This project only supports Linux.\nTo build for linux, run `cargo build --target x86_64-unknown-linux-gnu`");
+    }
+
     match dotenv::from_filename("../.env") {
         Ok(_) => (),
         Err(e) => {

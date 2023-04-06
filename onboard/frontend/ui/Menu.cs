@@ -118,9 +118,8 @@ public class Menu : IMenu {
             if (clear)
                 clearGames();
 
-            try
-            {
-                gameTitles =  Client.getGameList().Result.game_list;
+            try {
+                gameTitles = Client.getGameList().Result.into_result<List<DevcadeGame>>().unwrap_or(new List<DevcadeGame>());
                 setCards(device);
             }
             catch (AggregateException e)

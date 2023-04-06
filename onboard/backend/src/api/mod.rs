@@ -20,9 +20,17 @@ pub mod schema;
  * Internal module for network requests and JSON serialization
  */
 mod network {
+    use std::ops::Deref;
     use anyhow::Error;
+    use lazy_static::lazy_static;
     use log::{Level, log};
     use serde::Deserialize;
+
+    // Construct a static client to be used for all requests. Prevents opening a new connection for
+    // every request.
+    lazy_static! {
+        static ref CLIENT: reqwest::Client = reqwest::Client::new();
+    }
 
     /**
      * Request JSON from a URL and serialize it into a struct
@@ -32,7 +40,7 @@ mod network {
      */
     pub async fn request_json<T: for<'de> Deserialize<'de>>(url: &str) -> Result<T, Error> {
         log!(Level::Trace, "Requesting JSON from {}", url);
-        let response = reqwest::get(url).await?;
+        let response = CLIENT.deref().get(url).send().await?;
         let json = response.json().await?;
         Ok(json)
     }
@@ -45,7 +53,7 @@ mod network {
      */
     pub async fn request_bytes(url: &str) -> Result<Vec<u8>, Error> {
         log!(Level::Trace, "Requesting binary from {}", url);
-        let response = reqwest::get(url).await?;
+        let response = CLIENT.deref().get(url).send().await?;
         let bytes = response.bytes().await?;
         Ok(bytes.to_vec())
     }

@@ -4,6 +4,10 @@ using System.Threading.Tasks;
 namespace onboard.util;
 
 public class Result<T, E> {
+    private class ResultException : Exception {
+        public ResultException(string message) : base(message) { }
+    }
+    
     private T value { get; }
     private E error { get; }
     private bool _ok { get; }
@@ -143,15 +147,15 @@ public class Result<T, E> {
     /// Returns the Ok value and throws an exception otherwise
     /// Differs from unwrap in that you can add an exception message
     /// </summary>
-    /// <param name="message"></param>
+    /// <param name="message">A string </param>
     /// <returns></returns>
-    /// <exception cref="Exception"></exception>
+    /// <exception cref="Exception">Thrown if the Result contains an Err</exception>
     public T expect(string message) {
         if (this.is_ok()) {
             return this.value;
         }
 
-        throw new Exception(message);
+        throw new ResultException(message);
     }
 
     /// <summary>
@@ -159,13 +163,13 @@ public class Result<T, E> {
     /// Used when a result will always be Ok
     /// </summary>
     /// <returns></returns>
-    /// <exception cref="Exception"></exception>
+    /// <exception cref="ResultException">Thrown if Result contains an Err</exception>
     public T unwrap() {
         if (this.is_ok()) {
             return this.value;
         }
 
-        throw new Exception("called Result.unwrap() on an error value");
+        throw new ResultException("called Result.unwrap() on an error value");
     }
 
     /// <summary>
@@ -182,26 +186,26 @@ public class Result<T, E> {
     /// </summary>
     /// <param name="message"></param>
     /// <returns></returns>
-    /// <exception cref="Exception"></exception>
+    /// <exception cref="Exception">Thrown if the Result contains an Ok Value</exception>
     public E expect_err(string message) {
         if (this.is_err()) {
             return this.error;
         }
 
-        throw new Exception(message);
+        throw new ResultException(message);
     }
 
     /// <summary>
     /// Returns the Err value of the Result or throws an exception if the Result is Ok
     /// </summary>
     /// <returns></returns>
-    /// <exception cref="Exception"></exception>
+    /// <exception cref="Exception">Thrown if the Result contains on Ok Value</exception>
     public E unwrap_err() {
         if (this.is_err()) {
             return this.error;
         }
 
-        throw new Exception("called Result.unwrap_err() on an ok value");
+        throw new ResultException("called Result.unwrap_err() on an ok value");
     }
 
     /// <summary>
@@ -338,7 +342,7 @@ public class Result<T, E> {
     /// </summary>
     /// <param name="res"></param>
     /// <returns></returns>
-    public static Result<T, Exception> await(Result<Task<T>, Exception> res) {
+    public static Result<T, Exception> awaitInner(Result<Task<T>, Exception> res) {
         return res.is_ok() && res.value.IsCompletedSuccessfully
             ? new Result<T, Exception>(res.value.Result)
             : new Result<T, Exception>(res.is_err() ? res.error : new Exception("Task did not complete successfully"));

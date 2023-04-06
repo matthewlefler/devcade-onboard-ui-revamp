@@ -13,6 +13,8 @@ use crate::api::schema::DevcadeGame;
  */
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Request {
+    Ping(u32), // Used to check if the backend is alive
+
     GetGameList(u32),
     GetGameListFromFs(u32),
     GetGame(u32, String),        // String is the game ID
@@ -25,29 +27,14 @@ pub enum Request {
     LaunchGame(u32, String), // String is the game ID
 }
 
-impl Request {
-    /**
-     * Return a list of all request variants.
-     */
-    #[must_use] pub fn all() -> Vec<Request> {
-        vec![
-            Request::GetGameList(0),
-            Request::GetGameListFromFs(0),
-            Request::GetGame(0, String::from("abc123")),
-            Request::DownloadGame(0, String::from("abc123")),
-            Request::DownloadIcon(0, String::from("abc123")),
-            Request::DownloadBanner(0, String::from("abc123")),
-            Request::LaunchGame(0, String::from("abc123")),
-        ]
-    }
-}
-
 /**
  * A response sent by the backend to the frontend. The u32 is the request ID, which is used to
  * identify the request in the response to the frontend.
  */
 #[derive(Debug, Serialize, Deserialize)]
 pub enum Response {
+    Pong(u32),
+
     Ok(u32),
     Err(u32, String),
 
@@ -107,6 +94,7 @@ impl Response {
  */
 pub async fn handle(req: Request) -> Response {
     match req {
+        Request::Ping(id) => Response::Pong(id),
         Request::GetGameList(id) => match game_list().await {
             Ok(games) => Response::game_list_from_id(id, games),
             Err(err) => Response::err_from_id_and_err(id, err),
@@ -148,6 +136,7 @@ pub async fn handle(req: Request) -> Response {
 impl Display for Request {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Request::Ping(id) => write!(f, "[{id:9}] Ping"),
             Request::GetGameList(id) => write!(f, "[{id:9}] Get Game List"),
             Request::GetGameListFromFs(id) => write!(f, "[{id:9}] Get Game List From Filesystem"),
             Request::GetGame(id, game_id) => {
@@ -176,6 +165,7 @@ impl Display for Request {
 impl Display for Response {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Response::Pong(id) => write!(f, "[{id:9}] Pong"),
             Response::Ok(id) => write!(f, "[{id:9}] Ok"),
             Response::Err(id, err) => write!(f, "[{id:9}] Err: {err}"),
             Response::GameList(id, games) => {

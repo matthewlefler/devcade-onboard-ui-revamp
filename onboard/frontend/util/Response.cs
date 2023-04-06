@@ -1,24 +1,14 @@
 #nullable enable
 using System.Collections.Generic;
+using System.Runtime.InteropServices.ComTypes;
 using Newtonsoft.Json;
 
 namespace onboard.util;
 
 public class Response {
-    // Deserialized response. Equivalent to the following Rust enum:
-    /*
-     * pub enum Response {
-     *   Ok(u32),
-     *   Err(u32, String),
-     *   GameList(u32, Vec<DevcadeGame>),
-     *   Game(u32, DevcadeGame),
-     * }
-     */
-
-    // Trying to get C# to deserialize something that serde serialized is actual hell
-    // This is probably the best I can do in this fucked up language
-
     public enum ResponseType {
+        Pong,
+        
         Ok,
         Err,
         GameList,
@@ -31,6 +21,7 @@ public class Response {
 
     public ResponseType type {
         get {
+            if (data.ContainsKey("Pong")) return ResponseType.Pong;
             if (data.ContainsKey("Ok")) return ResponseType.Ok;
             if (data.ContainsKey("Err")) return ResponseType.Err;
             if (data.ContainsKey("GameList")) return ResponseType.GameList;
@@ -39,9 +30,12 @@ public class Response {
         }
     }
 
-    public uint? id {
+    public uint id {
         get {
-            switch (type) {
+            switch (type) 
+            {
+                case ResponseType.Pong:
+                    return (uint)(long)data["Pong"];
                 case ResponseType.Ok:
                     return (uint)(long)data["Ok"];
                 case ResponseType.Err:
@@ -55,12 +49,15 @@ public class Response {
                     object[]? c = JsonConvert.DeserializeObject<object[]>(JsonConvert.SerializeObject(data["Game"]));
                     return (uint)(long)c[0];
                 default:
-                    return null;
+                    return uint.MaxValue;
             }
         }
     }
 
-    public string? err {
+    /// <summary>
+    /// If the response is an error, this will contain the error message
+    /// </summary>
+    private string? err {
         get {
             if (type != ResponseType.Err) return null;
             object[]? a = JsonConvert.DeserializeObject<object[]>(JsonConvert.SerializeObject(data["Err"]));
@@ -68,7 +65,10 @@ public class Response {
         }
     }
 
-    public List<devcade.DevcadeGame> game_list {
+    /// <summary>
+    /// If the response is a game list, this will contain the list of games
+    /// </summary>
+    private List<devcade.DevcadeGame> game_list {
         get {
             if (type != ResponseType.GameList) return new List<devcade.DevcadeGame>();
             object[]? a = JsonConvert.DeserializeObject<object[]>(JsonConvert.SerializeObject(data["GameList"]));
@@ -76,12 +76,55 @@ public class Response {
         }
     }
 
-    public devcade.DevcadeGame? game {
+    /// <summary>
+    /// If the response is a game, this will contain the game
+    /// </summary>
+    private devcade.DevcadeGame? game {
         get {
             if (type != ResponseType.Game) return null;
             object[]? a = JsonConvert.DeserializeObject<object[]>(JsonConvert.SerializeObject(data["Game"]));
             return JsonConvert.DeserializeObject<devcade.DevcadeGame>(JsonConvert.SerializeObject(a[1]));
         }
+    }
+
+    /// <summary>
+    /// Converts the response to a Result type to force consumers to handle errors rather than access nullable fields
+    /// directly
+    /// </summary>
+    /// <typeparam name="T">The expected return type of the response</typeparam>
+    /// <returns>A Result containing either the expected return type or an error string</returns>
+    public Result<T, string> into_result<T>() {
+        return type switch {
+            ResponseType.Err => Result<T, string>.Err(err ?? "Unknown error"),
+            ResponseType.GameList when typeof(T) == typeof(List<devcade.DevcadeGame>) => Result<T, string>.Ok(
+                (T)(object)game_list),
+            ResponseType.Game when typeof(T) == typeof(devcade.DevcadeGame) => Result<T, string>.Ok((T)(object)game),
+            ResponseType.Ok when typeof(T) == typeof(uint) => Result<T, string>.Ok((T)(object)id),
+            ResponseType.Pong when typeof(T) == typeof(uint) => Result<T, string>.Ok((T)(object)id),
+            ResponseType.Unknown when typeof(T) == typeof(string) => Result<T, string>.Ok(
+                (T)(object)JsonConvert.SerializeObject(data)),
+            _ => Result<T, string>.Err("Invalid response type")
+        };
+    }
+
+    /// <summary>
+    /// Converts the response to an Option type to indicate that the response may not contain a value. This works identically
+    /// to `to_result` except that it implicitly discards the error message. Used when the error message is not important
+    /// </summary>
+    /// <typeparam name="T">The expected return type of the response</typeparam>
+    /// <returns>An option containing either the expected return type or None</returns>
+    public Option<T> into_option<T>() {
+        return into_result<T>().ok();
+    }
+    
+    /// <summary>
+    /// Converts the response to a result and unwraps it. This is equivalent to `to_result().unwrap()`
+    /// </summary>
+    /// <typeparam name="T">The expected return type of the response</typeparam>
+    /// <returns>An instance of type T</returns>
+    /// <exception cref="">Throws an exception if the result is an Err</exception>
+    public T into<T>() {
+        return into_result<T>().unwrap();
     }
 
     private Response(Dictionary<string, object> data) {
