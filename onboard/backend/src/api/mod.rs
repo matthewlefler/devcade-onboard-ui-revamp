@@ -326,11 +326,13 @@ pub async fn launch_game(game_id: String) -> Result<JoinHandle<ExitStatus>, Erro
             continue;
         }
 
-        if let Some(extension) = path.extension().map(|s| s.to_str().unwrap_or("")) {
-            if extension != "runtimeconfig.json" {
+        if let Some(filename) = path.file_name().map(|s| s.to_str().unwrap_or("")) {
+            if !filename.ends_with("runtimeconfig.json") {
                 continue;
             }
-            executable = path.file_stem().unwrap_or(OsStr::new("")).to_str().unwrap_or("").to_string();
+            log!(Level::Debug, "Found runtimeconfig.json file: {}", filename);
+            executable = path.file_prefix().unwrap_or(OsStr::new("")).to_str().unwrap_or("").to_string();
+            log!(Level::Debug, "Executable inferred from runtimeconfig.json: {}", executable);
             break;
 
         }

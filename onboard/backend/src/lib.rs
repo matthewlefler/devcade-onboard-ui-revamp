@@ -1,4 +1,5 @@
 #![feature(is_some_and)]
+#![feature(path_file_prefix)]
 
 use anyhow::{anyhow, Error};
 use log::{Level, log};
@@ -85,37 +86,6 @@ pub mod env {
         }
     }
 }
-
-/**
- * A game from the Devcade API
- */
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-// TODO Update struct to match new schema
-pub struct DevcadeGame {
-    pub author: String,
-    pub authrequired: bool,
-    pub description: String,
-    pub hash: String,
-    pub id: String,
-    pub name: String,
-    pub upload_date: String,
-}
-
-impl Default for DevcadeGame {
-    fn default() -> Self {
-        DevcadeGame {
-            author: String::new(),
-            authrequired: false,
-            description: String::new(),
-            hash: String::new(),
-            id: String::new(),
-            name: String::new(),
-            // default upload date is unix epoch
-            upload_date: String::from("1970-01-01"),
-        }
-    }
-}
-
 
 /**
  * Make a FIFO at the given path. Uses an unsafe call to `libc::mkfifo`.

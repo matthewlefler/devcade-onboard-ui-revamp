@@ -23,7 +23,6 @@ public static class Client {
         logger.Trace("onGameFinished Invoked");
     };
     
-    
     /**
      * FS
      *   tmp/

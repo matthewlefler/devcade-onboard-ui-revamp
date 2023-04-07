@@ -59,7 +59,7 @@ pub async fn main(command_pipe: &str, response_pipe: &str) -> ! {
         let mut buffer = [0; 4096];
         match command_pipe.try_read(&mut buffer) {
             Ok(_) => {
-                log!(Level::Trace, "Read from command pipe: {}", String::from_utf8_lossy(&buffer).trim());
+                log!(Level::Trace, "Read from command pipe: {}", String::from_utf8_lossy(&buffer).trim_end_matches(|c| c == '\0' || c == ' ' || c == '\n'));
             }
             Err(e) => {
                 if e.kind() == std::io::ErrorKind::WouldBlock {

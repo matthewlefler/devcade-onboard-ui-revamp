@@ -1,7 +1,7 @@
 use futures_util::FutureExt;
 use log::{log, Level};
 use tokio::task::JoinError;
-use crate::servers::onboard::main;
+
 
 /**
  * Module for getting the paths to the pipes that the servers use to communicate
@@ -63,9 +63,9 @@ impl ThreadHandles {
      * Restart the onboard server thread with the given pipes
      */
     pub fn restart_onboard(&mut self, command_pipe: String, response_pipe: String) {
-        log!(Level::Info, "Restarting onboard thread ...");
+        log!(Level::Info, "Starting onboard thread ...");
         self.onboard = Some(tokio::spawn(async move {
-            main(
+            onboard::main(
                 command_pipe.as_str(),
                 response_pipe.as_str(),
             ).await;
