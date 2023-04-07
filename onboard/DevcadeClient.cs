@@ -124,6 +124,7 @@ namespace onboard
             {
                 Console.WriteLine("\nException Caught!");
                 Console.WriteLine("Message :{0} ", e.Message);
+                DownloadFailed = true;
             }
         }
 
