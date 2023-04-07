@@ -1,7 +1,6 @@
 #!/bin/sh
 
 configure_display() {
-	RESOLUTION="$VIEW_WIDTH"'x'"$VIEW_HEIGHT"'_75.00'
 	xrandr -q >> ~/onboard.log 2>&1
 	DEVCADE_OUTPUT=$(xrandr -q | grep ' connected ' | awk '{print $1}')
 	echo "using output: $DEVCADE_OUTPUT" >> ~/onboard.log 2>&1
