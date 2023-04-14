@@ -8,7 +8,7 @@ using System.Threading;
 using log4net;
 using System.Threading.Tasks;
 
-namespace onboard.devcade; 
+namespace onboard.devcade;
 using util;
 
 public static class Client {
@@ -35,7 +35,7 @@ public static class Client {
 
     public static bool isProduction { get; private set; } = true;
     
-    private static bool connected = false;
+    private static bool connected;
     
     private static readonly ILog logger = LogManager.GetLogger(MethodBase.GetCurrentMethod()?.DeclaringType?.FullName);
     
@@ -155,10 +155,21 @@ public static class Client {
                     logger.Debug($"Received game response for request {res.id}");
                     break;
                 case Response.ResponseType.GameList:
-                    logger.Debug($"Received game list response for request {res.id} (contained {res.into<List<DevcadeGame>>().Count} games)");
+                    logger.Debug($"Received game list response for request {res.id} (contained {res.unwrap<List<DevcadeGame>>().Count} games)");
+                    break;
+                case Response.ResponseType.TagList:
+                    logger.Debug(
+                        $"Received tag list response for request {res.id} (contained {res.unwrap<List<Tag>>().Count} tags)");
+                    break;
+                case Response.ResponseType.Tag:
+                    logger.Debug($"Received tag response for request {res.id}");
+                    break;
+                case Response.ResponseType.User:
+                    logger.Debug($"Received user response for request {res.id}");
                     break;
                 default:
                     logger.Warn($"Received unknown response type for request {res.id}: {res.type}");
+                    logger.Warn("Did you forget to add a case to the switch statement?");
                     break;
             }
         }
@@ -200,7 +211,7 @@ public static class Client {
     /// </summary>
     /// <returns></returns>
     private static string read() {
-        return reader?.ReadLine() ?? "";
+        return reader.ReadLine() ?? "";
     }
 
     /// <summary>
@@ -208,9 +219,9 @@ public static class Client {
     /// </summary>
     /// <param name="message"></param>
     private static void write(string message) {
-        writer?.WriteLine(message);
-        writer?.Flush();
-        writer?.BaseStream.Flush();
+        writer.WriteLine(message);
+        writer.Flush();
+        writer.BaseStream.Flush();
     }
     
     #endregion
@@ -303,9 +314,37 @@ public static class Client {
             }
         });
     }
+    
+    public static Task<Response> getTags() {
+        Request req = Request.GetTagList();
+        logger.Debug($"Getting tags list (id {req.id})");
+        return sendRequest(req);
+    }
+
+    public static Task<Response> getTag(string name) {
+        Request req = Request.GetTag(name);
+        logger.Debug($"Getting tag with name '{name}' (id {req.id})");
+        return sendRequest(req);
+    }
+    
+    public static Task<Response> getGamesWithTag(string name) {
+        Request req = Request.GetGameListFromTag(name);
+        logger.Debug($"Getting games with tag '{name}' (id {req.id})");
+        return sendRequest(req);
+    }
+    
+    public static Task<Response> getGamesWithTag(Tag tag) {
+        return getGamesWithTag(tag.name);
+    }
+    
+    public static Task<Response> getUser(string username) {
+        Request req = Request.getUser(username);
+        logger.Debug($"Getting user with username '{username}' (id {req.id})");
+        return sendRequest(req);
+    }
 
     /// <summary>
-    /// Repeatedly pings the backend to check if it is still connected
+    /// Repeatedly pings the backend to check if it is still connected. Spawned as a separate thread that will never die.
     /// </summary>
     /// <param name="intervalMillis">The time between one ping finishing and another ping starting</param>
     /// <param name="timeoutMillis">The timeout to wait for a ping before giving up</param>

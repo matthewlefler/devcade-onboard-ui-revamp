@@ -3,7 +3,7 @@
 
 use anyhow::{anyhow, Error};
 use log::{Level, log};
-use serde::{Deserialize, Serialize};
+
 use tokio::net::unix::pipe::{OpenOptions, Receiver, Sender};
 
 /**
@@ -129,6 +129,8 @@ pub fn open_read_pipe(path: &str) -> Result<Receiver, Error> {
         // opening read_write allows the write end of the pipe to close without causing the read
         // end to close as well. This is necessary as if there is an unexpected error in the onboard
         // this will allow the main process to continue and wait for the onboard to restart.
+        // This behavior is only supported on Linux, so on other POSIX systems the write end of the
+        // pipe will fail to open as the file is already open for writing.
         .read_write(true)
         .open_receiver(path)?;
 

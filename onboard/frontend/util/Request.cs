@@ -1,4 +1,6 @@
 #nullable enable
+using Newtonsoft.Json;
+
 namespace onboard.util;
 
 /**
@@ -16,30 +18,35 @@ public class Request {
         DownloadGame,
         DownloadIcon,
         DownloadBanner,
+        
+        GetTagList,
+        GetTag,
+        GetGameListFromTag,
+        
+        GetUser,
 
         SetProduction,
 
         LaunchGame,
     }
 
-    public readonly uint id;
+    public uint id { get; private set; }
     private readonly RequestType type;
-    private readonly bool? prod;
-    private readonly string? game_id;
+    private readonly object data;
 
-    private Request(RequestType type, string? game_id = null, bool? prod = null) {
+    private Request(RequestType type, string? string_id = null, bool? prod = null) {
         this.id = _id++;
         this.type = type;
-        this.game_id = game_id;
-        this.prod = prod;
+        this.data = type switch {
+            RequestType.Ping or RequestType.GetGameList or RequestType.GetGameListFromFs or RequestType.GetTagList =>
+                id,
+            RequestType.SetProduction => new object[] { id, prod ?? true },
+            _ => new object[] { id, string_id ?? "" }
+        };
     }
 
     public string serialize() {
-        return this.type switch {
-            RequestType.GetGameList or RequestType.GetGameListFromFs or RequestType.Ping => $"{{\"{this.type}\":{this.id}}}",
-            RequestType.SetProduction => $"{{\"{this.type}\":[{this.id}, {(this.prod ?? true).ToString().ToLower()}]}}",
-            _ => $"{{\"{this.type}\":[{this.id},\"{this.game_id}\"]}}"
-        };
+        return "{\"type\": \"" + type + "\", \"data\": " + JsonConvert.SerializeObject(data) + "}";
     }
 
     public static Request GetGameList() {
@@ -72,6 +79,22 @@ public class Request {
 
     public static Request SetProduction(bool prod) {
         return new Request(RequestType.SetProduction, null, prod);
+    }
+    
+    public static Request GetTagList() {
+        return new Request(RequestType.GetTagList);
+    }
+    
+    public static Request GetTag(string tag_name) {
+        return new Request(RequestType.GetTag, tag_name);
+    }
+    
+    public static Request GetGameListFromTag(string tag_name) {
+        return new Request(RequestType.GetGameListFromTag, tag_name);
+    }
+    
+    public static Request getUser(string username) {
+        return new Request(RequestType.GetUser, username);
     }
     
     public static Request Ping() {

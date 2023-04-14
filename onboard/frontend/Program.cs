@@ -13,12 +13,12 @@ namespace onboard
             Env.load("../.env");
 
             // Logging setup
-            GlobalContext.Properties["LogFilePath"] = $"{Env.get("DEVCADE_PATH").unwrap_or("/tmp/devcade")}/logs";
+            GlobalContext.Properties["LogFilePath"] = $"{Env.get("DEVCADE_PATH").unwrap_or("/tmp/devcade")}/logs/frontend";
             GlobalContext.Properties["LogFileName"] = ".log";
             log4net.Config.XmlConfigurator.Configure();
             LogManager.GetLogger(MethodBase.GetCurrentMethod()?.DeclaringType?.FullName).Info("Starting application");
             
-            LogConfig.Level level = Env.get("FRONTEND_LOG").unwrap_or("INFO").ToUpper() switch {
+            LogConfig.Level level = Env.get("FRONTEND_LOG").unwrap_or_else(() => Env.get("RUST_LOG").unwrap_or("INFO")).ToUpper() switch {
                 "TRACE" => LogConfig.Level.TRACE,
                 "VERBOSE" => LogConfig.Level.VERBOSE,
                 "DEBUG" => LogConfig.Level.DEBUG,
@@ -30,7 +30,7 @@ namespace onboard
             };
             
             // Set namespace log levels
-            LogConfig.init(LogConfig.Level.TRACE);
+            LogConfig.init(level);
 
             // Application setup
             Client.init();

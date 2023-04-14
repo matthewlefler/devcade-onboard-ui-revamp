@@ -122,6 +122,14 @@ pub async fn main(command_pipe: &str, response_pipe: &str) -> ! {
             continue;
         }
 
+        for c in &commands {
+            if let Request::Ping(_) = &c {
+                log!(Level::Trace, "Handling command: {}", c);
+            } else {
+                log!(Level::Debug, "Handling command: {}", c);
+            }
+        }
+
         let command_futures = commands
             .into_iter()
             .map(handle)
@@ -132,6 +140,12 @@ pub async fn main(command_pipe: &str, response_pipe: &str) -> ! {
 
             if let Response::Err(id, e) = &response {
                 log!(Level::Warn, "Error handling command {}: {}", id, e);
+            } else {
+                if let Response::Pong(_) = &response {
+                    log!(Level::Trace, "Sending Response: {}", response);
+                } else {
+                    log!(Level::Debug, "Sending Response: {}", response);
+                }
             }
             
             let response = match response {
@@ -141,6 +155,8 @@ pub async fn main(command_pipe: &str, response_pipe: &str) -> ! {
                 }
                 _ => response
             };
+
+
 
             let mut response = match serde_json::to_string(&response) {
                 Ok(r) => r,

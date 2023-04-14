@@ -122,3 +122,20 @@ pub struct DevcadeGame {
      */
     pub user: User,
 }
+
+/**
+ * A game from the Devcade API, but with less information. This is returned by the route that gets
+ * games by tag. This is used to reduce the amount of data that needs to be sent over the network,
+ * but also caused a weird bug that took me way too long to figure out.
+ *
+ * For per-field documentation, see the `DevcadeGame` struct.
+ */
+#[derive(Default, Debug, Serialize, Deserialize)]
+pub struct MinimalGame {
+    pub id: String,
+    pub author: String,
+    pub upload_date: String,
+    pub name: String,
+    pub hash: String,
+    pub description: String,
+}

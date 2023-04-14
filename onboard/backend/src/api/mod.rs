@@ -8,7 +8,7 @@ use std::time::Duration;
 use log::{Level, log};
 use std::thread::JoinHandle;
 use crate::env::{api_url, devcade_path};
-use crate::api::schema::DevcadeGame;
+use crate::api::schema::{DevcadeGame, Tag, User, MinimalGame};
 
 /**
  * Module for defining the database schema, these are the same schema that the API uses, so they are
@@ -99,6 +99,34 @@ mod route {
      */
     pub fn game_download(id: &str) -> String {
         format!("games/{id}/game")
+    }
+
+    /**
+     * Get all tags
+     */
+    pub fn tag_list() -> String {
+        String::from("tags/")
+    }
+
+    /**
+     * Get a specific tag
+     */
+    pub fn tag(name: &str) -> String {
+        format!("tags/{name}")
+    }
+
+    /**
+     * Get all games with a specific tag
+     */
+    pub fn tag_games(name: &str) -> String {
+        format!("tags/{name}/games")
+    }
+
+    /**
+     * Get a specific user
+     */
+    pub fn user(uid: &str) -> String {
+        format!("users/{uid}")
     }
 }
 
@@ -384,6 +412,65 @@ pub async fn launch_game(game_id: String) -> Result<JoinHandle<ExitStatus>, Erro
 }
 
 /**
+ * Returns a list of all tags in the database
+ *
+ * # Errors
+ * This function will return an error if the server cannot be reached, or if the server returns an
+ * error.
+ */
+pub async fn tag_list() -> Result<Vec<Tag>, Error> {
+    network::request_json(format!("{}/{}", api_url(), route::tag_list()).as_str()).await
+}
+
+/**
+ * Returns a tag by its name
+ *
+ * # Errors
+ * This function will return an error if the server cannot be reached, or if the server returns an
+ * error.
+ */
+pub async fn tag(name: String) -> Result<Tag, Error> {
+    network::request_json(format!("{}/{}", api_url(), route::tag(name.as_str())).as_str()).await
+}
+
+/**
+ * Returns a list of all games with the given tag
+ *
+ * # Errors
+ * This function will return an error if the server cannot be reached, or if the server returns an
+ * error.
+ */
+pub async fn tag_games(name: String) -> Result<Vec<DevcadeGame>, Error> {
+    let games: Vec<MinimalGame> = network::request_json(format!("{}/{}", api_url(), route::tag_games(name.as_str())).as_str()).await?;
+    let games: Vec<_> = games.into_iter().map(|g| game_from_minimal(g)).collect();
+    // await all the games and return them
+    let games: Vec<Result<DevcadeGame, Error>> = futures_util::future::join_all(games).await;
+    Ok(games
+        .into_iter()
+        .filter_map(|g| {
+            if let Ok(g) = g {
+                Some(g)
+            } else {
+                log!(Level::Warn, "Failed to get game by tag {name}: {}", g.unwrap_err());
+                None
+            }
+        })
+        .collect()
+    )
+}
+
+/**
+ * Gets a user's information by their user ID
+ *
+ * # Errors
+ * This function will return an error if the server cannot be reached, or if the server returns an
+ * error.
+ */
+pub async fn user(uid: String) -> Result<User, Error> {
+    network::request_json(format!("{}/{}", api_url(), route::user(uid.as_str())).as_str()).await
+}
+
+/**
  * Returns a devcade game if the file at the path is a JSON file containing a devcade game
  *
  * # Errors
@@ -404,4 +491,8 @@ fn game_from_path(path: &str) -> Result<DevcadeGame, Error> {
     let game: DevcadeGame = serde_json::from_str(&str)?;
 
     Ok(game)
+}
+
+async fn game_from_minimal(game: MinimalGame) -> Result<DevcadeGame, Error> {
+    network::request_json::<DevcadeGame>(format!("{}/{}", api_url(), route::game(game.id.as_str())).as_str()).await
 }
