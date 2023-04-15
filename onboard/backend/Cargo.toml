@@ -1,0 +1,21 @@
+[package]
+name = "backend"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1.0.70"
+dotenv = "0.15.0"
+env = "0.0.0"
+env_logger = "0.10.0"
+futures-util = "0.3.27"
+lazy_static = "1.4.0"
+libc = "0.2.140"
+log = "0.4.17"
+reqwest = { version = "0.11.15", features = ["blocking", "json"] }
+serde = { version = "1.0.158", features = ["derive"] }
+serde_json = "1.0.94"
+tokio = { version = "1.26.0", features = ["macros"] }
+zip = "0.6.4"
