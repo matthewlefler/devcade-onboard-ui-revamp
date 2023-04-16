@@ -13,15 +13,15 @@ using onboard.util;
 
 namespace onboard.ui;
 
-public class Menu : IMenu
-{
+public class Menu : IMenu {
     private static readonly ILog logger = LogManager.GetLogger(MethodBase.GetCurrentMethod()?.DeclaringType?.FullName);
 
     public static Menu instance { get; private set; }
 
     private readonly GraphicsDeviceManager _device;
 
-    public List<devcade.DevcadeGame> gameTitles { get; set; }
+    public List<DevcadeGame> gameTitles { get; private set; }
+    private DevcadeGame defaultGame;
     public int itemSelected { get; set; }
     private Dictionary<string, MenuCard> cards { get; } = new();
 
@@ -45,72 +45,70 @@ public class Menu : IMenu
 
     private string devcadePath;
 
-    public Menu(GraphicsDeviceManager _device)
-    {
+    public Menu(GraphicsDeviceManager _device) {
         instance = this;
         this._device = _device;
     }
 
-    public void Initialize()
-    {
+    public void Initialize() {
         // Container.OnContainerBuilt += (_, args) => {
         //     logger.Info("Running game");
         //     Container.runContainer(args);
         // };
         devcadePath = Env.get("DEVCADE_PATH").unwrap_or("/tmp/devcade");
+        defaultGame = new DevcadeGame {
+            name = "Error",
+            description = "There was a problem loading games from the API. Please check the logs for more information.",
+            id = "error",
+            author = "None",
+        };
         updateDims(_device);
     }
 
-    public void LoadContent(ContentManager contentManager)
-    {
+    public void LoadContent(ContentManager contentManager) {
         // Setup banner finished callback
-        Client.onBannerFinished += (_, game) =>
-        {
-            Devcade.instance.loadTextureFromFile($"{devcadePath}/{game.id}/banner.png").ContinueWith(t =>
-            {
-                if (t.IsCompletedSuccessfully && t.Result.is_ok() && cards.ContainsKey(game.id))
-                {
+        Client.onBannerFinished += (_, game) => {
+            Devcade.instance.loadTextureFromFile($"{devcadePath}/{game.id}/banner.png").ContinueWith(t => {
+                if (t.IsCompletedSuccessfully && t.Result.is_ok() && cards.ContainsKey(game.id)) {
                     cards[game.name].setTexture(t.Result.unwrap());
                     return;
                 }
 
-                if (!t.IsCompletedSuccessfully)
-                {
+                if (!t.IsCompletedSuccessfully) {
                     logger.Error($"Download thread failed: {t.Exception}");
                     return;
                 }
-                if (!t.Result.is_ok())
-                {
+
+                if (!t.Result.is_ok()) {
                     logger.Error($"Download returned error: {t.Result.unwrap_err()}");
                     return;
                 }
+
                 logger.Warn($"Attempted to load banner for non-existent game {game.name}");
             });
         };
     }
 
-    public void Update(GameTime gameTime)
-    {
+    public void Update(GameTime gameTime) {
         // Comment to make the linter happy
     }
 
-    public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
-    {
+    public void Draw(SpriteBatch spriteBatch, GameTime gameTime) {
         // Comment to make the linter happy
     }
 
-    public void Unload()
-    {
+    public void Unload() {
         // Comment to make the linter happy
     }
 
-    public void updateDims(GraphicsDeviceManager _graphics)
-    {
+    public void updateDims(GraphicsDeviceManager _graphics) {
         // Get the screen width and height. If none are set, set the to the default values
         _sWidth = Env.get("VIEW_WIDTH").map_or_else(() => 1920, int.Parse);
         _sHeight = Env.get("VIEW_HEIGHT").map_or_else(() => 1080, int.Parse);
 
-        scalingAmount = Math.Sqrt(_sHeight * _sWidth / (double)(1920 * 1080)); // This is a constant value that is used to scale the UI elements
+        scalingAmount =
+            Math.Sqrt(_sHeight * _sWidth /
+                      (double)(1920 * 1080)); // This is a constant value that is used to scale the UI elements
 
         _graphics.PreferredBackBufferHeight = _sHeight;
         _graphics.PreferredBackBufferWidth = _sWidth;
@@ -118,71 +116,84 @@ public class Menu : IMenu
     }
 
     // Empties the gameTitles and cards lists. Called when the reload buttons are pressed
-    public void clearGames()
-    {
+    public void clearGames() {
         gameTitles?.Clear();
         cards?.Clear();
         itemSelected = 0;
     }
 
-    public bool reloadGames(GraphicsDevice device, bool clear = true)
-    {
+    public bool reloadGames(GraphicsDevice device, bool clear = true) {
         if (clear)
             clearGames();
+        // Reload the .env file every time the games are reloaded to make sure that the demo mode is up to date
+        Env.load("../.env");
+        itemSelected = 0;
+        try {
+            var gameTask = Client.getGameList();
+            // wait for the task to finish or timeout
+            if (!gameTask.Wait(TimeSpan.FromSeconds(2))) {
+                logger.Error("Failed to fetch game list: Timed out");
+                gameTitles = new List<DevcadeGame> { defaultGame };
+            }
+            else {
+                gameTitles = gameTask.Result.into_result<List<DevcadeGame>>()
+                    .unwrap_or(new List<DevcadeGame> { defaultGame });
+            }
 
-        try
-        {
-            gameTitles = Client.getGameList().Result.into_result<List<DevcadeGame>>().unwrap_or(new List<DevcadeGame>());
+            if (Env.get("DEMO_MODE").map_or(false, bool.Parse)) {
+                gameTitles = gameTitles.Where(game => !game.containsTag("CSH Only") && !game.containsTag("Gamejam") &&
+                                                      // Manual filtering of games that shouldn't be shown, but don't have the correct tags
+                                                      game.name != "ferris-spinner" && game.name != "MonoZombie" &&
+                                                      game.name != "demo").ToList();
+                // sorry ferris but crustaceans alone don't make good games
+            }
+
             setCards(device);
         }
-        catch (AggregateException e)
-        {
+        catch (AggregateException e) {
             logger.Error($"Failed to fetch game list: {e}");
             return false;
         }
+
         return true;
     }
 
-    public void setCards(GraphicsDevice graphics)
-    {
-        for (int i = 0; i < gameTitles.Count; i++)
-        {
+    public void setCards(GraphicsDevice graphics) {
+        for (int i = 0; i < gameTitles.Count; i++) {
             devcade.DevcadeGame game = gameTitles[i];
             // Start downloading the textures
-            Client.downloadBanner(game.id);
-            // check if /tmp/ has the banner
+            if (game.id != "error") {
+                // don't download the banner for the default game
+                Client.downloadBanner(game.id);
+            } // check if /tmp/ has the banner
+
             string bannerPath = $"/tmp/devcade/{game.id}/banner.png";
-            if (File.Exists(bannerPath))
-            {
-                try
-                {
+            if (File.Exists(bannerPath)) {
+                try {
                     Texture2D banner = Texture2D.FromStream(graphics, File.OpenRead(bannerPath));
                     cards.Add(game.id, new MenuCard(i * -1, banner));
                 }
-                catch (InvalidOperationException e)
-                {
+                catch (InvalidOperationException e) {
                     logger.Warn($"Unable to set card.{e}");
                     cards.Add(game.id, new MenuCard(i * -1, null));
                 }
             }
-            else
-            {
+            else {
                 // If the banner doesn't exist, use a placeholder until it can be downloaded later.
                 cards.Add(game.id, new MenuCard(i * -1, null));
             }
-
         }
+
         MenuCard.cardX = 0;
         descX = _sWidth * 1.5f;
     }
 
-    public devcade.DevcadeGame gameSelected()
-    {
+    public devcade.DevcadeGame gameSelected() {
         return gameTitles.ElementAt(itemSelected);
     }
 
-    public void drawBackground(SpriteBatch _spriteBatch, Texture2D BGgradient, Texture2D icon, float col, GameTime gameTime)
-    {
+    public void drawBackground(SpriteBatch _spriteBatch, Texture2D BGgradient, Texture2D icon, float col,
+        GameTime gameTime) {
         _spriteBatch.Draw(
             BGgradient,
             new Rectangle(0, 0, _sWidth, _sHeight),
@@ -201,9 +212,9 @@ public class Menu : IMenu
         // Added to the X and Y values will be it's offset, which is calculated by 150 * time elapsed. Making it move 150 px in one second
         // Once offset reaches 150, it goes back to zero. 
 
-        offset += 150 * (float)gameTime.ElapsedGameTime.TotalSeconds / 2; // Divided by two to make the animation a little slower
-        if (offset > 150)
-        {
+        offset += 150 * (float)gameTime.ElapsedGameTime.TotalSeconds /
+                  2; // Divided by two to make the animation a little slower
+        if (offset > 150) {
             offset = 0;
         }
 
@@ -212,8 +223,7 @@ public class Menu : IMenu
 
         for (int row = -150; row <= numRows * 150; row += 150) // Starts at -150 to draw an extra row above the screen
         {
-            for (int column = 0; column <= numColumns * 150; column += 150)
-            {
+            for (int column = 0; column <= numColumns * 150; column += 150) {
                 _spriteBatch.Draw(
                     icon,
                     new Vector2(column - offset, row + offset),
@@ -227,11 +237,9 @@ public class Menu : IMenu
                 );
             }
         }
-
     }
 
-    public void drawTitle(SpriteBatch _spriteBatch, Texture2D titleTexture, float col)
-    {
+    public void drawTitle(SpriteBatch _spriteBatch, Texture2D titleTexture, float col) {
         // The title will always be scaled to fit the width of the screen. The height follows scaling based on how
         // much the title was stretched horizontally
         float scaling = (float)_sWidth / titleTexture.Width;
@@ -247,18 +255,18 @@ public class Menu : IMenu
         );
     }
 
-    public void drawInstructions(SpriteBatch _spriteBatch, SpriteFont font)
-    {
+    public void drawInstructions(SpriteBatch _spriteBatch, SpriteFont font) {
         List<string> instructions = wrapText("Press the Red button to play! Press both Black Buttons to refresh", 25);
         float instructSize = font.MeasureString("Press the Red button to play! Press both Black Buttons to refresh").Y;
         int lineNum = 0;
 
-        foreach (string line in instructions)
-        {
+        foreach (string line in instructions) {
             writeString(_spriteBatch,
                 font,
                 line,
-                new Vector2(_sWidth / 2.0f, (int)(500 * scalingAmount) + instructSize * lineNum), // 500 is the height of the title, this string goes right beneath that
+                new Vector2(_sWidth / 2.0f,
+                    (int)(500 * scalingAmount) +
+                    instructSize * lineNum), // 500 is the height of the title, this string goes right beneath that
                 1f
             );
             lineNum++;
@@ -266,19 +274,19 @@ public class Menu : IMenu
     }
 
 
-    public void drawError(SpriteBatch _spriteBatch, SpriteFont font)
-    {
+    public void drawError(SpriteBatch _spriteBatch, SpriteFont font) {
         const string error = "Error: Could not get game list. Is API Down? Press both black buttons to reload.";
         var instructions = wrapText(error, 25);
         float instructSize = font.MeasureString(error).Y;
         int lineNum = 0;
 
-        foreach (string line in instructions)
-        {
+        foreach (string line in instructions) {
             writeString(_spriteBatch,
                 font,
                 line,
-                new Vector2(_sWidth / 2.0f, (int)(500 * scalingAmount) + instructSize * lineNum), // 500 is the height of the title, this string goes right beneath that
+                new Vector2(_sWidth / 2.0f,
+                    (int)(500 * scalingAmount) +
+                    instructSize * lineNum), // 500 is the height of the title, this string goes right beneath that
                 1f,
                 Color.Red
             );
@@ -286,14 +294,11 @@ public class Menu : IMenu
         }
     }
 
-    public void drawLoading(SpriteBatch _spriteBatch, Texture2D loadingSpin, float col)
-    {
-        if (loadingCol > 4)
-        {
+    public void drawLoading(SpriteBatch _spriteBatch, Texture2D loadingSpin, float col) {
+        if (loadingCol > 4) {
             loadingCol = 0;
             loadingRow++;
-            if (loadingRow > 4)
-            {
+            if (loadingRow > 4) {
                 loadingRow = 0;
             }
         }
@@ -319,41 +324,36 @@ public class Menu : IMenu
         );
 
         loadingCol++;
-
     }
 
-    public void descFadeIn(GameTime gameTime)
-    {
+    public void descFadeIn(GameTime gameTime) {
         // This does the slide in animation, starting off screen and moving to the middle over 0.8 seconds
         if (descOpacity >= 1) return;
         descX -= _sWidth / descFadeTime * (float)gameTime.ElapsedGameTime.TotalSeconds;
         descOpacity += 1 / descFadeTime * (float)gameTime.ElapsedGameTime.TotalSeconds;
     }
 
-    public void descFadeOut(GameTime gameTime)
-    {
+    public void descFadeOut(GameTime gameTime) {
         // This does the slide out animation, starting in the middle of the screen and moving it off over 0.8 seconds
         if (descOpacity <= 0) return;
         descX += _sWidth / descFadeTime * (float)gameTime.ElapsedGameTime.TotalSeconds;
         descOpacity -= 1 / descFadeTime * (float)gameTime.ElapsedGameTime.TotalSeconds;
     }
 
-    public void cardFadeIn(GameTime gameTime)
-    {
+    public void cardFadeIn(GameTime gameTime) {
         if (MenuCard.cardOpacity >= 1) return;
         MenuCard.cardX += _sWidth / descFadeTime * (float)gameTime.ElapsedGameTime.TotalSeconds;
         MenuCard.cardOpacity += 1 / descFadeTime * (float)gameTime.ElapsedGameTime.TotalSeconds;
     }
 
-    public void cardFadeOut(GameTime gameTime)
-    {
+    public void cardFadeOut(GameTime gameTime) {
         if (MenuCard.cardOpacity <= 0) return;
         MenuCard.cardX -= _sWidth / descFadeTime * (float)gameTime.ElapsedGameTime.TotalSeconds;
         MenuCard.cardOpacity -= 1 / descFadeTime * (float)gameTime.ElapsedGameTime.TotalSeconds;
     }
 
-    public void drawDescription(SpriteBatch _spriteBatch, Texture2D descTexture, SpriteFont titleFont, SpriteFont descFont)
-    {
+    public void drawDescription(SpriteBatch _spriteBatch, Texture2D descTexture, SpriteFont titleFont,
+        SpriteFont descFont) {
         // First, draw the backdrop of the description
         // I'm not sure why I added descTexture.Height/6 to the position. It is to make the image draw slightly below the center of the screen, but there is probably a better way to do this?
         Vector2 descPos = new Vector2(descX, _sHeight / 2 + (int)(descTexture.Height * scalingAmount / 6));
@@ -375,14 +375,13 @@ public class Menu : IMenu
         float descHeight = descFont.MeasureString(gameSelected().description).Y;
 
         int lineNum = 0;
-        foreach (string line in wrapDesc)
-        {
+        foreach (string line in wrapDesc) {
             writeString(_spriteBatch,
-            descFont,
-            line,
-            new Vector2(descPos.X, (float)(descPos.Y - descTexture.Height * scalingAmount / 5 +
-                                            descHeight * lineNum)),
-            descOpacity
+                descFont,
+                line,
+                new Vector2(descPos.X, (float)(descPos.Y - descTexture.Height * scalingAmount / 5 +
+                                               descHeight * lineNum)),
+                descOpacity
             );
             lineNum++;
         }
@@ -395,7 +394,7 @@ public class Menu : IMenu
             descOpacity
         );
 
-        String author = (gameSelected().user.user_type == UserType.CSH) ? gameSelected().user.id : gameSelected().user.email.Remove(gameSelected().user.email.IndexOf('@'));
+        // String author = (gameSelected().user.user_type == UserType.CSH) ? gameSelected().user.id : gameSelected().user.email.Remove(gameSelected().user.email.IndexOf('@'));
         // Write the game's author
         writeString(_spriteBatch,
             descFont,
@@ -411,28 +410,25 @@ public class Menu : IMenu
             new Vector2(descPos.X, descPos.Y + (int)(descTexture.Height * scalingAmount / 2 - descHeight)),
             descOpacity
         );
-
     }
 
-    public static List<string> wrapText(string desc, int lineLimit)
-    {
+    public static List<string> wrapText(string desc, int lineLimit) {
         // This function should take in a description and return a list of lines to print to the screen
         string[] words = desc.Split(' '); // Split the description up by words
         List<string> lines = new() { ' '.ToString() }; // Create a list to return 
 
         int currentLine = 0;
         StringBuilder currentLineStr = new();
-        foreach (string word in words)
-        {
+        foreach (string word in words) {
             // For each word in the description, we add it to a line. 
             currentLineStr.Append(word + ' ');
             // Once that line is over the limit of  characters, we move to the next line
-            if (currentLineStr.Length <= lineLimit)
-            {
-                lines[currentLine] = currentLineStr.ToString();
-                currentLineStr = new();
+            if (currentLineStr.Length <= lineLimit) {
                 continue;
             }
+
+            lines[currentLine] = currentLineStr.ToString();
+            currentLineStr.Clear();
             currentLine++;
             lines.Add(' '.ToString());
         }
@@ -440,8 +436,8 @@ public class Menu : IMenu
         return lines;
     }
 
-    public void writeString(SpriteBatch _spriteBatch, SpriteFont font, string str, Vector2 pos, float opacity, Color color)
-    {
+    public void writeString(SpriteBatch _spriteBatch, SpriteFont font, string str, Vector2 pos, float opacity,
+        Color color) {
         Vector2 strSize = font.MeasureString(str);
 
         _spriteBatch.DrawString(font,
@@ -456,8 +452,7 @@ public class Menu : IMenu
         );
     }
 
-    public void writeString(SpriteBatch _spriteBatch, SpriteFont font, string str, Vector2 pos, float opacity)
-    {
+    public void writeString(SpriteBatch _spriteBatch, SpriteFont font, string str, Vector2 pos, float opacity) {
         Vector2 strSize = font.MeasureString(str);
 
         _spriteBatch.DrawString(font,
@@ -472,73 +467,67 @@ public class Menu : IMenu
         );
     }
 
-    public void drawCards(SpriteBatch _spriteBatch, Texture2D cardTexture, SpriteFont font)
-    {
+    public void drawCards(SpriteBatch _spriteBatch, Texture2D cardTexture, SpriteFont font) {
         // I still have no idea why the layerDepth does not work
-        foreach (MenuCard card in cards.Values.Where(card => Math.Abs(card.listPos) == 4))
-        {
+        foreach (MenuCard card in cards.Values.Where(card => Math.Abs(card.listPos) == 4)) {
             card.DrawSelf(_spriteBatch, cardTexture, _sHeight, scalingAmount);
         }
-        foreach (MenuCard card in cards.Values.Where(card => Math.Abs(card.listPos) == 3))
-        {
+
+        foreach (MenuCard card in cards.Values.Where(card => Math.Abs(card.listPos) == 3)) {
             card.DrawSelf(_spriteBatch, cardTexture, _sHeight, scalingAmount);
         }
-        foreach (MenuCard card in cards.Values.Where(card => Math.Abs(card.listPos) == 2))
-        {
+
+        foreach (MenuCard card in cards.Values.Where(card => Math.Abs(card.listPos) == 2)) {
             card.DrawSelf(_spriteBatch, cardTexture, _sHeight, scalingAmount);
         }
-        foreach (MenuCard card in cards.Values.Where(card => Math.Abs(card.listPos) == 1))
-        {
+
+        foreach (MenuCard card in cards.Values.Where(card => Math.Abs(card.listPos) == 1)) {
             card.DrawSelf(_spriteBatch, cardTexture, _sHeight, scalingAmount);
         }
-        foreach (MenuCard card in cards.Values.Where(card => Math.Abs(card.listPos) == 0))
-        {
+
+        foreach (MenuCard card in cards.Values.Where(card => Math.Abs(card.listPos) == 0)) {
             card.DrawSelf(_spriteBatch, cardTexture, _sHeight, scalingAmount);
         }
     }
 
-    public void beginAnimUp()
-    {
-        if (movingUp || movingDown || itemSelected >= gameTitles.Count - 1) return; // scrolling beginds only if it is not already moving, and not at bottom of list
-        foreach (MenuCard card in cards.Values)
-        {
+    public void beginAnimUp() {
+        if (movingUp || movingDown || itemSelected >= gameTitles.Count - 1)
+            return; // scrolling beginds only if it is not already moving, and not at bottom of list
+        foreach (MenuCard card in cards.Values) {
             card.listPos++;
             //card.layer = (float)Math.Abs(card.listPos) / 4;
         }
+
         timeRemaining = moveTime; // Time remaining in the animation begins at the total expected move time
         movingUp = true;
         itemSelected++; // Update which game is currently selected, so the proper one will be launched
     }
 
-    public void beginAnimDown()
-    {
-        if (movingDown || movingUp || itemSelected <= 0) return; // scrolling begins only if it is not already moving, and not at the top of the list
-        foreach (MenuCard card in cards.Values)
-        {
+    public void beginAnimDown() {
+        if (movingDown || movingUp || itemSelected <= 0)
+            return; // scrolling begins only if it is not already moving, and not at the top of the list
+        foreach (MenuCard card in cards.Values) {
             card.listPos--;
             //card.layer = (float)Math.Abs(card.listPos) / 4;
         }
+
         timeRemaining = moveTime; // Time remaining in the animation begins at the total expected move time
         movingDown = true;
         itemSelected--;
     }
 
-    public void animate(GameTime gameTime)
-    {
-        if (timeRemaining > 0) // Continues to execute the following code as long as the animation is playing AND max time isn't reached
+    public void animate(GameTime gameTime) {
+        if (timeRemaining >
+            0) // Continues to execute the following code as long as the animation is playing AND max time isn't reached
         {
-            if (movingUp)
-            {
-                foreach (MenuCard card in cards.Values)
-                {
+            if (movingUp) {
+                foreach (MenuCard card in cards.Values) {
                     card.moveUp(gameTime);
                 }
             }
 
-            else if (movingDown)
-            {
-                foreach (MenuCard card in cards.Values)
-                {
+            else if (movingDown) {
+                foreach (MenuCard card in cards.Values) {
                     card.moveDown(gameTime);
                 }
             }
@@ -553,4 +542,3 @@ public class Menu : IMenu
         }
     }
 }
-
