@@ -11,6 +11,8 @@ using Microsoft.Xna.Framework.Graphics;
 using onboard.devcade;
 using onboard.util;
 
+using Microsoft.Xna.Framework.Input;
+
 namespace onboard.ui;
 
 public class Menu : IMenu
@@ -18,6 +20,10 @@ public class Menu : IMenu
     private static readonly ILog logger = LogManager.GetLogger(MethodBase.GetCurrentMethod()?.DeclaringType?.FullName);
 
     public static Menu instance { get; private set; }
+
+    // The instance of TagsMenu that will be used to draw the area where the user can sort by tag
+    private static TagsMenu tagsMenu;
+    private string currentTag = "All Games";
 
     private readonly GraphicsDeviceManager _device;
 
@@ -110,7 +116,7 @@ public class Menu : IMenu
         _sWidth = Env.get("VIEW_WIDTH").map_or_else(() => 1920, int.Parse);
         _sHeight = Env.get("VIEW_HEIGHT").map_or_else(() => 1080, int.Parse);
 
-        scalingAmount = Math.Sqrt(_sHeight * _sWidth / (double)(1920 * 1080)); // This is a constant value that is used to scale the UI elements
+        scalingAmount = Math.Sqrt(_sHeight * _sWidth / (double)(1080 * 2560)); // This is a constant value that is used to scale the UI elements
 
         _graphics.PreferredBackBufferHeight = _sHeight;
         _graphics.PreferredBackBufferWidth = _sWidth;
@@ -179,6 +185,38 @@ public class Menu : IMenu
     public devcade.DevcadeGame gameSelected()
     {
         return gameTitles.ElementAt(itemSelected);
+    }
+
+    /* 
+    * Tags Menu Related Functions
+    */
+    
+    // MAKE FONTS, TEXTURES, AND DIMS FIELDS WITHIN TAGS MENU
+    public void initializeTagsMenu(Texture2D cardTexture, SpriteFont font) {
+        string[] placeholderTags = {"test1", "test2", "test3", "test4", "test5"};
+        tagsMenu = new TagsMenu(new List<string>(placeholderTags), cardTexture, font, new Vector2(_sWidth, _sHeight), scalingAmount);
+    }
+
+    public void drawTagsMenu(SpriteBatch spriteBatch, SpriteFont font) {
+        tagsMenu.Draw(spriteBatch, font, new Vector2(_sWidth, _sHeight));
+    }
+
+    public void updateTagsMenu(KeyboardState currentState, KeyboardState lastState, GameTime gameTime) {
+        tagsMenu.Update(currentState, lastState, gameTime);
+    }
+
+    public int getTagCol() { return tagsMenu.getCurrentCol(); }
+
+    public void updateTag() { this.currentTag = tagsMenu.getCurrentTag(); }
+
+    public void showTags() {
+        tagsMenu.setIsShowing(true);
+        tagsMenu.resetxVel();
+    }
+
+    public void hideTags() {
+        tagsMenu.setIsShowing(false);
+        tagsMenu.resetxVel();
     }
 
     public void drawBackground(SpriteBatch _spriteBatch, Texture2D BGgradient, Texture2D icon, float col, GameTime gameTime)
