@@ -182,15 +182,15 @@ public class Devcade : Game {
 
         loadingSpin = Content.Load<Texture2D>("loadingSheet");
 
-        // Create instances related to the tags menu
-        menu.initializeTagsMenu(cardTexture, _devcadeMenuBig);
-
         // TODO: use this.Content to load your game content here
 
         if (!menu.reloadGames(GraphicsDevice, false)) {
             state = MenuState.Loading;
             _cantFetch = true; 
         }
+
+        // Create instances related to the tags menu
+        menu.initializeTagsMenu(cardTexture, _devcadeMenuBig);
 
         base.LoadContent();
     }

@@ -21,13 +21,13 @@ public class TagsMenu
     private double scalingAmount;
     private bool isShowing = false;
 
-    public TagsMenu(List<string> tags, Texture2D cardTexture, SpriteFont font, Vector2 dims, double scalingAmount) {
+    public TagsMenu(string[] tags, Texture2D cardTexture, SpriteFont font, Vector2 dims, double scalingAmount) {
 
         this.scalingAmount = scalingAmount;
 
         // cards is a 2D array of every tag in the form [row][col]
         // The # of rows is tags.length / 2 rounded up
-        TagsMenu.rows = (int)Math.Ceiling((double)tags.Count/2);
+        TagsMenu.rows = (int)Math.Ceiling((double)tags.Length/2);
         // # of cols is a constant 2
         cards = new TagCard[rows, cols]; // Surprised that math.floor/ceiling dont return ints
 
@@ -38,7 +38,7 @@ public class TagsMenu
                 // If the number of tags is ODD, then the 2D array of cards will be LARGER than the number of tags
                 // To prevent index OOB, add an additional check to see if we've reached the end of the tags list
                 // This also results in the bottom right element of the cards array being NULL, and there needs to be checks for this when moving through the array.
-                if (currentTag < tags.Count) {
+                if (currentTag < tags.Length) {
                     // Create a new tagCard for each tag. 
                     //      The height is dependent on it's row. Starting at 1/3 down the page, its position is lower down depending on it's row
                     float y = (float)(dims.Y/3 + row * 3 * cardTexture.Height/4 * scalingAmount);

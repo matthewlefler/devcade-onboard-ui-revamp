@@ -24,6 +24,8 @@ public class Menu : IMenu
     // The instance of TagsMenu that will be used to draw the area where the user can sort by tag
     private static TagsMenu tagsMenu;
     private string currentTag = "All Games";
+    // A dictionary that will map the current tag to a list of the cards that have that tag
+    private Dictionary<string, List<MenuCard>> tags = new Dictionary<string, List<MenuCard>>();
 
     private readonly GraphicsDeviceManager _device;
 
@@ -151,9 +153,14 @@ public class Menu : IMenu
 
     public void setCards(GraphicsDevice graphics)
     {
+        tags.Add("All Games", new List<MenuCard>());
+
         for (int i = 0; i < gameTitles.Count; i++)
         {
             devcade.DevcadeGame game = gameTitles[i];
+
+            MenuCard newCard;
+
             // Start downloading the textures
             Client.downloadBanner(game.id);
             // check if /tmp/ has the banner
@@ -163,21 +170,39 @@ public class Menu : IMenu
                 try
                 {
                     Texture2D banner = Texture2D.FromStream(graphics, File.OpenRead(bannerPath));
-                    cards.Add(game.id, new MenuCard(i * -1, banner));
+                    newCard = new MenuCard(i * -1, banner);
                 }
                 catch (InvalidOperationException e)
                 {
                     logger.Warn($"Unable to set card.{e}");
-                    cards.Add(game.id, new MenuCard(i * -1, null));
+                    newCard = new MenuCard(i * -1, null);
                 }
             }
             else
             {
                 // If the banner doesn't exist, use a placeholder until it can be downloaded later.
-                cards.Add(game.id, new MenuCard(i * -1, null));
+                newCard = new MenuCard(i * -1, null);
+            }
+
+            cards.Add(game.id, newCard);
+
+            // Add the reference to the card to the proper lists within the tag dictionary
+            foreach(devcade.Tag tag in game.tags)
+            {
+                if(!tags.ContainsKey(tag.name)) 
+                    tags.Add(tag.name, new List<MenuCard>());
+
+                tags[tag.name].Add(newCard);
+                tags["All Games"].Add(newCard);
             }
 
         }
+
+        foreach(string tagName in tags.Keys) {
+            Console.WriteLine(tagName);
+        }
+        Console.WriteLine(tags.Keys.ToArray().Length);
+
         MenuCard.cardX = 0;
         descX = _sWidth * 1.5f;
     }
@@ -193,8 +218,7 @@ public class Menu : IMenu
     
     // MAKE FONTS, TEXTURES, AND DIMS FIELDS WITHIN TAGS MENU
     public void initializeTagsMenu(Texture2D cardTexture, SpriteFont font) {
-        string[] placeholderTags = {"test1", "test2", "test3", "test4", "test5"};
-        tagsMenu = new TagsMenu(new List<string>(placeholderTags), cardTexture, font, new Vector2(_sWidth, _sHeight), scalingAmount);
+        tagsMenu = new TagsMenu(tags.Keys.ToArray(), cardTexture, font, new Vector2(_sWidth, _sHeight), scalingAmount);
     }
 
     public void drawTagsMenu(SpriteBatch spriteBatch, SpriteFont font) {
@@ -231,13 +255,6 @@ public class Menu : IMenu
             SpriteEffects.None,
             0f
         );
-
-        // Idea for scrolling icons: This surprisingly worked with no hassle
-        // For row in range (# of rows)
-        // For column in range (# of cols)
-        // Draw a single icon. The location is based on it's row & column. Both of these values will incremement by 150 (150 is the size of the icon sprite)
-        // Added to the X and Y values will be it's offset, which is calculated by 150 * time elapsed. Making it move 150 px in one second
-        // Once offset reaches 150, it goes back to zero. 
 
         offset += 150 * (float)gameTime.ElapsedGameTime.TotalSeconds / 2; // Divided by two to make the animation a little slower
         if (offset > 150)
