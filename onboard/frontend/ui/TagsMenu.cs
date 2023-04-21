@@ -162,9 +162,9 @@ public class TagsMenu
 
                     // Update animations for when switching between cards and tags screen
                     if(isShowing)
-                        cards[row, col].scrollLeft(gameTime);
+                        cards[row, col].scrollLeft(gameTime, scalingAmount);
                     else
-                        cards[row, col].scrollRight(gameTime); 
+                        cards[row, col].scrollRight(gameTime, scalingAmount); 
                 }
             }
         }

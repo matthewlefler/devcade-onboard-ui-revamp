@@ -121,7 +121,8 @@ public class Menu : IMenu
         _sWidth = Env.get("VIEW_WIDTH").map_or_else(() => 1920, int.Parse);
         _sHeight = Env.get("VIEW_HEIGHT").map_or_else(() => 1080, int.Parse);
 
-        scalingAmount = Math.Sqrt(_sHeight * _sWidth / (double)(1080 * 2560)); // This is a constant value that is used to scale the UI elements
+        // This is a constant value that is used to scale the UI elements if the resolution is smaller than 2560x1080. Results may vary if the same aspect ratio is not kept
+        scalingAmount = Math.Sqrt(_sHeight * _sWidth / (double)(1080 * 2560)); 
 
         _graphics.PreferredBackBufferHeight = _sHeight;
         _graphics.PreferredBackBufferWidth = _sWidth;

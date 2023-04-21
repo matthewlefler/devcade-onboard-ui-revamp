@@ -80,10 +80,12 @@ public class TagCard {
     }
 
     // These two methods are similar to the one above, where the X position of the cards gradually changes each frame when switching between tags and games menu.
-    public void scrollRight( GameTime gameTime ) {
+    public void scrollRight( GameTime gameTime, double scalingAmount ) {
         // With these two, I have them slow down as they slide. So, if the xVel reaches zero, just snap them to where they need to be
         if (pos.X < xHidden && xVel > 0) {
-            pos.X += xVel * xSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            // If the resolution differs from what's expected, this animation will play much slower/faster than it should
+            // It still functions, but looks wrong. using scalingAmount more or less makes the animations play at their proper speed
+            pos.X += xVel * xSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds * (float) scalingAmount;
             xVel *= xAccel;
         } else {
             pos.X = xHidden;
@@ -91,9 +93,9 @@ public class TagCard {
         }
     }
 
-    public void scrollLeft( GameTime gameTime ) {
+    public void scrollLeft( GameTime gameTime, double scalingAmount ) {
         if (pos.X > xShowing && xVel > 0) {
-            pos.X -= xVel * xSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            pos.X -= xVel * xSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds * (float)scalingAmount;
             xVel *= xAccel;
         } else {
             pos.X = xShowing;
