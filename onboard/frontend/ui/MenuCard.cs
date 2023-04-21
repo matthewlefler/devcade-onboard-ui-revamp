@@ -25,10 +25,15 @@ namespace onboard.ui
         private static readonly float rotationSpeed = rotation_amt / moveTime;
         private const float scaleSpeed = scale_amt / moveTime;
 
-        public MenuCard(int initialPos, Texture2D cardTexture)
+        // I made each card keep a reference to the game it represents
+        // Because when sorting by tags, the positions of the cards will change, so it is easier to launch the currently selected game by first getting the card
+        public devcade.DevcadeGame game;
+
+        public MenuCard(int initialPos, Texture2D cardTexture, devcade.DevcadeGame game)
         {
             this.listPos = initialPos;
             this.texture = cardTexture;
+            this.game = game;
 
             while(initialPos > 0)
             {
@@ -45,6 +50,28 @@ namespace onboard.ui
                 initialPos++;
             }
 
+        }
+
+        public void setListPos(int pos) { 
+            this.listPos = pos; 
+            this.rotation = 0f;
+            this.scale = 1f;
+
+            while(pos > 0)
+            {
+                rotation -= rotation_amt;
+                scale -= scale_amt;
+
+                pos--;
+            }
+
+            while (pos < 0)
+            {
+                rotation += rotation_amt;
+                scale -= scale_amt;
+
+                pos++;
+            }
         }
 
         public void moveUp(GameTime gameTime)

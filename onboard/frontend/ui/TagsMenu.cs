@@ -21,7 +21,7 @@ public class TagsMenu
     private double scalingAmount;
     private bool isShowing = false;
 
-    public TagsMenu(string[] tags, Texture2D cardTexture, SpriteFont font, Vector2 dims, double scalingAmount) {
+    public TagsMenu(devcade.Tag[] tags, Texture2D cardTexture, SpriteFont font, Vector2 dims, double scalingAmount) {
 
         this.scalingAmount = scalingAmount;
 
@@ -95,7 +95,7 @@ public class TagsMenu
 
         if (isShowing) {
             // Draw the Instructions
-            Vector2 strSize = font.MeasureString("Select a tag below to search:");
+            Vector2 strSize = font.MeasureString("Select a tag below to sort:");
             _spriteBatch.DrawString(font,
                 "Select a tag below to search:",
                 new Vector2(dims.X/2, (int)(500 * scalingAmount)), // 500 is the height of the title, this string goes right beneath that
@@ -107,15 +107,15 @@ public class TagsMenu
                 0f
             );
 
-            // Display the name of the tag (and probably description later)
-            strSize = font.MeasureString(cards[currentRow, currentCol].getName());
+            // Display the description of the tag 
+            strSize = font.MeasureString(cards[currentRow, currentCol].tag.description);
             _spriteBatch.DrawString(font,
-                cards[currentRow, currentCol].getName(),
+                cards[currentRow, currentCol].tag.description,
                 new Vector2(dims.X/2, (int)(500 * scalingAmount) + strSize.Y), // 500 is the height of the title, this string goes right beneath that
                 Color.Black,
                 0f,
                 new Vector2(strSize.X / 2, strSize.Y / 2), 
-                (float)(1.2f * scalingAmount),
+                (float)(1.1f * scalingAmount),
                 SpriteEffects.None,
                 0f
             );
@@ -170,7 +170,7 @@ public class TagsMenu
         }
     }
 
-    public string getCurrentTag() { return cards[currentRow, currentCol].getName(); }
+    public devcade.Tag getCurrentTag() { return cards[currentRow, currentCol].tag; }
 
     public void highlightUp() {
         cards[currentRow, currentCol].setSelected(false);

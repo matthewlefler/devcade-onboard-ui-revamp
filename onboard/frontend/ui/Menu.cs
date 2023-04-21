@@ -23,9 +23,12 @@ public class Menu : IMenu
 
     // The instance of TagsMenu that will be used to draw the area where the user can sort by tag
     private static TagsMenu tagsMenu;
-    private string currentTag = "All Games";
+    private static devcade.Tag allTag = new devcade.Tag("All Games", "View all available games");
+    private string currentTag = allTag.name;
+    // A list of all the tags
+    private List<devcade.Tag> tags;
     // A dictionary that will map the current tag to a list of the cards that have that tag
-    private Dictionary<string, List<MenuCard>> tags = new Dictionary<string, List<MenuCard>>();
+    private Dictionary<string, List<MenuCard>> tagLists = new Dictionary<string, List<MenuCard>>();
 
     private readonly GraphicsDeviceManager _device;
 
@@ -130,6 +133,7 @@ public class Menu : IMenu
     {
         gameTitles?.Clear();
         cards?.Clear();
+        tagLists.Clear();
         itemSelected = 0;
     }
 
@@ -150,10 +154,15 @@ public class Menu : IMenu
         }
         return true;
     }
-
     public void setCards(GraphicsDevice graphics)
     {
-        tags.Add("All Games", new List<MenuCard>());
+        // Get all of the tags from the API
+        tags = Client.getTags().Result.into_result<List<devcade.Tag>>().unwrap_or(new List<devcade.Tag>());
+        tags.Add(allTag);
+        foreach(devcade.Tag tag in tags) 
+        {
+            tagLists.Add(tag.name, new List<MenuCard>());
+        }
 
         for (int i = 0; i < gameTitles.Count; i++)
         {
@@ -170,18 +179,18 @@ public class Menu : IMenu
                 try
                 {
                     Texture2D banner = Texture2D.FromStream(graphics, File.OpenRead(bannerPath));
-                    newCard = new MenuCard(i * -1, banner);
+                    newCard = new MenuCard(i * -1, banner, game);
                 }
                 catch (InvalidOperationException e)
                 {
                     logger.Warn($"Unable to set card.{e}");
-                    newCard = new MenuCard(i * -1, null);
+                    newCard = new MenuCard(i * -1, null, game);
                 }
             }
             else
             {
                 // If the banner doesn't exist, use a placeholder until it can be downloaded later.
-                newCard = new MenuCard(i * -1, null);
+                newCard = new MenuCard(i * -1, null, game);
             }
 
             cards.Add(game.id, newCard);
@@ -189,19 +198,12 @@ public class Menu : IMenu
             // Add the reference to the card to the proper lists within the tag dictionary
             foreach(devcade.Tag tag in game.tags)
             {
-                if(!tags.ContainsKey(tag.name)) 
-                    tags.Add(tag.name, new List<MenuCard>());
+                tagLists[tag.name].Add(newCard);
+            }  
 
-                tags[tag.name].Add(newCard);
-                tags["All Games"].Add(newCard);
-            }
+            tagLists[allTag.name].Add(newCard);
 
         }
-
-        foreach(string tagName in tags.Keys) {
-            Console.WriteLine(tagName);
-        }
-        Console.WriteLine(tags.Keys.ToArray().Length);
 
         MenuCard.cardX = 0;
         descX = _sWidth * 1.5f;
@@ -209,7 +211,7 @@ public class Menu : IMenu
 
     public devcade.DevcadeGame gameSelected()
     {
-        return gameTitles.ElementAt(itemSelected);
+        return tagLists[currentTag].ElementAt(itemSelected).game;
     }
 
     /* 
@@ -217,28 +219,43 @@ public class Menu : IMenu
     */
     
     // MAKE FONTS, TEXTURES, AND DIMS FIELDS WITHIN TAGS MENU
-    public void initializeTagsMenu(Texture2D cardTexture, SpriteFont font) {
-        tagsMenu = new TagsMenu(tags.Keys.ToArray(), cardTexture, font, new Vector2(_sWidth, _sHeight), scalingAmount);
+    public void initializeTagsMenu(Texture2D cardTexture, SpriteFont font) 
+    {
+        tagsMenu = new TagsMenu(tags.ToArray(), cardTexture, font, new Vector2(_sWidth, _sHeight), scalingAmount);
     }
 
-    public void drawTagsMenu(SpriteBatch spriteBatch, SpriteFont font) {
+    public void drawTagsMenu(SpriteBatch spriteBatch, SpriteFont font) 
+    {
         tagsMenu.Draw(spriteBatch, font, new Vector2(_sWidth, _sHeight));
     }
 
-    public void updateTagsMenu(KeyboardState currentState, KeyboardState lastState, GameTime gameTime) {
+    public void updateTagsMenu(KeyboardState currentState, KeyboardState lastState, GameTime gameTime)
+    {
         tagsMenu.Update(currentState, lastState, gameTime);
     }
 
     public int getTagCol() { return tagsMenu.getCurrentCol(); }
 
-    public void updateTag() { this.currentTag = tagsMenu.getCurrentTag(); }
+    public void updateTag() { 
+        this.currentTag = tagsMenu.getCurrentTag().name; 
 
-    public void showTags() {
+        // Reset the listPos of each card within the list of currently visible cards
+        List<MenuCard> visibleCards = tagLists[currentTag];
+        for (int i=0; i<visibleCards.Count; i++) 
+        {
+            visibleCards[i].setListPos(i * -1);
+        }
+        itemSelected = 0;
+    }
+
+    public void showTags() 
+    {
         tagsMenu.setIsShowing(true);
         tagsMenu.resetxVel();
     }
 
-    public void hideTags() {
+    public void hideTags() 
+    {
         tagsMenu.setIsShowing(false);
         tagsMenu.resetxVel();
     }
@@ -410,7 +427,6 @@ public class Menu : IMenu
     public void drawDescription(SpriteBatch _spriteBatch, Texture2D descTexture, SpriteFont titleFont, SpriteFont descFont)
     {
         // First, draw the backdrop of the description
-        // I'm not sure why I added descTexture.Height/6 to the position. It is to make the image draw slightly below the center of the screen, but there is probably a better way to do this?
         Vector2 descPos = new Vector2(descX, _sHeight / 2 + (int)(descTexture.Height * scalingAmount / 6));
 
         _spriteBatch.Draw(descTexture,
@@ -530,23 +546,23 @@ public class Menu : IMenu
     public void drawCards(SpriteBatch _spriteBatch, Texture2D cardTexture, SpriteFont font)
     {
         // I still have no idea why the layerDepth does not work
-        foreach (MenuCard card in cards.Values.Where(card => Math.Abs(card.listPos) == 4))
+        foreach (MenuCard card in tagLists[currentTag].Where(card => Math.Abs(card.listPos) == 4))
         {
             card.DrawSelf(_spriteBatch, cardTexture, _sHeight, scalingAmount);
         }
-        foreach (MenuCard card in cards.Values.Where(card => Math.Abs(card.listPos) == 3))
+        foreach (MenuCard card in tagLists[currentTag].Where(card => Math.Abs(card.listPos) == 3))
         {
             card.DrawSelf(_spriteBatch, cardTexture, _sHeight, scalingAmount);
         }
-        foreach (MenuCard card in cards.Values.Where(card => Math.Abs(card.listPos) == 2))
+        foreach (MenuCard card in tagLists[currentTag].Where(card => Math.Abs(card.listPos) == 2))
         {
             card.DrawSelf(_spriteBatch, cardTexture, _sHeight, scalingAmount);
         }
-        foreach (MenuCard card in cards.Values.Where(card => Math.Abs(card.listPos) == 1))
+        foreach (MenuCard card in tagLists[currentTag].Where(card => Math.Abs(card.listPos) == 1))
         {
             card.DrawSelf(_spriteBatch, cardTexture, _sHeight, scalingAmount);
         }
-        foreach (MenuCard card in cards.Values.Where(card => Math.Abs(card.listPos) == 0))
+        foreach (MenuCard card in tagLists[currentTag].Where(card => Math.Abs(card.listPos) == 0))
         {
             card.DrawSelf(_spriteBatch, cardTexture, _sHeight, scalingAmount);
         }
@@ -554,8 +570,8 @@ public class Menu : IMenu
 
     public void beginAnimUp()
     {
-        if (movingUp || movingDown || itemSelected >= gameTitles.Count - 1) return; // scrolling beginds only if it is not already moving, and not at bottom of list
-        foreach (MenuCard card in cards.Values)
+        if (movingUp || movingDown || itemSelected >= tagLists[currentTag].Count - 1) return; // scrolling beginds only if it is not already moving, and not at bottom of list
+        foreach (MenuCard card in tagLists[currentTag])
         {
             card.listPos++;
             //card.layer = (float)Math.Abs(card.listPos) / 4;
@@ -568,7 +584,7 @@ public class Menu : IMenu
     public void beginAnimDown()
     {
         if (movingDown || movingUp || itemSelected <= 0) return; // scrolling begins only if it is not already moving, and not at the top of the list
-        foreach (MenuCard card in cards.Values)
+        foreach (MenuCard card in tagLists[currentTag])
         {
             card.listPos--;
             //card.layer = (float)Math.Abs(card.listPos) / 4;

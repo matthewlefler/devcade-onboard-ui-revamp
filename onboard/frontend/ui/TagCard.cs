@@ -30,9 +30,9 @@ public class TagCard {
     private float scaleAccel = 0.5f;
 
     private static Color color = new Color(150, 0 ,0);
-    private string name;
+    public devcade.Tag tag;
 
-    public TagCard(Texture2D texture, SpriteFont font, Vector2 startPos, string name, float hiddenOffset) {
+    public TagCard(Texture2D texture, SpriteFont font, Vector2 startPos, devcade.Tag tag, float hiddenOffset) {
         TagCard.texture = texture;
         TagCard.font = font;
 
@@ -40,10 +40,9 @@ public class TagCard {
         this.xHidden = startPos.X;
         this.xShowing = startPos.X - hiddenOffset;
         this.scale = unhighlightedScale;
-        this.name = name;
+        this.tag = tag;
     }
 
-    public string getName() { return this.name; }
     public void setSelected(bool selected) { this.isSelected = selected; }
 
     public void updateScale( GameTime gameTime ) {
@@ -118,10 +117,10 @@ public class TagCard {
             0f
         );
 
-        Vector2 strSize = font.MeasureString(name);
+        Vector2 strSize = font.MeasureString(this.tag.name);
 
         _spriteBatch.DrawString(font,
-            name,
+            this.tag.name,
             pos,
             Color.White,
             0f,
