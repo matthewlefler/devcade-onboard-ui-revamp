@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace onboard.devcade;
 
@@ -67,6 +68,10 @@ public class DevcadeGame {
         this.tags = new List<Tag>();
         this.upload_date = "";
         this.user = new User();
+    }
+    
+    public bool containsTag(string tag) {
+        return tags.Any(t => t.name == tag);
     }
 }
 

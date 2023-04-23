@@ -225,9 +225,7 @@ public class Devcade : Game {
                 if (_cantFetch && (myState.IsKeyDown(Keys.Space) || (Input.GetButton(1, Input.ArcadeButtons.Menu) &&
                                                                      Input.GetButton(2, Input.ArcadeButtons.Menu)))) {
                     try {
-                        menu.clearGames();
-                        menu.gameTitles = Client.getGameList().Result.into_result<List<DevcadeGame>>().unwrap_or(new List<DevcadeGame>());
-                        menu.setCards(GraphicsDevice);
+                        menu.reloadGames(GraphicsDevice);
                         _cantFetch = false;
                         state = MenuState.Input;
                     }
@@ -309,9 +307,7 @@ public class Devcade : Game {
                      Input.GetButton(2, Input.ArcadeButtons.Menu) && // OR Both Menu Buttons
                      Input.GetButton(1, Input.ArcadeButtons.B4))) // and Player 1 B4
                 {
-                    menu.clearGames();
-                    menu.gameTitles = Client.getGameList().Result.into_result<List<DevcadeGame>>().unwrap();
-                    menu.setCards(GraphicsDevice);
+                    menu.reloadGames(GraphicsDevice);
 
                     state = MenuState.Input;
                 }
@@ -335,6 +331,11 @@ public class Devcade : Game {
                     Input.GetButtonDown(1, Input.ArcadeButtons.A1) || // or A1 button
                     Input.GetButtonDown(2, Input.ArcadeButtons.A1)) // of either player
                 {
+                    if (menu.gameSelected().id == "error") {
+                        // Don't launch the default error game
+                        logger.Info("Someone tried to launch the placeholder error game");
+                        break;
+                    }
                     logger.Info("Launching game: " + menu.gameSelected().id + " - " + menu.gameSelected().name);
                     Client.launchGame(
                         menu.gameSelected().id

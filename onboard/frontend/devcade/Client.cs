@@ -48,6 +48,7 @@ public static class Client {
     // Unix FIFO pipe reader and writer for communication with backend
     private static StreamReader reader;
     private static StreamWriter writer;
+    private static bool brokenPipe;
     
     // Dictionary of started tasks by request id
     private static readonly Dictionary<uint, TaskCompletionSource<Response>> tasks = new();
@@ -112,6 +113,12 @@ public static class Client {
 
         // Start the main loop
         while (true) {
+            if (brokenPipe) {
+                logger.Debug("Attempting to fix broken pipe");
+                fixPipes();
+                Thread.Sleep(500);
+            }
+            
             string message = read();
 
             if (message == "") {
@@ -211,7 +218,13 @@ public static class Client {
     /// </summary>
     /// <returns></returns>
     private static string read() {
-        return reader.ReadLine() ?? "";
+        try {
+            return reader.ReadLine() ?? "";
+        } catch (Exception e) {
+            logger.Error("Failed to read from read pipe: " + e);
+            brokenPipe = true;
+            return "";
+        }
     }
 
     /// <summary>
@@ -387,7 +400,18 @@ public static class Client {
     /// <returns>A Task that will be completed when the backend responds</returns>
     private static Task<Response> sendRequest(Request req) {
         if (connected) {
-            write(req.serialize());
+            if (brokenPipe && !fixPipes()) {
+                return Task.FromResult(
+                    Response.fromError(req.id, "Pipes currently broken. Please wait for the plumber"));
+            }
+            try {
+                write(req.serialize());
+            } catch (Exception e) {
+                logger.Error($"Failed to send request {req.id} to backend: {e.Message}");
+                connected = false;
+                brokenPipe = true;
+                return Task.FromResult(Response.fromError(req.id, e.Message));
+            }
         }
         else {
             // Add the request to the queue, it will be sent when the backend is connected
@@ -409,7 +433,14 @@ public static class Client {
     /// <param name="req"></param>
     /// <returns></returns>
     private static Task<Response> forceSendRequest(Request req) {
-        write(req.serialize());
+        try {
+            write(req.serialize());
+        } catch (Exception e) {
+            logger.Error($"Failed to send request {req.id} to backend: {e.Message}");
+            connected = false;
+            brokenPipe = true;
+            return Task.FromResult(Response.fromError(req.id, e.Message));
+        }
         
         TaskCompletionSource<Response> tcs = new();
         
@@ -441,5 +472,23 @@ public static class Client {
             write(req.serialize());
         }
         requests.Clear();
+    }
+
+    /// <summary>
+    /// Attempt to reconnect to the backend. This will just attempt opening a new pipe, and log if it fails.
+    /// </summary>
+    private static bool fixPipes() {
+        var readerResult = tryOpenReader($"{workingDir}/write_onboard.pipe");
+        var writerResult = tryOpenWriter($"{workingDir}/read_onboard.pipe");
+        if (readerResult.is_ok() && writerResult.is_ok()) {
+            reader = readerResult.unwrap();
+            writer = writerResult.unwrap();
+            brokenPipe = false;
+            logger.Info("Reconnected to backend");
+            return true;
+        }
+
+        logger.Warn("Failed to reconnect to backend (is it running?)");
+        return false;
     }
 }

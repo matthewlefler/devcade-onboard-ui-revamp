@@ -103,4 +103,9 @@ public class Response {
     public T unwrap<T>() {
         return into_result<T>().unwrap();
     }
+
+    public static Response fromError(uint id, string err) {
+        object data = new object[] { id, err };
+        return new Response(ResponseType.Err, data);
+    }
 }
