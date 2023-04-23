@@ -374,9 +374,9 @@ public class Devcade : Game {
                     state = MenuState.Input;
                 }
 
-                if((myState.IsKeyDown(Keys.Enter) && lastState.IsKeyUp(Keys.Enter)) ||    // Keyboard Enter
-                    Input.GetButtonDown(1, Input.ArcadeButtons.StickLeft) ||                // OR A1
-                    Input.GetButtonDown(2, Input.ArcadeButtons.StickLeft))                  // of either player
+                if((myState.IsKeyDown(Keys.Enter) && lastState.IsKeyUp(Keys.Enter)) ||  // Keyboard Enter
+                    Input.GetButtonDown(1, Input.ArcadeButtons.A1) ||                   // OR A1
+                    Input.GetButtonDown(2, Input.ArcadeButtons.A1))                     // of either player
                 {
                     menu.updateTag();
                     menu.hideTags();
