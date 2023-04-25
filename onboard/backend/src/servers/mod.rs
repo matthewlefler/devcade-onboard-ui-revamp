@@ -2,7 +2,6 @@ use futures_util::FutureExt;
 use log::{log, Level};
 use tokio::task::JoinError;
 
-
 /**
  * Module for getting the paths to the pipes that the servers use to communicate
  */
@@ -12,14 +11,16 @@ pub mod path {
     /**
      * Get the path to the pipe that the frontend will write to
      */
-    #[must_use] pub fn onboard_command_pipe() -> String {
+    #[must_use]
+    pub fn onboard_command_pipe() -> String {
         format!("{}/read_onboard.pipe", devcade_path())
     }
 
     /**
      * Get the path to the pipe that the frontend will read from
      */
-    #[must_use] pub fn onboard_response_pipe() -> String {
+    #[must_use]
+    pub fn onboard_response_pipe() -> String {
         format!("{}/write_onboard.pipe", devcade_path())
     }
 }
@@ -51,7 +52,8 @@ impl ThreadHandles {
     /**
      * Create a new empty ThreadHandles struct
      */
-    #[must_use] pub fn new() -> Self {
+    #[must_use]
+    pub fn new() -> Self {
         Self {
             onboard: None,
             game_sl: None,
@@ -65,10 +67,7 @@ impl ThreadHandles {
     pub fn restart_onboard(&mut self, command_pipe: String, response_pipe: String) {
         log!(Level::Info, "Starting onboard thread ...");
         self.onboard = Some(tokio::spawn(async move {
-            onboard::main(
-                command_pipe.as_str(),
-                response_pipe.as_str(),
-            ).await;
+            onboard::main(command_pipe.as_str(), response_pipe.as_str()).await;
         }));
     }
 
@@ -83,14 +82,14 @@ impl ThreadHandles {
             } else {
                 self.onboard = Some(handle);
                 None
-            }
+            };
         }
         None
     }
 
     /**
-    * Check if the game thread has errored and return the error if it has
-    */
+     * Check if the game thread has errored and return the error if it has
+     */
     pub fn _game_error(&mut self) -> Option<JoinError> {
         let handle = self.game_sl.take();
         if let Some(handle) = handle {
@@ -99,7 +98,7 @@ impl ThreadHandles {
             } else {
                 self.game_sl = Some(handle);
                 None
-            }
+            };
         }
         None
     }
@@ -115,7 +114,7 @@ impl ThreadHandles {
             } else {
                 self.gatekeeper = Some(handle);
                 None
-            }
+            };
         }
         None
     }

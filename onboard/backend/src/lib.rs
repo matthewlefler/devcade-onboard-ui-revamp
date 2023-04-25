@@ -2,7 +2,7 @@
 #![feature(path_file_prefix)]
 
 use anyhow::{anyhow, Error};
-use log::{Level, log};
+use log::{log, Level};
 
 use tokio::net::unix::pipe::{OpenOptions, Receiver, Sender};
 
@@ -21,15 +21,14 @@ pub mod api;
  */
 pub mod command;
 
-
 /**
  * Module for safely getting environment variables, logging any errors that occur and providing
  * default values.
  */
 pub mod env {
     // TODO Cache env vars? Probably not necessary
+    use log::{log, Level};
     use std::env;
-    use log::{Level, log};
 
     static mut PRODUCTION: bool = true;
 
@@ -37,13 +36,18 @@ pub mod env {
      * Get the path to the devcade directory. This is where games are installed.
      * If the value is not set in the environment, it will default to /tmp/devcade.
      */
-    #[must_use] pub fn devcade_path() -> String {
+    #[must_use]
+    pub fn devcade_path() -> String {
         let path = env::var("DEVCADE_PATH");
 
         match path {
             Ok(path) => path,
             Err(e) => {
-                log!(Level::Warn, "Error getting DEVCADE_PATH falling back to '/tmp/devcade': {}", e);
+                log!(
+                    Level::Warn,
+                    "Error getting DEVCADE_PATH falling back to '/tmp/devcade': {}",
+                    e
+                );
                 env::set_var("DEVCADE_PATH", "/tmp/devcade");
                 String::from("/tmp/devcade")
             }
@@ -54,7 +58,8 @@ pub mod env {
      * Get the URL of the API. This is where games are downloaded from.
      * If the value is not set in the environment, it will throw a fatal error and panic.
      */
-    #[must_use] pub fn api_url() -> String {
+    #[must_use]
+    pub fn api_url() -> String {
         let url = if unsafe { PRODUCTION } {
             env::var("DEVCADE_API_DOMAIN")
         } else {
@@ -151,8 +156,7 @@ pub fn open_write_pipe(path: &str) -> Result<Sender, Error> {
         }
     }
 
-    let pipe = OpenOptions::new()
-        .open_sender(path)?;
+    let pipe = OpenOptions::new().open_sender(path)?;
 
     Ok(pipe)
 }

@@ -1,7 +1,6 @@
-
-use log::{log, Level};
 use backend::servers::path::{onboard_command_pipe, onboard_response_pipe};
 use backend::servers::ThreadHandles;
+use log::{log, Level};
 
 #[tokio::main]
 async fn main() -> ! {

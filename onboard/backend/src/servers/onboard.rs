@@ -1,9 +1,9 @@
+use crate::command::{handle, Request, Response};
+use crate::{open_read_pipe, open_write_pipe};
+use log::{log, Level};
 use std::process::ExitStatus;
 use std::thread::JoinHandle;
-use log::{log, Level};
 use tokio::io::AsyncWriteExt;
-use crate::{open_read_pipe, open_write_pipe};
-use crate::command::{handle, Request, Response};
 
 /**
  * Main function for the onboard process. This function handles all communication to/from the onboard
@@ -50,7 +50,11 @@ pub async fn main(command_pipe: &str, response_pipe: &str) -> ! {
         }
     };
 
-    log!(Level::Debug, "Opened response pipe at {}", response_pipe_path);
+    log!(
+        Level::Debug,
+        "Opened response pipe at {}",
+        response_pipe_path
+    );
 
     let mut game_handle: Option<(u32, JoinHandle<ExitStatus>)> = None;
 
@@ -59,7 +63,12 @@ pub async fn main(command_pipe: &str, response_pipe: &str) -> ! {
         let mut buffer = [0; 4096];
         match command_pipe.try_read(&mut buffer) {
             Ok(_) => {
-                log!(Level::Trace, "Read from command pipe: {}", String::from_utf8_lossy(&buffer).trim_end_matches(|c| c == '\0' || c == ' ' || c == '\n'));
+                log!(
+                    Level::Trace,
+                    "Read from command pipe: {}",
+                    String::from_utf8_lossy(&buffer)
+                        .trim_end_matches(|c| c == '\0' || c == ' ' || c == '\n')
+                );
             }
             Err(e) => {
                 if e.kind() == std::io::ErrorKind::WouldBlock {
@@ -91,7 +100,7 @@ pub async fn main(command_pipe: &str, response_pipe: &str) -> ! {
                 log!(Level::Trace, "Writing response to pipe: {}", response);
                 response.push('\n');
                 match response_pipe.write_all(response.as_bytes()).await {
-                    Ok(_) => {},
+                    Ok(_) => {}
                     Err(e) => {
                         log!(Level::Error, "Error writing to response pipe: {}", e);
                     }
@@ -118,7 +127,11 @@ pub async fn main(command_pipe: &str, response_pipe: &str) -> ! {
             .collect::<Vec<Request>>();
 
         if commands.is_empty() {
-            log!(Level::Warn, "Read from command pipe, but no valid commands were found (read {})", buffer);
+            log!(
+                Level::Warn,
+                "Read from command pipe, but no valid commands were found (read {})",
+                buffer
+            );
             continue;
         }
 
@@ -130,10 +143,7 @@ pub async fn main(command_pipe: &str, response_pipe: &str) -> ! {
             }
         }
 
-        let command_futures = commands
-            .into_iter()
-            .map(handle)
-            .collect::<Vec<_>>();
+        let command_futures = commands.into_iter().map(handle).collect::<Vec<_>>();
 
         for res in command_futures {
             let response = res.await;
@@ -147,16 +157,14 @@ pub async fn main(command_pipe: &str, response_pipe: &str) -> ! {
                     log!(Level::Debug, "Sending Response: {}", response);
                 }
             }
-            
+
             let response = match response {
                 Response::InternalGame(id, handle) => {
                     let _: &mut (u32, JoinHandle<ExitStatus>) = game_handle.insert((id, handle));
                     continue;
                 }
-                _ => response
+                _ => response,
             };
-
-
 
             let mut response = match serde_json::to_string(&response) {
                 Ok(r) => r,
@@ -168,7 +176,7 @@ pub async fn main(command_pipe: &str, response_pipe: &str) -> ! {
             log!(Level::Trace, "Writing response to pipe: {}", response);
             response.push('\n');
             match response_pipe.write_all(response.as_bytes()).await {
-                Ok(_) => {},
+                Ok(_) => {}
                 Err(e) => {
                     log!(Level::Error, "Error writing to response pipe: {}", e);
                 }

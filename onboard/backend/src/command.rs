@@ -1,11 +1,14 @@
+use anyhow::Error;
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 use std::process::ExitStatus;
-use anyhow::Error;
 use std::thread::JoinHandle;
 
-use crate::api::{download_banner, download_game, download_icon, game_list, game_list_from_fs, launch_game, tag_games, tag_list, user};
 use crate::api::schema::{DevcadeGame, Tag, User};
+use crate::api::{
+    download_banner, download_game, download_icon, game_list, game_list_from_fs, launch_game,
+    tag_games, tag_list, user,
+};
 
 /**
  * A request received by the backend from the frontend. The u32 is the request ID, which is used to
@@ -24,7 +27,7 @@ pub enum Request {
     DownloadBanner(u32, String), // String is the game ID
 
     GetTagList(u32),
-    GetTag(u32, String), // String is the tag name
+    GetTag(u32, String),             // String is the tag name
     GetGameListFromTag(u32, String), // String is the tag name
 
     GetUser(u32, String), // String is the user ID
@@ -197,7 +200,7 @@ pub async fn handle(req: Request) -> Response {
         Request::LaunchGame(id, game_id) => match launch_game(game_id).await {
             Ok(handle) => Response::internal_game_from_id(id, handle),
             Err(err) => Response::err_from_id_and_err(id, err),
-        }
+        },
         Request::SetProduction(id, prod) => {
             crate::env::set_production(prod);
             Response::ok_from_id(id)
@@ -220,7 +223,7 @@ pub async fn handle(req: Request) -> Response {
         Request::GetUser(id, uid) => match user(uid).await {
             Ok(user) => Response::user_from_id(id, user),
             Err(err) => Response::err_from_id_and_err(id, err),
-        }
+        },
     }
 }
 
@@ -246,7 +249,12 @@ impl Display for Request {
                 write!(f, "[{id:9}] Launch game with id '{game_id}'")
             }
             Request::SetProduction(id, prod) => {
-                write!(f, "[{:9}] Set API to '{}'", id, if *prod { "production" } else { "development" })
+                write!(
+                    f,
+                    "[{:9}] Set API to '{}'",
+                    id,
+                    if *prod { "production" } else { "development" }
+                )
             }
             Request::GetTagList(id) => write!(f, "[{id:9}] Get Tag List"),
             Request::GetTag(id, tag_name) => write!(f, "[{id:9}] Get Tag with name '{tag_name}'"),
@@ -268,7 +276,9 @@ impl Display for Response {
             Response::GameList(id, games) => {
                 write!(f, "[{:9}] Got game list with {} games", id, games.len())
             }
-            Response::Game(id, game) => write!(f, "[{:9}] Downloaded game with id '{}'", id, game.id),
+            Response::Game(id, game) => {
+                write!(f, "[{:9}] Downloaded game with id '{}'", id, game.id)
+            }
             Response::InternalGame(id, _) => write!(f, "[{id:9}] Launched game"),
             Response::TagList(id, tags) => {
                 write!(f, "[{:9}] Got tag list with {} tags", id, tags.len())
@@ -278,4 +288,3 @@ impl Display for Response {
         }
     }
 }
-
