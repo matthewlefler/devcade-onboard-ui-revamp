@@ -37,6 +37,7 @@ public class Devcade : Game {
         Loading,
         Input,
         Descritpion,
+        Tags
     }
 
     private Texture2D cardTexture;
@@ -185,8 +186,11 @@ public class Devcade : Game {
 
         if (!menu.reloadGames(GraphicsDevice, false)) {
             state = MenuState.Loading;
-            _cantFetch = true;
+            _cantFetch = true; 
         }
+
+        // Create instances related to the tags menu
+        menu.initializeTagsMenu(cardTexture, _devcadeMenuBig);
 
         base.LoadContent();
     }
@@ -254,6 +258,7 @@ public class Devcade : Game {
             case MenuState.Input:
                 menu.descFadeOut(gameTime);
                 menu.cardFadeIn(gameTime);
+                menu.updateTagsMenu(myState, lastState, gameTime);
 
                 if ((myState.IsKeyDown(Keys.Space) || (Input.GetButton(1, Input.ArcadeButtons.Menu) &&
                                                        Input.GetButton(2, Input.ArcadeButtons.Menu))) &&
@@ -307,6 +312,14 @@ public class Devcade : Game {
                     state = MenuState.Input;
                 }
 
+                if ((myState.IsKeyDown(Keys.Right) && lastState.IsKeyUp(Keys.Right)) || // Keyboard Right
+                    Input.GetButtonDown(1, Input.ArcadeButtons.StickRight) ||           
+                    Input.GetButtonDown(2, Input.ArcadeButtons.StickRight))             // OR either right stick
+                {
+                    menu.showTags();
+                    state = MenuState.Tags;
+                }
+
                 menu.animate(gameTime);
                 break;
 
@@ -349,6 +362,31 @@ public class Devcade : Game {
                 }
 
                 break;
+            
+            case MenuState.Tags:
+                menu.cardFadeOut(gameTime);
+
+                if( ((myState.IsKeyDown(Keys.Left) && lastState.IsKeyUp(Keys.Left)) ||  // Keyboard Left
+                    Input.GetButtonDown(1, Input.ArcadeButtons.StickLeft) ||            // OR Stick Left
+                    Input.GetButtonDown(2, Input.ArcadeButtons.StickLeft)) &&           // of either player
+                    menu.getTagCol() == 0 )                                             // AND if we are already on the left column of tags
+                {
+                    menu.hideTags();
+                    state = MenuState.Input;
+                }
+
+                if((myState.IsKeyDown(Keys.Enter) && lastState.IsKeyUp(Keys.Enter)) ||  // Keyboard Enter
+                    Input.GetButtonDown(1, Input.ArcadeButtons.A1) ||                   // OR A1
+                    Input.GetButtonDown(2, Input.ArcadeButtons.A1))                     // of either player
+                {
+                    menu.updateTag();
+                    menu.hideTags();
+                    state = MenuState.Input;
+                }
+
+                menu.updateTagsMenu(myState, lastState, gameTime);
+
+                break;
         }
 
         lastState = Keyboard.GetState();
@@ -369,6 +407,7 @@ public class Devcade : Game {
                 menu.drawCards(this.spriteBatch, cardTexture, _devcadeMenuBig);
                 menu.drawDescription(this.spriteBatch, descriptionTexture, _devcadeMenuTitle, _devcadeMenuBig);
                 menu.drawInstructions(this.spriteBatch, _devcadeMenuBig);
+                menu.drawTagsMenu(this.spriteBatch, _devcadeMenuBig);
                 break;
 
             case MenuState.Loading:
@@ -376,6 +415,12 @@ public class Devcade : Game {
                 menu.drawTitle(this.spriteBatch, titleTextureWhite, fadeColor);
                 if (_cantFetch)
                     menu.drawError(this.spriteBatch, _devcadeMenuBig);
+                break;
+            
+            case MenuState.Tags:
+                menu.drawBackground(this.spriteBatch, BGgradient, icon, fadeColor, gameTime);
+                menu.drawTitle(this.spriteBatch, Client.isProduction ? titleTexture : titleDevTexture, fadeColor);
+                menu.drawTagsMenu(this.spriteBatch, _devcadeMenuBig);
                 break;
         }
 
