@@ -153,14 +153,6 @@ public class Menu : IMenu {
                     .unwrap_or(new List<DevcadeGame> { defaultGame });
             }
 
-            if (Env.get("DEMO_MODE").map_or(false, bool.Parse)) {
-                gameTitles = gameTitles.Where(game => !game.containsTag("CSH Only") && !game.containsTag("Gamejam") &&
-                                                      // Manual filtering of games that shouldn't be shown, but don't have the correct tags
-                                                      game.name != "ferris-spinner" && game.name != "MonoZombie" &&
-                                                      game.name != "demo").ToList();
-                // sorry ferris but crustaceans alone don't make good games
-            }
-
             setCards(device);
         }
         catch (AggregateException e) {
@@ -216,6 +208,11 @@ public class Menu : IMenu {
             tagLists[allTag.name].Add(newCard);
         }
 
+        // If demo mode is on, then set the tag to be curated instead of all
+        if (Env.get("DEMO_MODE").map_or(false, bool.Parse)) {
+            updateTag("Curated");
+        }
+
         MenuCard.cardX = 0;
         descX = _sWidth * 1.5f;
     }
@@ -243,8 +240,8 @@ public class Menu : IMenu {
 
     public int getTagCol() { return tagsMenu.getCurrentCol(); }
 
-    public void updateTag() { 
-        this.currentTag = tagsMenu.getCurrentTag().name; 
+    public void updateTag(string tag) {
+        this.currentTag = tag;
 
         // Reset the listPos of each card within the list of currently visible cards
         List<MenuCard> visibleCards = tagLists[currentTag];
@@ -253,6 +250,8 @@ public class Menu : IMenu {
         }
         itemSelected = 0;
     }
+
+    public void updateTag() { updateTag(tagsMenu.getCurrentTag().name); }
 
     public void showTags() {
         tagsMenu.setIsShowing(true);
