@@ -7,7 +7,7 @@ use std::thread::JoinHandle;
 use crate::api::schema::{DevcadeGame, Tag, User};
 use crate::api::{
     download_banner, download_game, download_icon, game_list, game_list_from_fs, launch_game,
-    tag_games, tag_list, user,
+    nfc_tags, tag_games, tag_list, user, Player,
 };
 
 /**
@@ -35,6 +35,8 @@ pub enum Request {
     SetProduction(u32, bool), // Sets prod / dev api url
 
     LaunchGame(u32, String), // String is the game ID
+
+    GetNfcTags(u32, Player), // u8 is the index of the reader. Right now just 0.
 }
 
 impl Request {
@@ -55,6 +57,7 @@ impl Request {
             Request::GetGameListFromTag(0, String::new()),
             Request::SetProduction(0, false),
             Request::LaunchGame(0, String::new()),
+            Request::GetNfcTags(0, Player::P1),
         ]
     }
 }
@@ -78,6 +81,8 @@ pub enum Response {
     Tag(u32, Tag),
 
     User(u32, User),
+
+    NfcTags(u32, Option<String>),
 
     #[serde(skip)]
     InternalGame(u32, JoinHandle<ExitStatus>),
@@ -145,6 +150,13 @@ impl Response {
      */
     fn user_from_id(id: u32, user: User) -> Self {
         Response::User(id, user)
+    }
+
+    /**
+     * Create a new `Response::NfcTags` from a request ID and association IDs.
+     */
+    fn nfc_tags(id: u32, association_id: Option<String>) -> Self {
+        Response::NfcTags(id, association_id)
     }
 
     /**
@@ -224,6 +236,10 @@ pub async fn handle(req: Request) -> Response {
             Ok(user) => Response::user_from_id(id, user),
             Err(err) => Response::err_from_id_and_err(id, err),
         },
+        Request::GetNfcTags(id, reader_id) => match nfc_tags(reader_id).await {
+            Ok(user) => Response::nfc_tags(id, user),
+            Err(err) => Response::err_from_id_and_err(id, err),
+        },
     }
 }
 
@@ -262,6 +278,9 @@ impl Display for Request {
                 write!(f, "[{id:9}] Get Game List from Tag with name '{tag_name}'")
             }
             Request::GetUser(id, uid) => write!(f, "[{id:9}] Get User with id '{uid}'"),
+            Request::GetNfcTags(id, player) => {
+                write!(f, "[{id:9}] Get NFC tags for player '{player}'")
+            }
         }
     }
 }
@@ -285,6 +304,9 @@ impl Display for Response {
             }
             Response::Tag(id, tag) => write!(f, "[{:9}] Got tag with name '{}'", id, tag.name),
             Response::User(id, user) => write!(f, "[{:9}] Got user with id '{}'", id, user.id),
+            Response::NfcTags(id, player) => {
+                write!(f, "[{id:9}] Got NFC association ID '{:?}'", player)
+            }
         }
     }
 }

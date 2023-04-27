@@ -1,14 +1,46 @@
 use crate::api::schema::{DevcadeGame, MinimalGame, Tag, User};
 use crate::env::{api_url, devcade_path};
+use crate::nfc::NFC_CLIENT;
 use anyhow::{anyhow, Error};
 use log::{log, Level};
+use serde::{Deserialize, Serialize};
 use std::ffi::OsStr;
+use std::fmt;
 use std::os::unix::fs::PermissionsExt;
 use std::path::Path;
 use std::process::ExitStatus;
 use std::thread;
 use std::thread::JoinHandle;
 use std::time::Duration;
+
+/// Identifies which user is using the machine
+#[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub enum Player {
+    /// Player 1 (left controls)
+    P1,
+    /// Player 2 (right controls)
+    P2,
+}
+
+impl fmt::Display for Player {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use Player::*;
+        match self {
+            P1 => write!(f, "P1"),
+            P2 => write!(f, "P2"),
+        }
+    }
+}
+
+impl From<Player> for u8 {
+    fn from(player: Player) -> Self {
+        use Player::*;
+        match player {
+            P1 => 0,
+            P2 => 1,
+        }
+    }
+}
 
 /**
  * Module for defining the database schema, these are the same schema that the API uses, so they are
@@ -235,6 +267,11 @@ pub async fn download_icon(game_id: String) -> Result<(), Error> {
     .await?;
     std::fs::write(path, bytes)?;
     Ok(())
+}
+
+pub async fn nfc_tags(reader_id: Player) -> Result<Option<String>, Error> {
+    assert!(reader_id == Player::P1);
+    Ok(NFC_CLIENT.submit().await.unwrap())
 }
 
 /**

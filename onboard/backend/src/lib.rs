@@ -22,6 +22,11 @@ pub mod api;
 pub mod command;
 
 /**
+ * Module for talking to gatekeeper tags
+ */
+pub mod nfc;
+
+/**
  * Module for safely getting environment variables, logging any errors that occur and providing
  * default values.
  */
