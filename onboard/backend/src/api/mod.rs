@@ -4,6 +4,7 @@ use crate::nfc::NFC_CLIENT;
 use anyhow::{anyhow, Error};
 use log::{log, Level};
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use std::ffi::OsStr;
 use std::fmt;
 use std::os::unix::fs::PermissionsExt;
@@ -271,7 +272,17 @@ pub async fn download_icon(game_id: String) -> Result<(), Error> {
 
 pub async fn nfc_tags(reader_id: Player) -> Result<Option<String>, Error> {
     assert!(reader_id == Player::P1);
-    Ok(NFC_CLIENT.submit().await.unwrap())
+    NFC_CLIENT
+        .submit()
+        .await
+        .map_err(|err| anyhow!("Couldn't get NFC tags: {:?}", err))
+}
+
+pub async fn nfc_user(association_id: String) -> Result<Option<Value>, Error> {
+    NFC_CLIENT
+        .get_user(association_id)
+        .await
+        .map_err(|err| anyhow!("Couldn't get NFC user: {:?}", err))
 }
 
 /**

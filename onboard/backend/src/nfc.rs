@@ -1,6 +1,7 @@
 use gatekeeper_members::GateKeeperMemberListener;
 use lazy_static::lazy_static;
 use libgatekeeper_sys::Nfc;
+use serde_json::Value;
 use std::fmt;
 use std::sync::mpsc;
 use std::sync::mpsc::{Receiver, Sender};
@@ -10,10 +11,20 @@ use std::thread::JoinHandle;
 use std::time::Duration;
 use tokio::sync::oneshot;
 
-type NfcCallback = tokio::sync::oneshot::Sender<Option<String>>;
+type NfcCallback = oneshot::Sender<Option<String>>;
 pub struct NfcClient {
-    request_queue: Mutex<Sender<NfcCallback>>,
+    request_queue: Mutex<Sender<NfcRequest>>,
     thread: JoinHandle<()>,
+}
+
+enum NfcRequest {
+    Tags {
+        callback: NfcCallback,
+    },
+    User {
+        association_id: String,
+        callback: oneshot::Sender<Option<Value>>,
+    },
 }
 
 lazy_static! {
@@ -36,7 +47,7 @@ impl Default for NfcClient {
 const NFC_DEVICE_NAME: &str = "pn532_uart:/dev/ttyUSB0";
 
 impl NfcClient {
-    fn run(rx: Receiver<NfcCallback>) {
+    fn run(rx: Receiver<NfcRequest>) {
         loop {
             // Unwrap rationale: If the main thread is crashed, not much we can do
             let mut callback = rx.recv().unwrap();
@@ -48,14 +59,30 @@ impl NfcClient {
                     None => {
                         log::error!("Couldn't build Gatekeeper listener?");
                         // Unwrap rationale: If the main thread is crashed, not much we can do
-                        callback.send(None).unwrap();
+                        match callback {
+                            NfcRequest::User { callback, .. } => callback.send(None).unwrap(),
+                            NfcRequest::Tags { callback } => callback.send(None).unwrap(),
+                        }
                         continue;
                     }
                 };
 
             loop {
-                // Unwrap rationale: If the main thread is crashed, not much we can do
-                callback.send(listener.poll_for_user()).unwrap();
+                match callback {
+                    NfcRequest::User {
+                        callback,
+                        association_id,
+                    } => {
+                        callback
+                            .send(listener.fetch_user(association_id).ok())
+                            .unwrap();
+                    }
+                    NfcRequest::Tags { callback } => {
+                        // Unwrap rationale: If the main thread is crashed, not much we can do
+                        callback.send(listener.poll_for_user()).unwrap();
+                    }
+                }
+
                 if let Ok(new_request) = rx.recv_timeout(Duration::from_secs(30)) {
                     callback = new_request;
                 } else {
@@ -68,7 +95,24 @@ impl NfcClient {
         let (tx, rx) = oneshot::channel();
 
         match self.request_queue.lock() {
-            Ok(guard) => guard.send(tx)?,
+            Ok(guard) => guard.send(NfcRequest::Tags { callback: tx })?,
+            Err(_) => {
+                return Err(Box::new(NfcThreadError));
+            }
+        };
+        Ok(rx.await?)
+    }
+    pub async fn get_user(
+        &self,
+        association_id: String,
+    ) -> Result<Option<Value>, Box<dyn std::error::Error>> {
+        let (tx, rx) = oneshot::channel();
+
+        match self.request_queue.lock() {
+            Ok(guard) => guard.send(NfcRequest::User {
+                association_id,
+                callback: tx,
+            })?,
             Err(_) => {
                 return Err(Box::new(NfcThreadError));
             }
