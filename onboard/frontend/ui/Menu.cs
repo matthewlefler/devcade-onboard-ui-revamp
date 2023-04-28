@@ -166,7 +166,7 @@ public class Menu : IMenu {
     public void setCards(GraphicsDevice graphics) {
         // Get all of the tags from the API
         tags = Client.getTags().Result.into_result<List<devcade.Tag>>().unwrap_or(new List<devcade.Tag>());
-        tags.Add(allTag);
+        tags.Insert(0, allTag); // Make all tag appear at the top of the list
         foreach(devcade.Tag tag in tags) {
             tagLists.Add(tag.name, new List<MenuCard>());
         }
@@ -211,6 +211,8 @@ public class Menu : IMenu {
         // If demo mode is on, then set the tag to be curated instead of all
         if (Env.get("DEMO_MODE").map_or(false, bool.Parse)) {
             updateTag("Curated");
+        } else {
+            updateTag(currentTag);
         }
 
         MenuCard.cardX = 0;
