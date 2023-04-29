@@ -130,13 +130,6 @@ impl Response {
     }
 
     /**
-     * Create a new `Response::InternalGame` from a request ID and a game.
-     */
-    fn internal_game_from_id(id: u32, game: JoinHandle<ExitStatus>) -> Self {
-        Response::InternalGame(id, game)
-    }
-
-    /**
      * Create a new `Response::TagList` from a request ID and a list of tags.
      */
     fn tag_list_from_id(id: u32, tags: Vec<Tag>) -> Self {
@@ -223,7 +216,7 @@ pub async fn handle(req: Request) -> Response {
             Err(err) => Response::err_from_id_and_err(id, err),
         },
         Request::LaunchGame(id, game_id) => match launch_game(game_id).await {
-            Ok(handle) => Response::internal_game_from_id(id, handle),
+            Ok(_) => Response::ok_from_id(id),
             Err(err) => Response::err_from_id_and_err(id, err),
         },
         Request::SetProduction(id, prod) => {

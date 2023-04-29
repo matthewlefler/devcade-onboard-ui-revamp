@@ -9,10 +9,9 @@ use std::ffi::OsStr;
 use std::fmt;
 use std::os::unix::fs::PermissionsExt;
 use std::path::Path;
-use std::process::ExitStatus;
-use std::thread;
-use std::thread::JoinHandle;
+use std::process::Stdio;
 use std::time::Duration;
+use tokio::process::Command;
 
 /// Identifies which user is using the machine
 #[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -425,7 +424,7 @@ pub async fn download_game(game_id: String) -> Result<(), Error> {
  * This function will never panic, but contains an `unwrap` call that will never fail. This section
  * is here to make clippy happy.
  */
-pub async fn launch_game(game_id: String) -> Result<JoinHandle<ExitStatus>, Error> {
+pub async fn launch_game(game_id: String) -> Result<(), Error> {
     let path = Path::new(devcade_path().as_str())
         .join(game_id.clone())
         .join("publish");
@@ -499,27 +498,18 @@ pub async fn launch_game(game_id: String) -> Result<JoinHandle<ExitStatus>, Erro
     std::fs::set_permissions(path.clone(), perms)?;
 
     // Launch the game and silence stdout (allow the game to print to stderr)
-    let mut child = std::process::Command::new(path.clone());
+    let mut child = Command::new(path.clone());
 
-    child.stdout(std::process::Stdio::null());
+    child.stdout(Stdio::null());
     // Unfortunately this will bypass the log crate, so no pretty logging for games
     child.stderr(std::process::Stdio::inherit());
     child.current_dir(path.parent().unwrap()); // This unwrap is safe because it is guaranteed to have a parent
 
-    let handle = thread::spawn(move || {
-        let mut child_handle = child.spawn().expect("failed to execute child");
-        child_handle.wait().expect("failed to wait on child")
-    });
+    let mut child = child.spawn().expect("Failed to launch game");
+    child.wait().await.expect("Failed to launch game");
 
     tokio::time::sleep(Duration::from_millis(200)).await;
-
-    if handle.is_finished() {
-        let e = handle.join();
-        // Even if the game exited successfully, if it exited after 200ms, something went wrong
-        return Err(anyhow!("Error launching game: {:?}", e));
-    }
-
-    Ok(handle)
+    Ok(())
 }
 
 /**

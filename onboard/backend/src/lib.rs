@@ -1,10 +1,6 @@
 #![feature(is_some_and)]
+#![feature(async_closure)]
 #![feature(path_file_prefix)]
-
-use anyhow::{anyhow, Error};
-use log::{log, Level};
-
-use tokio::net::unix::pipe::{OpenOptions, Receiver, Sender};
 
 /**
  * All the servers run by the backend that communicate with other processes on devcade
@@ -95,73 +91,4 @@ pub mod env {
             PRODUCTION = prod;
         }
     }
-}
-
-/**
- * Make a FIFO at the given path. Uses an unsafe call to `libc::mkfifo`.
- */
-fn mkfifo(path: &str) -> Result<(), Error> {
-    log!(Level::Info, "Creating FIFO at {}", path);
-    let path = std::path::Path::new(path);
-    if path.exists() {
-        // TODO: Check if it's a FIFO
-        return Ok(());
-    }
-    if !path.parent().unwrap().exists() {
-        std::fs::create_dir_all(path.parent().expect("Path has no parent"))?;
-    }
-    let path = path.to_str().expect("Path is not valid UTF-8");
-    let path = std::ffi::CString::new(path)?;
-    unsafe {
-        let exit_code = libc::mkfifo(path.as_ptr(), 0o644);
-        match exit_code {
-            0 => Ok(()),
-            c => Err(anyhow!(format!("mkfifo exited with code {c}"))),
-        }
-    }
-}
-
-/**
- * Opens a FIFO for reading. If the FIFO does not exist, it will be created.
- */
-pub fn open_read_pipe(path: &str) -> Result<Receiver, Error> {
-    if !std::path::Path::new(path).exists() {
-        match mkfifo(path) {
-            Ok(_) => (),
-            Err(e) => {
-                log!(Level::Error, "Error creating FIFO: {}", e);
-                panic!();
-            }
-        }
-    }
-
-    let pipe = OpenOptions::new()
-        // opening read_write allows the write end of the pipe to close without causing the read
-        // end to close as well. This is necessary as if there is an unexpected error in the onboard
-        // this will allow the main process to continue and wait for the onboard to restart.
-        // This behavior is only supported on Linux, so on other POSIX systems the write end of the
-        // pipe will fail to open as the file is already open for writing.
-        .read_write(true)
-        .open_receiver(path)?;
-
-    Ok(pipe)
-}
-
-/**
- * Opens a FIFO for writing. If the FIFO does not exist, it will be created.
- */
-pub fn open_write_pipe(path: &str) -> Result<Sender, Error> {
-    if !std::path::Path::new(path).exists() {
-        match mkfifo(path) {
-            Ok(_) => (),
-            Err(e) => {
-                log!(Level::Error, "Error creating FIFO: {}", e);
-                panic!();
-            }
-        }
-    }
-
-    let pipe = OpenOptions::new().open_sender(path)?;
-
-    Ok(pipe)
 }
