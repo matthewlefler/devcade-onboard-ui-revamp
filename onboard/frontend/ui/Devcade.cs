@@ -21,6 +21,7 @@ public class Devcade : Game {
     private SpriteBatch spriteBatch;
 
     private Menu menu;
+    private bool demo;
 
     private SpriteFont _devcadeMenuBig;
     private SpriteFont _devcadeMenuTitle;
@@ -69,6 +70,9 @@ public class Devcade : Game {
 
         int width = sWidth.map_or(1080, int.Parse);
         int height = sHeight.map_or(2560, int.Parse);
+
+        // if the DEMO_MODE environment variable is true, sorting by tags is disabled, and only curated games are shown
+        demo = Env.get("DEMO_MODE").map_or(false, bool.Parse);
 
         this.menu = new Menu(this.graphics);
 
@@ -312,9 +316,10 @@ public class Devcade : Game {
                     state = MenuState.Input;
                 }
 
-                if ((myState.IsKeyDown(Keys.Right) && lastState.IsKeyUp(Keys.Right)) || // Keyboard Right
+                if (((myState.IsKeyDown(Keys.Right) && lastState.IsKeyUp(Keys.Right)) || // Keyboard Right
                     Input.GetButtonDown(1, Input.ArcadeButtons.StickRight) ||           
-                    Input.GetButtonDown(2, Input.ArcadeButtons.StickRight))             // OR either right stick
+                    Input.GetButtonDown(2, Input.ArcadeButtons.StickRight)) &&           // OR either right stick
+                    !demo)                                                               // AND demo mode is off
                 {
                     menu.showTags();
                     state = MenuState.Tags;
