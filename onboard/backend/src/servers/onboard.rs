@@ -1,9 +1,11 @@
-use crate::command::{handle, Request};
+use crate::command::handle;
 use crate::servers::open_server;
+use devcade_onboard_types::{Request, RequestBody, Response};
 use futures_util::future;
 use log::{log, Level};
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 use tokio::io::AsyncWriteExt;
+use tokio::sync::Mutex;
 use tokio::task;
 
 /**
@@ -28,29 +30,27 @@ pub async fn main(command_pipe: &str) -> ! {
         while let Some(line) = lines.next_line().await? {
             let command: Request = serde_json::from_str(&line)?;
 
-            if let Request::Ping(_) = &command {
+            if let RequestBody::Ping = &command.body {
                 log!(Level::Trace, "Handling command: {}", command);
             } else {
                 log!(Level::Debug, "Handling command: {}", command);
             }
 
             let writer = writer.clone();
-            handles.push(task::spawn_local(async move {
-                let response_body = task::spawn(async move {
-                    let response = handle(command).await;
-                    let mut response_body = serde_json::to_vec(&response)?;
-                    response_body.push(b'\n');
 
-                    Ok(response_body) as Result<Vec<u8>, anyhow::Error>
-                })
-                .await??;
+            handles.push(task::spawn(async move {
+                let body = handle(command.body).await;
+                let response = Response {
+                    request_id: command.request_id,
+                    body,
+                };
+                log::debug!("Sending: {response}");
+                let mut response = serde_json::to_vec(&response)?;
+                response.push(b'\n');
 
-                task::spawn_local(async move {
-                    let mut writer = writer.lock().unwrap();
-                    writer.write_all(&response_body).await?;
-                    Ok(()) as Result<(), anyhow::Error>
-                })
-                .await?
+                let mut writer = writer.lock().await;
+                writer.write_all(&response).await?;
+                Ok(()) as Result<(), anyhow::Error>
             }));
         }
         future::join_all(handles).await;

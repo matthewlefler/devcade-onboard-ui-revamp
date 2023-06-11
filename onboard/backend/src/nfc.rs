@@ -1,15 +1,15 @@
+use devcade_onboard_types::{Map, Value};
 use gatekeeper_members::GateKeeperMemberListener;
 use lazy_static::lazy_static;
 use libgatekeeper_sys::Nfc;
-use serde_json::Value;
 use std::fmt;
 use std::sync::mpsc;
 use std::sync::mpsc::{Receiver, Sender};
-use std::sync::Mutex;
 use std::thread;
 use std::thread::JoinHandle;
 use std::time::Duration;
 use tokio::sync::oneshot;
+use tokio::sync::Mutex;
 
 type NfcCallback = oneshot::Sender<Option<String>>;
 pub struct NfcClient {
@@ -23,7 +23,7 @@ enum NfcRequest {
     },
     User {
         association_id: String,
-        callback: oneshot::Sender<Option<Value>>,
+        callback: oneshot::Sender<Option<Map<String, Value>>>,
     },
 }
 
@@ -74,7 +74,12 @@ impl NfcClient {
                         association_id,
                     } => {
                         callback
-                            .send(listener.fetch_user(association_id).ok())
+                            .send(
+                                listener
+                                    .fetch_user(association_id)
+                                    .ok()
+                                    .and_then(|user| user["user"].as_object().cloned()),
+                            )
                             .unwrap();
                     }
                     NfcRequest::Tags { callback } => {
@@ -94,30 +99,26 @@ impl NfcClient {
     pub async fn submit(&self) -> Result<Option<String>, Box<dyn std::error::Error>> {
         let (tx, rx) = oneshot::channel();
 
-        match self.request_queue.lock() {
-            Ok(guard) => guard.send(NfcRequest::Tags { callback: tx })?,
-            Err(_) => {
-                return Err(Box::new(NfcThreadError));
-            }
-        };
+        self.request_queue
+            .lock()
+            .await
+            .send(NfcRequest::Tags { callback: tx })?;
         Ok(rx.await?)
     }
     pub async fn get_user(
         &self,
         association_id: String,
-    ) -> Result<Option<Value>, Box<dyn std::error::Error>> {
+    ) -> Result<Map<String, Value>, anyhow::Error> {
         let (tx, rx) = oneshot::channel();
 
-        match self.request_queue.lock() {
-            Ok(guard) => guard.send(NfcRequest::User {
-                association_id,
-                callback: tx,
-            })?,
-            Err(_) => {
-                return Err(Box::new(NfcThreadError));
-            }
-        };
-        Ok(rx.await?)
+        self.request_queue.lock().await.send(NfcRequest::User {
+            association_id,
+            callback: tx,
+        })?;
+        match rx.await? {
+            Some(user) => Ok(user),
+            None => Err(anyhow::anyhow!("User not found with that association ID")),
+        }
     }
 }
 

@@ -1,4 +1,3 @@
-#![feature(is_some_and)]
 #![feature(async_closure)]
 #![feature(path_file_prefix)]
 

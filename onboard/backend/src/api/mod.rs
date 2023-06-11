@@ -1,52 +1,19 @@
-use crate::api::schema::{DevcadeGame, MinimalGame, Tag, User};
 use crate::env::{api_url, devcade_path};
 use crate::nfc::NFC_CLIENT;
 use anyhow::{anyhow, Error};
+use devcade_onboard_types::{
+    schema::{DevcadeGame, MinimalGame, Tag, User},
+    Map, Player, Value,
+};
 use log::{log, Level};
-use serde::{Deserialize, Serialize};
-use serde_json::Value;
+
 use std::ffi::OsStr;
-use std::fmt;
+
 use std::os::unix::fs::PermissionsExt;
 use std::path::Path;
 use std::process::Stdio;
 use std::time::Duration;
 use tokio::process::Command;
-
-/// Identifies which user is using the machine
-#[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
-pub enum Player {
-    /// Player 1 (left controls)
-    P1,
-    /// Player 2 (right controls)
-    P2,
-}
-
-impl fmt::Display for Player {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        use Player::*;
-        match self {
-            P1 => write!(f, "P1"),
-            P2 => write!(f, "P2"),
-        }
-    }
-}
-
-impl From<Player> for u8 {
-    fn from(player: Player) -> Self {
-        use Player::*;
-        match player {
-            P1 => 0,
-            P2 => 1,
-        }
-    }
-}
-
-/**
- * Module for defining the database schema, these are the same schema that the API uses, so they are
- * defined here as well to deserialize the responses from the API.
- */
-pub mod schema;
 
 /**
  * Internal module for network requests and JSON serialization
@@ -277,7 +244,7 @@ pub async fn nfc_tags(reader_id: Player) -> Result<Option<String>, Error> {
         .map_err(|err| anyhow!("Couldn't get NFC tags: {:?}", err))
 }
 
-pub async fn nfc_user(association_id: String) -> Result<Option<Value>, Error> {
+pub async fn nfc_user(association_id: String) -> Result<Map<String, Value>, Error> {
     NFC_CLIENT
         .get_user(association_id)
         .await
@@ -546,7 +513,7 @@ pub async fn tag_games(name: String) -> Result<Vec<DevcadeGame>, Error> {
         format!("{}/{}", api_url(), route::tag_games(name.as_str())).as_str(),
     )
     .await?;
-    let games: Vec<_> = games.into_iter().map(|g| game_from_minimal(g)).collect();
+    let games: Vec<_> = games.into_iter().map(game_from_minimal).collect();
     // await all the games and return them
     let games: Vec<Result<DevcadeGame, Error>> = futures_util::future::join_all(games).await;
     Ok(games

@@ -1,6 +1,8 @@
+use backend::env::devcade_path;
 use backend::servers::path::onboard_pipe;
 use backend::servers::ThreadHandles;
 use log::{log, Level};
+use tokio::fs;
 
 #[tokio::main]
 async fn main() -> ! {
@@ -8,6 +10,10 @@ async fn main() -> ! {
     {
         compile_error!("This project only supports Linux.\nTo build for linux, run `cargo build --target x86_64-unknown-linux-gnu`");
     }
+
+    fs::create_dir_all(devcade_path())
+        .await
+        .expect("Couldn't create devcade dir");
 
     match dotenv::from_filename("../.env") {
         Ok(_) => (),
@@ -18,6 +24,7 @@ async fn main() -> ! {
     env_logger::init();
 
     let mut handles: ThreadHandles = ThreadHandles::new();
+
     handles.restart_onboard(onboard_pipe());
 
     // TODO Game Save / Load
