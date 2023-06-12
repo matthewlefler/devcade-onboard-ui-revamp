@@ -56,6 +56,5 @@ pub async fn main(command_pipe: &str) -> ! {
         future::join_all(handles).await;
         Ok(())
     })
-    .await;
-    panic!("Chom");
+    .await
 }

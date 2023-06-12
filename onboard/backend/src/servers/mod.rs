@@ -149,5 +149,5 @@ where
         }));
     }
     future::join_all(handles).await;
-    panic!("lol");
+    panic!("Looks like our server stopped serving?! This shouldn't happen.");
 }
