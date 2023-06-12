@@ -29,10 +29,10 @@ public class Response {
     private ILog logger = LogManager.GetLogger(MethodBase.GetCurrentMethod()?.DeclaringType?.FullName);
     
     public ResponseType type { get; private set; }
-    private object data { get; set; }
-    public uint id { get; private set; }
+    private object? data { get; set; }
+    public uint request_id { get; private set; }
 
-    private Response(ResponseType type, object data) {
+    private Response(ResponseType type, object? data) {
         this.type = type;
         this.data = data;
     }
@@ -41,20 +41,18 @@ public class Response {
         var dict = JsonConvert.DeserializeObject<Dictionary<string, object>>(json);
         Debug.Assert(dict != null, nameof(dict) + " != null");
         var type = (ResponseType)Enum.Parse(typeof(ResponseType), (string)dict["type"]);
-        uint id;
+        uint id = (uint)(long)dict["request_id"];
         Response res;
         switch (type) {
             case ResponseType.Ok or ResponseType.Pong:
-                id = (uint)(long)dict["data"];
-                res = new Response(type, dict["data"]);
+                res = new Response(type, null);
                 break;
             default:
-                object[] data = JsonConvert.DeserializeObject<object[]>(JsonConvert.SerializeObject(dict["data"])) ?? throw new NullReferenceException();
-                id = (uint)(long)data[0];
-                res = new Response(type, data[1]);
+                object data = JsonConvert.DeserializeObject<object>(JsonConvert.SerializeObject(dict["data"])) ?? throw new NullReferenceException();
+                res = new Response(type, data);
                 break;
         }
-        res.id = id;
+        res.request_id = id;
         return res;
     }
 

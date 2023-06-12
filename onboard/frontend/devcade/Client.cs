@@ -3,7 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Net.Sockets;
 using System.Reflection;
+using System.Text;
 using System.Threading;
 using log4net;
 using System.Threading.Tasks;
@@ -45,7 +47,8 @@ public static class Client {
     // Path to the working directory
     private static readonly string workingDir;
     
-    // Unix FIFO pipe reader and writer for communication with backend
+    // Unix socket for communication with backend
+    private static Socket socket;
     private static StreamReader reader;
     private static StreamWriter writer;
     private static bool brokenPipe;
@@ -91,23 +94,16 @@ public static class Client {
         
         // Open the read/write pipe to the backend
         
-        var readerResult = tryOpenReader($"{workingDir}/write_onboard.pipe");
-        while (readerResult.is_err()) {
-            logger.Warn($"Failed to open read pipe, retrying in 500ms: {readerResult.unwrap_err()}");
+        while (true) {
+            var socketResult = tryOpenSocket($"{workingDir}/onboard.sock");
+            if (!socketResult.is_err()) {
+                break;
+            }
+            logger.Warn($"Failed to open backend socket, retrying in 500ms: {socketResult.unwrap_err()}");
             Thread.Sleep(500);
-            readerResult = tryOpenReader($"{workingDir}/write_onboard.pipe");
         }
-        reader = readerResult.unwrap();
-        logger.Info($"Opened read pipe: {workingDir}/write_onboard.pipe");
-        
-        var writerResult = tryOpenWriter($"{workingDir}/read_onboard.pipe");
-        while (writerResult.is_err()) {
-            logger.Warn($"Failed to open write pipe, retrying in 500ms: {writerResult.unwrap_err()}");
-            Thread.Sleep(500);
-            writerResult = tryOpenWriter($"{workingDir}/read_onboard.pipe");
-        }
-        writer = writerResult.unwrap();
-        logger.Info($"Opened write pipe: {workingDir}/read_onboard.pipe");
+
+        logger.Info($"Opened read pipe: {workingDir}/onboard.sock");
 
         repeatPing(5000, 5000);
 
@@ -132,16 +128,16 @@ public static class Client {
             // Parse the message
             Response res = Response.deserialize(message);
 
-            if (!tasks.ContainsKey(res.id)) {
-                logger.Warn("Received response for unknown request id: " + res.id);
+            if (!tasks.ContainsKey(res.request_id)) {
+                logger.Warn("Received response for unknown request id: " + res.request_id);
                 continue;
             }
             
             // Get the task associated with the request id
-            var task = tasks[res.id];
+            var task = tasks[res.request_id];
             
             // Remove the task from the dictionary
-            tasks.Remove(res.id);
+            tasks.Remove(res.request_id);
             
             // Set the result of the task
             task.SetResult(res);
@@ -149,33 +145,33 @@ public static class Client {
             // Log the response
             switch (res.type) {
                 case Response.ResponseType.Pong:
-                    logger.Trace($"Received pong response for request {res.id}");
+                    logger.Trace($"Received pong response for request {res.request_id}");
                     break;
                 case Response.ResponseType.Err:
                     // Result is always an error here, so type parameter doesn't matter
-                    logger.Error($"Received error response for request {res.id}: {res.into_result<uint>().unwrap_err()}");
+                    logger.Error($"Received error response for request {res.request_id}: {res.into_result<uint>().unwrap_err()}");
                     break;
                 case Response.ResponseType.Ok:
-                    logger.Debug($"Received ok response for request {res.id}");
+                    logger.Debug($"Received ok response for request {res.request_id}");
                     break;
                 case Response.ResponseType.Game:
-                    logger.Debug($"Received game response for request {res.id}");
+                    logger.Debug($"Received game response for request {res.request_id}");
                     break;
                 case Response.ResponseType.GameList:
-                    logger.Debug($"Received game list response for request {res.id} (contained {res.unwrap<List<DevcadeGame>>().Count} games)");
+                    logger.Debug($"Received game list response for request {res.request_id} (contained {res.unwrap<List<DevcadeGame>>().Count} games)");
                     break;
                 case Response.ResponseType.TagList:
                     logger.Debug(
-                        $"Received tag list response for request {res.id} (contained {res.unwrap<List<Tag>>().Count} tags)");
+                        $"Received tag list response for request {res.request_id} (contained {res.unwrap<List<Tag>>().Count} tags)");
                     break;
                 case Response.ResponseType.Tag:
-                    logger.Debug($"Received tag response for request {res.id}");
+                    logger.Debug($"Received tag response for request {res.request_id}");
                     break;
                 case Response.ResponseType.User:
-                    logger.Debug($"Received user response for request {res.id}");
+                    logger.Debug($"Received user response for request {res.request_id}");
                     break;
                 default:
-                    logger.Warn($"Received unknown response type for request {res.id}: {res.type}");
+                    logger.Warn($"Received unknown response type for request {res.request_id}: {res.type}");
                     logger.Warn("Did you forget to add a case to the switch statement?");
                     break;
             }
@@ -186,33 +182,26 @@ public static class Client {
     #region Backend Communication
 
     /// <summary>
-    /// Tries to open a read pipe to the backend, returning an error if it fails
+    /// Tries to open a socket to the backend, returning an error if it fails
     /// </summary>
-    /// <param name="path">The path at which to open a StreamReader</param>
-    /// <returns>A Result containing either a StreamReader or an Error</returns>
-    private static Result<StreamReader, Exception> tryOpenReader(string path) {
-        try {
-            var _reader = new StreamReader(new FileStream(path, FileMode.Open, FileAccess.ReadWrite));
-            return Result<StreamReader, Exception>.Ok(_reader);
+    /// <param name="path">The path at which to open a Socket</param>
+    /// <returns>A Result containing either a Socket or an Error</returns>
+    private static Result<Socket, Exception> tryOpenSocket(string path) {
+        try
+        {
+            socket = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.IP);
+            var endpoint = new UnixDomainSocketEndPoint(path);
+            socket.Connect(endpoint);
+
+            var stream = new NetworkStream(socket);
+            reader = new StreamReader(stream, new UTF8Encoding(false));
+            writer = new StreamWriter(stream, new UTF8Encoding(false));
+            return Result<Socket, Exception>.Ok(socket);
         } catch (Exception e) {
-            return Result<StreamReader, Exception>.Err(e);
+            return Result<Socket, Exception>.Err(e);
         }
     }
 
-    /// <summary>
-    /// Tries to open a write pipe to the backend, returning an error if it fails
-    /// </summary>
-    /// <param name="path">The path at which to open a streamWriter</param>
-    /// <returns>A Result containing either a StreamWriter or an Error</returns>
-    private static Result<StreamWriter, Exception> tryOpenWriter(string path) {
-        try {
-            var _writer = new StreamWriter(new FileStream(path, FileMode.Open, FileAccess.Write));
-            return Result<StreamWriter, Exception>.Ok(_writer);
-        } catch (Exception e) {
-            return Result<StreamWriter, Exception>.Err(e);
-        }
-    }
-    
     /// <summary>
     /// Read the contents of the read pipe, returning an empty string if the pipe is empty
     /// </summary>
@@ -330,19 +319,19 @@ public static class Client {
     
     public static Task<Response> getTags() {
         Request req = Request.GetTagList();
-        logger.Debug($"Getting tags list (id {req.id})");
+        logger.Debug($"Getting tags list (id {req.request_id})");
         return sendRequest(req);
     }
 
     public static Task<Response> getTag(string name) {
         Request req = Request.GetTag(name);
-        logger.Debug($"Getting tag with name '{name}' (id {req.id})");
+        logger.Debug($"Getting tag with name '{name}' (id {req.request_id})");
         return sendRequest(req);
     }
     
     public static Task<Response> getGamesWithTag(string name) {
         Request req = Request.GetGameListFromTag(name);
-        logger.Debug($"Getting games with tag '{name}' (id {req.id})");
+        logger.Debug($"Getting games with tag '{name}' (id {req.request_id})");
         return sendRequest(req);
     }
     
@@ -352,7 +341,7 @@ public static class Client {
     
     public static Task<Response> getUser(string username) {
         Request req = Request.getUser(username);
-        logger.Debug($"Getting user with username '{username}' (id {req.id})");
+        logger.Debug($"Getting user with username '{username}' (id {req.request_id})");
         return sendRequest(req);
     }
 
@@ -402,15 +391,15 @@ public static class Client {
         if (connected) {
             if (brokenPipe && !fixPipes()) {
                 return Task.FromResult(
-                    Response.fromError(req.id, "Pipes currently broken. Please wait for the plumber"));
+                    Response.fromError(req.request_id, "Pipes currently broken. Please wait for the plumber"));
             }
             try {
                 write(req.serialize());
             } catch (Exception e) {
-                logger.Error($"Failed to send request {req.id} to backend: {e.Message}");
+                logger.Error($"Failed to send request {req.request_id} to backend: {e.Message}");
                 connected = false;
                 brokenPipe = true;
-                return Task.FromResult(Response.fromError(req.id, e.Message));
+                return Task.FromResult(Response.fromError(req.request_id, e.Message));
             }
         }
         else {
@@ -420,7 +409,7 @@ public static class Client {
         
         TaskCompletionSource<Response> tcs = new();
         
-        tasks.Add(req.id, tcs);
+        tasks.Add(req.request_id, tcs);
         
         return tcs.Task;
     }
@@ -436,15 +425,15 @@ public static class Client {
         try {
             write(req.serialize());
         } catch (Exception e) {
-            logger.Error($"Failed to send request {req.id} to backend: {e.Message}");
+            logger.Error($"Failed to send request {req.request_id} to backend: {e.Message}");
             connected = false;
             brokenPipe = true;
-            return Task.FromResult(Response.fromError(req.id, e.Message));
+            return Task.FromResult(Response.fromError(req.request_id, e.Message));
         }
         
         TaskCompletionSource<Response> tcs = new();
         
-        tasks.Add(req.id, tcs);
+        tasks.Add(req.request_id, tcs);
         
         return tcs.Task;
     }
@@ -478,11 +467,8 @@ public static class Client {
     /// Attempt to reconnect to the backend. This will just attempt opening a new pipe, and log if it fails.
     /// </summary>
     private static bool fixPipes() {
-        var readerResult = tryOpenReader($"{workingDir}/write_onboard.pipe");
-        var writerResult = tryOpenWriter($"{workingDir}/read_onboard.pipe");
-        if (readerResult.is_ok() && writerResult.is_ok()) {
-            reader = readerResult.unwrap();
-            writer = writerResult.unwrap();
+        var socketResult = tryOpenSocket($"{workingDir}/onboard.sock");
+        if (socketResult.is_ok()) { 
             brokenPipe = false;
             logger.Info("Reconnected to backend");
             return true;

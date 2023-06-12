@@ -30,23 +30,28 @@ public class Request {
         LaunchGame,
     }
 
-    public uint id { get; private set; }
+    public uint request_id { get; private set; }
     private readonly RequestType type;
-    private readonly object data;
+    private readonly object? data;
 
-    private Request(RequestType type, string? string_id = null, bool? prod = null) {
-        this.id = _id++;
+    private Request(RequestType type, string string_id = null, bool? prod = null) {
+        this.request_id = _id++;
         this.type = type;
         this.data = type switch {
             RequestType.Ping or RequestType.GetGameList or RequestType.GetGameListFromFs or RequestType.GetTagList =>
-                id,
-            RequestType.SetProduction => new object[] { id, prod ?? true },
-            _ => new object[] { id, string_id ?? "" }
+                null,
+            RequestType.SetProduction => prod ?? true,
+            _ => string_id ?? ""
         };
     }
 
-    public string serialize() {
-        return "{\"type\": \"" + type + "\", \"data\": " + JsonConvert.SerializeObject(data) + "}";
+    public string serialize()
+    {
+        var rest = "";
+        if (data != null) {
+            rest = ", \"data\": " + JsonConvert.SerializeObject(data);
+        }
+        return "{\"request_id\": " + request_id + ", \"type\": \"" + type + "\"" + rest + "}";
     }
 
     public static Request GetGameList() {
