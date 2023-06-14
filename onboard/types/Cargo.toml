@@ -1,7 +1,11 @@
 [package]
 name = "devcade_onboard_types"
+description = "Types used by the devcade onboard socket"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
+repository = "https://github.com/ComputerScienceHouse/Devcade-onboard"
+homepage = "https://github.com/ComputerScienceHouse/Devcade-onboard/tree/main/onboard/types"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
