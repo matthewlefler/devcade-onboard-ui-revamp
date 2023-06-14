@@ -1,5 +1,11 @@
+use futures_util::future;
 use futures_util::FutureExt;
 use log::{log, Level};
+use std::future::Future;
+use std::sync::Arc;
+use tokio::io::{AsyncBufReadExt, BufReader, Lines, ReadHalf, WriteHalf};
+use tokio::net::{UnixListener, UnixStream};
+use tokio::task;
 use tokio::task::JoinError;
 
 /**
@@ -12,16 +18,8 @@ pub mod path {
      * Get the path to the pipe that the frontend will write to
      */
     #[must_use]
-    pub fn onboard_command_pipe() -> String {
-        format!("{}/read_onboard.pipe", devcade_path())
-    }
-
-    /**
-     * Get the path to the pipe that the frontend will read from
-     */
-    #[must_use]
-    pub fn onboard_response_pipe() -> String {
-        format!("{}/write_onboard.pipe", devcade_path())
+    pub fn onboard_pipe() -> String {
+        format!("{}/onboard.sock", devcade_path())
     }
 }
 
@@ -64,10 +62,10 @@ impl ThreadHandles {
     /**
      * Restart the onboard server thread with the given pipes
      */
-    pub fn restart_onboard(&mut self, command_pipe: String, response_pipe: String) {
+    pub fn restart_onboard(&mut self, command_pipe: String) {
         log!(Level::Info, "Starting onboard thread ...");
         self.onboard = Some(tokio::spawn(async move {
-            onboard::main(command_pipe.as_str(), response_pipe.as_str()).await;
+            onboard::main(command_pipe.as_str()).await;
         }));
     }
 
@@ -124,4 +122,32 @@ impl Default for ThreadHandles {
     fn default() -> Self {
         Self::new()
     }
+}
+
+pub async fn open_server<'a, T, U>(path: &str, handle_client: T) -> !
+where
+    T: (Fn(Lines<BufReader<ReadHalf<UnixStream>>>, WriteHalf<UnixStream>) -> U)
+        + Send
+        + Sync
+        + 'a + 'static,
+    U: Future<Output = Result<(), anyhow::Error>> + Send + Sync + 'a + 'static,
+{
+    let listener = UnixListener::bind(path).unwrap();
+    let handle_client = Arc::new(handle_client);
+
+    let mut handles = vec![];
+    while let Ok((stream, _address)) = listener.accept().await {
+        let handle_client = handle_client.clone();
+        handles.push(task::spawn(async move {
+            let (reader, writer) = tokio::io::split(stream);
+            let reader = BufReader::new(reader);
+
+            match handle_client(reader.lines(), writer).await {
+                Ok(()) => log::info!("Finished handling connections from client"),
+                Err(err) => log::error!("Finished handling connections from client: {:?}", err),
+            }
+        }));
+    }
+    future::join_all(handles).await;
+    panic!("Looks like our server stopped serving?! This shouldn't happen.");
 }

@@ -1,20 +1,19 @@
-use crate::api::schema::{DevcadeGame, MinimalGame, Tag, User};
 use crate::env::{api_url, devcade_path};
+use crate::nfc::NFC_CLIENT;
 use anyhow::{anyhow, Error};
+use devcade_onboard_types::{
+    schema::{DevcadeGame, MinimalGame, Tag, User},
+    Map, Player, Value,
+};
 use log::{log, Level};
+
 use std::ffi::OsStr;
+
 use std::os::unix::fs::PermissionsExt;
 use std::path::Path;
-use std::process::ExitStatus;
-use std::thread;
-use std::thread::JoinHandle;
+use std::process::Stdio;
 use std::time::Duration;
-
-/**
- * Module for defining the database schema, these are the same schema that the API uses, so they are
- * defined here as well to deserialize the responses from the API.
- */
-pub mod schema;
+use tokio::process::Command;
 
 /**
  * Internal module for network requests and JSON serialization
@@ -237,6 +236,21 @@ pub async fn download_icon(game_id: String) -> Result<(), Error> {
     Ok(())
 }
 
+pub async fn nfc_tags(reader_id: Player) -> Result<Option<String>, Error> {
+    assert!(reader_id == Player::P1);
+    NFC_CLIENT
+        .submit()
+        .await
+        .map_err(|err| anyhow!("Couldn't get NFC tags: {:?}", err))
+}
+
+pub async fn nfc_user(association_id: String) -> Result<Map<String, Value>, Error> {
+    NFC_CLIENT
+        .get_user(association_id)
+        .await
+        .map_err(|err| anyhow!("Couldn't get NFC user: {:?}", err))
+}
+
 /**
  * Download's a game's zip file from the API and unzips it into the game's directory. If the game is
  * already downloaded, it will check if the hash is the same. If it is, it will not download the game
@@ -377,7 +391,7 @@ pub async fn download_game(game_id: String) -> Result<(), Error> {
  * This function will never panic, but contains an `unwrap` call that will never fail. This section
  * is here to make clippy happy.
  */
-pub async fn launch_game(game_id: String) -> Result<JoinHandle<ExitStatus>, Error> {
+pub async fn launch_game(game_id: String) -> Result<(), Error> {
     let path = Path::new(devcade_path().as_str())
         .join(game_id.clone())
         .join("publish");
@@ -451,27 +465,18 @@ pub async fn launch_game(game_id: String) -> Result<JoinHandle<ExitStatus>, Erro
     std::fs::set_permissions(path.clone(), perms)?;
 
     // Launch the game and silence stdout (allow the game to print to stderr)
-    let mut child = std::process::Command::new(path.clone());
+    let mut child = Command::new(path.clone());
 
-    child.stdout(std::process::Stdio::null());
+    child.stdout(Stdio::null());
     // Unfortunately this will bypass the log crate, so no pretty logging for games
     child.stderr(std::process::Stdio::inherit());
     child.current_dir(path.parent().unwrap()); // This unwrap is safe because it is guaranteed to have a parent
 
-    let handle = thread::spawn(move || {
-        let mut child_handle = child.spawn().expect("failed to execute child");
-        child_handle.wait().expect("failed to wait on child")
-    });
+    let mut child = child.spawn().expect("Failed to launch game");
+    child.wait().await.expect("Failed to launch game");
 
     tokio::time::sleep(Duration::from_millis(200)).await;
-
-    if handle.is_finished() {
-        let e = handle.join();
-        // Even if the game exited successfully, if it exited after 200ms, something went wrong
-        return Err(anyhow!("Error launching game: {:?}", e));
-    }
-
-    Ok(handle)
+    Ok(())
 }
 
 /**
@@ -508,7 +513,7 @@ pub async fn tag_games(name: String) -> Result<Vec<DevcadeGame>, Error> {
         format!("{}/{}", api_url(), route::tag_games(name.as_str())).as_str(),
     )
     .await?;
-    let games: Vec<_> = games.into_iter().map(|g| game_from_minimal(g)).collect();
+    let games: Vec<_> = games.into_iter().map(game_from_minimal).collect();
     // await all the games and return them
     let games: Vec<Result<DevcadeGame, Error>> = futures_util::future::join_all(games).await;
     Ok(games
