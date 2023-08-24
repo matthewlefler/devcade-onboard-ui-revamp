@@ -359,3 +359,7 @@ HACKING/__pycache__/**
 .env
 onboard/.env
 HACKING/.env
+
+# test locations for save data
+onboard/backend/.save
+onboard/backend/src/.save

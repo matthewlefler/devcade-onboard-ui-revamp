@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 /**
  * A tag from the Devcade API that is associated with a game. Used to categorize games.
  */
-#[derive(Default, Debug, Serialize, Deserialize)]
+#[derive(Clone, Default, Debug, Serialize, Deserialize)]
 pub struct Tag {
     /**
      * The tag's description, used to describe the tag.
@@ -20,7 +20,7 @@ pub struct Tag {
  * A user from the Devcade API that is associated with a game. Used to identify the author of a game.
  * The user type is used to determine whether the user is a CSH member or a Google user.
  */
-#[derive(Default, Debug, Serialize, Deserialize)]
+#[derive(Clone, Default, Debug, Serialize, Deserialize)]
 pub struct User {
     /**
      * Whether the user is an admin.
@@ -61,7 +61,7 @@ pub struct User {
 /**
  * The type of user. This is used to determine whether the user is a CSH member or a Google user.
  */
-#[derive(Default, Debug, Serialize, Deserialize)]
+#[derive(Clone, Default, Debug, Serialize, Deserialize)]
 pub enum UserType {
     /**
      * A CSH member. Games made by CSH members can use the Gatekeeper API to authenticate other
@@ -79,7 +79,7 @@ pub enum UserType {
 /**
  * A game from the Devcade API
  */
-#[derive(Default, Debug, Serialize, Deserialize)]
+#[derive(Clone, Default, Debug, Serialize, Deserialize)]
 pub struct DevcadeGame {
     /**
      * The author's username, or the author's google username if the author is not a CSH member.
@@ -130,7 +130,7 @@ pub struct DevcadeGame {
  *
  * For per-field documentation, see the `DevcadeGame` struct.
  */
-#[derive(Default, Debug, Serialize, Deserialize)]
+#[derive(Clone, Default, Debug, Serialize, Deserialize)]
 pub struct MinimalGame {
     pub id: String,
     pub author: String,

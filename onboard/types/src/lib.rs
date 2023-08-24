@@ -58,6 +58,7 @@ pub struct Request {
 pub enum RequestBody {
     Ping, // Used to check if the backend is alive
 
+    // --- Onboard backend ---
     GetGameList,
     GetGameListFromFs,
     GetGame(String),        // String is the game ID
@@ -73,10 +74,18 @@ pub enum RequestBody {
 
     SetProduction(bool), // Sets prod / dev api url
 
-    LaunchGame(String), // String is the game ID
+    LaunchGame(String), // String is the game
+    // ---
 
-    GetNfcTag(Player),  // u8 is the index of the reader. Right now just 0.
+    // --- Persistence ---
+    Save(String, String, String), // Group, Key, Value
+    Load(String, String),         // Group, Key
+    // ---
+
+    // --- Gatekeeper ---
+    GetNfcTag(Player), // u8 is the index of the reader. Right now just 0.
     GetNfcUser(String), // String is the association ID
+                       // ---
 }
 
 impl RequestBody {
@@ -97,6 +106,8 @@ impl RequestBody {
             Self::GetGameListFromTag(String::new()),
             Self::SetProduction(false),
             Self::LaunchGame(String::new()),
+            Self::Save(String::new(), String::new(), String::new()),
+            Self::Load(String::new(), String::new()),
             Self::GetNfcTag(Player::P1),
             Self::GetNfcUser(String::new()),
         ]
@@ -134,6 +145,8 @@ pub enum ResponseBody {
 
     User(User),
 
+    Object(String),
+
     NfcTag(Option<String>),
     NfcUser(Map<String, Value>),
 
@@ -160,6 +173,8 @@ impl ResponseBody {
             Self::Game(DevcadeGame::default()),
             Self::TagList(Vec::new()),
             Self::Tag(Tag::default()),
+            Self::User(User::default()),
+            Self::Object(String::from("")),
             Self::InternalGame(std::thread::spawn(|| std::process::exit(0))),
             Self::NfcTag(None),
             Self::NfcUser(Map::default()),
@@ -201,6 +216,8 @@ impl Display for RequestBody {
                 write!(f, "Get Game List from Tag with name '{tag_name}'")
             }
             Self::GetUser(uid) => write!(f, "Get User with id '{uid}'"),
+            Self::Save(group, key, _value) => write!(f, "Save value to {group}/{key}"),
+            Self::Load(group, key) => write!(f, "Load value from {group}/{key}"),
             Self::GetNfcTag(player) => {
                 write!(f, "Get NFC tags for player '{player}'")
             }
@@ -246,6 +263,9 @@ impl Display for ResponseBody {
             }
             Self::Tag(Tag { name, .. }) => write!(f, "Got tag with name '{name}'"),
             Self::User(User { id, .. }) => write!(f, "Got user with id '{id}'"),
+            Self::Object(value) => {
+                write!(f, "Got Save data object ({} bytes)", value.bytes().len())
+            }
             Self::NfcTag(tag_id) => {
                 write!(f, "Got NFC tag ID '{tag_id:?}'")
             }

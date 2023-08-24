@@ -5,15 +5,23 @@ use devcade_onboard_types::{
     schema::{DevcadeGame, MinimalGame, Tag, User},
     Map, Player, Value,
 };
+use lazy_static::lazy_static;
 use log::{log, Level};
 
 use std::ffi::OsStr;
 
+use std::cell::Cell;
 use std::os::unix::fs::PermissionsExt;
 use std::path::Path;
 use std::process::Stdio;
+use std::sync::Mutex;
 use std::time::Duration;
 use tokio::process::Command;
+
+lazy_static! {
+    static ref CURRENT_GAME: Mutex<Cell<DevcadeGame>> =
+        Mutex::new(Cell::new(DevcadeGame::default()));
+}
 
 /**
  * Internal module for network requests and JSON serialization
@@ -403,6 +411,15 @@ pub async fn launch_game(game_id: String) -> Result<(), Error> {
         download_game(game_id.clone()).await?;
     }
 
+    let game = game_from_path(
+        path.parent()
+            .unwrap()
+            .join("game.json")
+            .to_str()
+            .unwrap_or(""),
+    )?;
+    CURRENT_GAME.lock().unwrap().set(game);
+
     // Infer executable name from *.runtimeconfig.json
     let mut executable = String::new();
 
@@ -572,4 +589,8 @@ async fn game_from_minimal(game: MinimalGame) -> Result<DevcadeGame, Error> {
         format!("{}/{}", api_url(), route::game(game.id.as_str())).as_str(),
     )
     .await
+}
+
+pub fn current_game() -> DevcadeGame {
+    CURRENT_GAME.lock().unwrap().get_mut().clone()
 }
