@@ -89,5 +89,9 @@ pub async fn handle(req: RequestBody) -> ResponseBody {
                 Err(err) => err.into(),
             }
         }
+        RequestBody::Flush => match servers::persistence::flush().await {
+            Ok(()) => ResponseBody::Ok,
+            Err(err) => err.into(),
+        },
     }
 }

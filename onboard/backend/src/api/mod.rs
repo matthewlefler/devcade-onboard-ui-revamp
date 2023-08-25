@@ -1,5 +1,6 @@
 use crate::env::{api_url, devcade_path};
 use crate::nfc::NFC_CLIENT;
+use crate::servers;
 use anyhow::{anyhow, Error};
 use devcade_onboard_types::{
     schema::{DevcadeGame, MinimalGame, Tag, User},
@@ -418,6 +419,11 @@ pub async fn launch_game(game_id: String) -> Result<(), Error> {
             .to_str()
             .unwrap_or(""),
     )?;
+    // flush data every time a new game is opened (in case previous launched game forgor)
+    match servers::persistence::flush().await {
+        Ok(_) => {}
+        Err(e) => log::warn!("Failed to flush save cache: {e}"),
+    }
     CURRENT_GAME.lock().unwrap().set(game);
 
     // Infer executable name from *.runtimeconfig.json

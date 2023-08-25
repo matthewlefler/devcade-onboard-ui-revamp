@@ -80,6 +80,7 @@ pub enum RequestBody {
     // --- Persistence ---
     Save(String, String, String), // Group, Key, Value
     Load(String, String),         // Group, Key
+    Flush,
     // ---
 
     // --- Gatekeeper ---
@@ -108,6 +109,7 @@ impl RequestBody {
             Self::LaunchGame(String::new()),
             Self::Save(String::new(), String::new(), String::new()),
             Self::Load(String::new(), String::new()),
+            Self::Flush,
             Self::GetNfcTag(Player::P1),
             Self::GetNfcUser(String::new()),
         ]
@@ -218,6 +220,7 @@ impl Display for RequestBody {
             Self::GetUser(uid) => write!(f, "Get User with id '{uid}'"),
             Self::Save(group, key, _value) => write!(f, "Save value to {group}/{key}"),
             Self::Load(group, key) => write!(f, "Load value from {group}/{key}"),
+            Self::Flush => write!(f, "Flush cached save data"),
             Self::GetNfcTag(player) => {
                 write!(f, "Get NFC tags for player '{player}'")
             }

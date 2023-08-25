@@ -10,6 +10,7 @@ use std::sync::Arc;
 use tokio::fs;
 use tokio::io::AsyncWriteExt;
 use tokio::sync::Mutex;
+use tokio::task;
 
 lazy_static! {
     // basically just checks if a user 'devcade' exists. If so, assumes that this is running on the
@@ -21,20 +22,35 @@ lazy_static! {
 
 pub async fn main(command_pipe: &str) -> ! {
     log::info!("Starting save/load process");
+    log::debug!("Opened command pipe at {}", command_pipe);
 
     open_server(command_pipe, async move |mut lines, writer| {
         let writer = Arc::new(Mutex::new(writer));
         let mut handles = vec![];
+        log::debug!("New client connected to persistence socket");
         while let Some(line) = lines.next_line().await? {
             let command: Request = serde_json::from_str(&line)?;
 
+            match &command.body {
+                RequestBody::Save(_, _, _) | RequestBody::Load(_, _) | RequestBody::Flush => {
+                    log::debug!("Handling command: {}", command);
+                }
+                RequestBody::Ping => {
+                    log::trace!("Handling command: {}", command);
+                }
+                _ => {
+                    log::warn!("Invalid command from game: {}", command);
+                }
+            }
+
             let writer = writer.clone();
 
-            handles.push(async move {
+            handles.push(task::spawn(async move {
                 let body: ResponseBody = match &command.body {
-                    RequestBody::Save(_, _, _) | RequestBody::Load(_, _) | RequestBody::Ping => {
-                        handle(command.body).await
-                    }
+                    RequestBody::Save(_, _, _)
+                    | RequestBody::Load(_, _)
+                    | RequestBody::Flush
+                    | RequestBody::Ping => handle(command.body).await,
                     // Don't allow game save/load to (for example) download a game, launch a game,
                     // etc. If games could launch other games, it would update the 'current game' in
                     // crate::api and allow games to corrupt other games' save data (possibly
@@ -52,10 +68,11 @@ pub async fn main(command_pipe: &str) -> ! {
                 let mut writer = writer.lock().await;
                 writer.write_all(&response).await?;
                 Ok(()) as Result<(), anyhow::Error>
-            });
+            }));
         }
 
         future::join_all(handles).await;
+        log::info!("Persistence thread disconnecting");
         Ok(())
     })
     .await
