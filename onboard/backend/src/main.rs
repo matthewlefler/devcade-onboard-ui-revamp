@@ -1,5 +1,5 @@
 use backend::env::devcade_path;
-use backend::servers::path::onboard_pipe;
+use backend::servers::path::{onboard_pipe, persistence_pipe};
 use backend::servers::ThreadHandles;
 use log::{log, Level};
 use tokio::fs;
@@ -27,7 +27,7 @@ async fn main() -> ! {
 
     handles.restart_onboard(onboard_pipe());
 
-    // TODO Game Save / Load
+    handles.restart_persistence(persistence_pipe());
 
     // TODO Gatekeeper / Authentication
 
@@ -39,9 +39,9 @@ async fn main() -> ! {
             log!(Level::Error, "Onboard thread has panicked: {}", err);
             handles.restart_onboard(onboard_pipe());
         }
-        if let Some(err) = handles._game_error() {
+        if let Some(err) = handles.game_error() {
             log!(Level::Error, "Game thread has panicked: {}", err);
-            // TODO Restart game thread (once implemented)
+            handles.restart_persistence(persistence_pipe());
         }
         if let Some(err) = handles._gatekeeper_error() {
             log!(Level::Error, "Gatekeeper thread has panicked: {}", err);

@@ -1,7 +1,10 @@
+use anyhow::anyhow;
 use futures_util::future;
 use futures_util::FutureExt;
 use log::{log, Level};
+use std::fs::remove_file;
 use std::future::Future;
+use std::process::{Command, Stdio};
 use std::sync::Arc;
 use tokio::io::{AsyncBufReadExt, BufReader, Lines, ReadHalf, WriteHalf};
 use tokio::net::{UnixListener, UnixStream};
@@ -21,12 +24,26 @@ pub mod path {
     pub fn onboard_pipe() -> String {
         format!("{}/onboard.sock", devcade_path())
     }
+
+    /**
+     * Get the path to the pipe that the persistence thread will write to
+     * */
+    #[must_use]
+    pub fn persistence_pipe() -> String {
+        format!("{}/persistence.sock", devcade_path())
+    }
 }
 
 /**
  * The onboard server is responsible for communicating with the frontend
  */
 pub mod onboard;
+
+/**
+ * The persistence server is responsible for communicating with the running game and saving /
+ * loading persistent data.
+ * */
+pub mod persistence;
 
 /**
  * A struct to hold the handles to the threads spawned by the backend.
@@ -60,12 +77,22 @@ impl ThreadHandles {
     }
 
     /**
-     * Restart the onboard server thread with the given pipes
+     * Restart the onboard server thread with the given pipe
      */
     pub fn restart_onboard(&mut self, command_pipe: String) {
         log!(Level::Info, "Starting onboard thread ...");
         self.onboard = Some(tokio::spawn(async move {
             onboard::main(command_pipe.as_str()).await;
+        }));
+    }
+
+    /**
+     * Restart the save / load server thread with the given pipe
+     * */
+    pub fn restart_persistence(&mut self, command_pipe: String) {
+        log!(Level::Info, "Starting persistence thread ...");
+        self.game_sl = Some(tokio::spawn(async move {
+            persistence::main(command_pipe.as_str()).await;
         }));
     }
 
@@ -88,7 +115,7 @@ impl ThreadHandles {
     /**
      * Check if the game thread has errored and return the error if it has
      */
-    pub fn _game_error(&mut self) -> Option<JoinError> {
+    pub fn game_error(&mut self) -> Option<JoinError> {
         let handle = self.game_sl.take();
         if let Some(handle) = handle {
             return if handle.is_finished() {
@@ -132,7 +159,7 @@ where
         + 'a + 'static,
     U: Future<Output = Result<(), anyhow::Error>> + Send + Sync + 'a + 'static,
 {
-    let listener = UnixListener::bind(path).unwrap();
+    let listener = bind_listener(path).unwrap();
     let handle_client = Arc::new(handle_client);
 
     let mut handles = vec![];
@@ -150,4 +177,29 @@ where
     }
     future::join_all(handles).await;
     panic!("Looks like our server stopped serving?! This shouldn't happen.");
+}
+
+fn bind_listener(path: &str) -> Result<UnixListener, anyhow::Error> {
+    match UnixListener::bind(path) {
+        Ok(l) => Ok(l),
+        Err(e) => match e.to_string().as_str() {
+            "Address already in use (os error 98)" => {
+                // Using std::process::Command instead of tokio equivalent because lsof doesn't
+                // take long enough to bother
+                let lsof = Command::new("lsof")
+                    .arg(path)
+                    .stdout(Stdio::null())
+                    .status()?;
+                if lsof.success() {
+                    // lsof returns success if any process is using this file
+                    Err(anyhow!("Failed to bind listener to path {}: {}", path, e))
+                } else {
+                    log::debug!("Socket was not closed correctly in last shutdown. Removing");
+                    remove_file(path)?;
+                    bind_listener(path)
+                }
+            }
+            _ => Err(anyhow!("Failed to bind listener to path {}: {}", path, e)),
+        },
+    }
 }
