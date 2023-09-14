@@ -44,7 +44,7 @@ impl Default for NfcClient {
     }
 }
 
-const NFC_DEVICE_NAME: &str = "pn532_uart:/dev/ttyUSB0";
+const NFC_DEVICE_NAME: &str = "pn532_uart:/dev/ttyACM0";
 
 impl NfcClient {
     fn run(rx: Receiver<NfcRequest>) {
