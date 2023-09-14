@@ -272,8 +272,10 @@ public class Devcade : Game {
                 }
 
 
-                if (myState.IsKeyDown(Keys.Z) || (Input.GetButton(1, Input.ArcadeButtons.B4) &&
-                                                  Input.GetButton(2, Input.ArcadeButtons.B4))) {
+                if (myState.IsKeyDown(Keys.Z) || (Input.GetButtonDown(1, Input.ArcadeButtons.B4) &&
+                                                  Input.GetButton(2, Input.ArcadeButtons.B4)) || 
+                                                  (Input.GetButton(1, Input.ArcadeButtons.B4) &&
+                                                  Input.GetButtonDown(2, Input.ArcadeButtons.B4))) {
                     // Switch to dev/prod
                     Client.setProduction(!Client.isProduction).Wait();
 
