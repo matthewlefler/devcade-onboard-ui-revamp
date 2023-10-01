@@ -208,6 +208,12 @@ public class Menu : IMenu {
             tagLists[allTag.name].Add(newCard);
         }
 
+        // shuffle lists
+        Random rand = new Random();
+        foreach(List<MenuCard> list in tagLists.Values) {
+            list.OrderBy(a => rand.Next()).ToList();
+        }
+
         // If demo mode is on, then set the tag to be curated instead of all
         if (Env.get("DEMO_MODE").map_or(false, bool.Parse)) {
             updateTag("Curated");
