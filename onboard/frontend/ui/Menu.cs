@@ -210,8 +210,8 @@ public class Menu : IMenu {
 
         // shuffle lists
         Random rand = new Random();
-        foreach(List<MenuCard> list in tagLists.Values) {
-            list.OrderBy(a => rand.Next()).ToList();
+        foreach(string key in tagLists.Keys) {
+            tagLists[key] = tagLists[key].OrderBy(a => rand.Next()).ToList();
         }
 
         // If demo mode is on, then set the tag to be curated instead of all
