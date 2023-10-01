@@ -226,8 +226,12 @@ public class Devcade : Game {
 
             case MenuState.Loading:
 
-                if (_cantFetch && (myState.IsKeyDown(Keys.Space) || (Input.GetButton(1, Input.ArcadeButtons.Menu) &&
-                                                                     Input.GetButton(2, Input.ArcadeButtons.Menu)))) {
+                if (_cantFetch && (myState.IsKeyDown(Keys.Space) || (
+                                (Input.GetButton(1, Input.ArcadeButtons.Menu) &&
+                                Input.GetButtonDown(2, Input.ArcadeButtons.Menu)) ||
+                                (Input.GetButtonDown(1, Input.ArcadeButtons.Menu) &&
+                                Input.GetButton(2, Input.ArcadeButtons.Menu))
+                                ))) {
                     try {
                         menu.reloadGames(GraphicsDevice);
                         _cantFetch = false;
