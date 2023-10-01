@@ -9,8 +9,8 @@ use devcade_onboard_types::{
 use lazy_static::lazy_static;
 use log::{log, Level};
 
-use std::ffi::OsStr;
-
+use base64::Engine;
+use serde::Serialize;
 use std::cell::Cell;
 use std::os::unix::fs::PermissionsExt;
 use std::path::Path;
@@ -184,7 +184,7 @@ pub fn game_list_from_fs() -> Result<Vec<DevcadeGame>, Error> {
                 continue;
             }
 
-            if let Ok(game) = game_from_path(path_.to_str().unwrap()) {
+            if let Ok(game) = game_from_path(&path_) {
                 games.push(game);
             }
         }
@@ -269,19 +269,34 @@ pub async fn nfc_user(association_id: String) -> Result<Map<String, Value>, Erro
  * This function will return an error if the request fails, or if the filesystem cannot be written to.
  */
 pub async fn download_game(game_id: String) -> Result<(), Error> {
+    log::debug!("Downloading a game!");
     let path = Path::new(devcade_path().as_str())
         .join(game_id.clone())
         .join("game.json");
 
-    let game = get_game(game_id.as_str()).await?;
-
-    // Check if the game is already downloaded, and if it is, check if the hash is the same
-    if path.exists() {
-        if let Ok(game_) = game_from_path(path.to_str().unwrap()) {
-            if game_.hash == game.hash {
-                return Ok(());
-            }
+    let game = match get_game(game_id.as_str()).await {
+        Ok(game) => {
+            log::debug!("Fetched game meta!");
+            game
         }
+        Err(err) => {
+            log::warn!("Couldn't request live info on game! Falling back to local file! {err:?}");
+            game_from_path(&path).expect("Game not downloaded and we're offline!")
+        }
+    };
+    if Command::new("flatpak")
+        .arg("info")
+        .arg(flatpak_id_for_game(&game))
+        .stdout(Stdio::null())
+        .stderr(Stdio::inherit())
+        .spawn()
+        .unwrap()
+        .wait()
+        .await
+        .unwrap()
+        .success()
+    {
+        return Ok(());
     }
 
     log!(Level::Info, "Downloading game {}...", game.name);
@@ -378,12 +393,126 @@ pub async fn download_game(game_id: String) -> Result<(), Error> {
     log!(Level::Trace, "Game json path: {}", path.to_str().unwrap());
     let json = serde_json::to_string(&game)?;
     std::fs::create_dir_all(path.parent().unwrap()).unwrap();
-    match std::fs::write(path, json) {
+    match std::fs::write(&path, json) {
         Ok(_) => {}
         Err(e) => {
             log!(Level::Warn, "Error writing game.json file: {}", e);
+            return Err(e.into());
         }
     };
+
+    build_flatpak(&game, path.parent().unwrap()).await?;
+
+    Ok(())
+}
+
+#[derive(Serialize, Debug, Clone)]
+#[serde(rename_all = "kebab-case")]
+struct FlatpakManifest {
+    app_id: String,
+    runtime: String,
+    runtime_version: String,
+    sdk: String,
+    command: String,
+    finish_args: Vec<String>,
+    modules: Vec<FlatpakModule>,
+}
+
+#[derive(Serialize, Debug, Clone)]
+#[serde(rename_all = "kebab-case")]
+struct FlatpakModule {
+    name: String,
+    #[serde(rename = "buildsystem")]
+    build_system: String,
+    build_commands: Vec<String>,
+    sources: Vec<FlatpakSource>,
+}
+
+#[derive(Serialize, Debug, Clone)]
+struct FlatpakSource {
+    r#type: FlatpakSourceType,
+    path: String,
+}
+
+#[derive(Serialize, Debug, Clone)]
+#[serde(rename_all = "lowercase")]
+enum FlatpakSourceType {
+    Dir,
+}
+
+fn flatpak_id_for_game(game: &DevcadeGame) -> String {
+    // - not allowed in middle components
+    let game_id = &game.id.replace('-', "_");
+    let game_hash_bytes = base64::engine::general_purpose::STANDARD
+        .decode(&game.hash)
+        .unwrap();
+    let game_hash_str = hex::encode(game_hash_bytes);
+
+    format!("edu.rit.csh.devcade.generated_game.id_{game_id}.hash_{game_hash_str}")
+}
+
+async fn build_flatpak(game: &DevcadeGame, game_dir: &Path) -> Result<(), Error> {
+    let game_id = &game.id;
+    log::debug!("Preparing to build flatpak for {game_id} @ {game_dir:?}");
+    let executable = locate_executable(&game_dir.join("publish")).await?;
+
+    {
+        let executable_path = game_dir.join("publish").join(&executable);
+        // Chmod +x the executable
+        let mut perms = executable_path.metadata()?.permissions();
+        perms.set_mode(0o755);
+        tokio::fs::set_permissions(executable_path.clone(), perms).await?;
+    }
+
+    let flatpak_manifest = FlatpakManifest {
+        app_id: flatpak_id_for_game(game),
+        runtime: "org.freedesktop.Platform".to_owned(),
+        runtime_version: "22.08".to_owned(),
+        sdk: "org.freedesktop.Sdk".to_owned(),
+        command: format!("/app/publish/{executable}"),
+        finish_args: vec![
+            "--share=ipc".to_owned(),
+            "--socket=x11".to_owned(),
+            "--socket=pulseaudio".to_owned(),
+            "--share=network".to_owned(),
+            "--device=dri".to_owned(),
+            "--filesystem=/tmp/devcade/persistence.sock".to_owned(),
+        ],
+        modules: vec![FlatpakModule {
+            name: game_id.to_string(),
+            build_system: "simple".to_owned(),
+            build_commands: vec!["cp -r . /app/publish".to_owned()],
+            sources: vec![FlatpakSource {
+                r#type: FlatpakSourceType::Dir,
+                path: "publish".to_owned(),
+            }],
+        }],
+    };
+
+    log::debug!("Writing flatpak yaml");
+    let flatpak_path = game_dir.join("flatpak.yml");
+    tokio::fs::write(&flatpak_path, serde_yaml::to_string(&flatpak_manifest)?).await?;
+
+    log::debug!("Building flatpak...");
+    Command::new("flatpak-builder")
+        .arg(format!(
+            "--state-dir={}",
+            game_dir.join("state-dir").to_str().unwrap()
+        ))
+        .arg("--force-clean")
+        .arg("--user")
+        .arg("--install")
+        .arg(game_dir.join("build").to_str().unwrap())
+        .arg(flatpak_path.to_str().unwrap())
+        .stdout(std::process::Stdio::inherit())
+        .stderr(std::process::Stdio::inherit())
+        .spawn()
+        .unwrap()
+        .wait()
+        .await
+        .unwrap();
+    log::debug!("Built flatpak!");
+
     Ok(())
 }
 
@@ -408,27 +537,38 @@ pub async fn launch_game(game_id: String) -> Result<(), Error> {
     log!(Level::Info, "Launching game {}...", game_id);
     log!(Level::Trace, "Game path: {}", path.to_str().unwrap());
 
-    if !path.exists() {
-        download_game(game_id.clone()).await?;
-    }
+    // Downloads game if we don't already have it
+    download_game(game_id.clone()).await?;
 
-    let game = game_from_path(
-        path.parent()
-            .unwrap()
-            .join("game.json")
-            .to_str()
-            .unwrap_or(""),
-    )?;
+    let game = game_from_path(&path.parent().unwrap().join("game.json"))?;
     // flush data every time a new game is opened (in case previous launched game forgor)
     match servers::persistence::flush().await {
         Ok(_) => {}
         Err(e) => log::warn!("Failed to flush save cache: {e}"),
     }
-    CURRENT_GAME.lock().unwrap().set(game);
+    CURRENT_GAME.lock().unwrap().set(game.clone());
 
+    // Launch the game and silence stdout (allow the game to print to stderr)
+    Command::new("flatpak")
+        .arg("run")
+        .arg(flatpak_id_for_game(&game))
+        // Unfortunately this will bypass the log crate, so no pretty logging for games
+        .stdout(Stdio::inherit())
+        .stderr(std::process::Stdio::inherit())
+        // This unwrap is safe because it is guaranteed to have a parent
+        .current_dir(path.parent().unwrap())
+        .spawn()
+        .expect("Failed to launch game")
+        .wait()
+        .await
+        .expect("Failed to launch game");
+
+    tokio::time::sleep(Duration::from_millis(200)).await;
+    Ok(())
+}
+
+async fn locate_executable(path: &Path) -> Result<String, Error> {
     // Infer executable name from *.runtimeconfig.json
-    let mut executable = String::new();
-
     for entry in std::fs::read_dir(path.clone())? {
         let entry = match entry {
             Ok(entry) => entry,
@@ -440,66 +580,29 @@ pub async fn launch_game(game_id: String) -> Result<(), Error> {
         }
 
         if let Some(filename) = path.file_name().map(|s| s.to_str().unwrap_or("")) {
-            if !filename.ends_with("runtimeconfig.json") {
+            if !filename.ends_with(".runtimeconfig.json") {
                 continue;
             }
             log!(Level::Debug, "Found runtimeconfig.json file: {}", filename);
-            executable = path
-                .file_prefix()
-                .unwrap_or(OsStr::new(""))
-                .to_str()
-                .unwrap_or("")
+            let executable = filename
+                .strip_suffix(".runtimeconfig.json")
+                .unwrap()
                 .to_string();
             log!(
                 Level::Debug,
                 "Executable inferred from runtimeconfig.json: {}",
                 executable
             );
-            break;
+            return Ok(executable);
         }
     }
 
     // If no *.runtimeconfig.json file is found, look for a file with the same name as the game
     // (this is the case for games that don't use .NET)
     // TODO: Some better way to find executable name?
-    if executable.is_empty() {
-        // This parent().unwrap() is safe because the path is guaranteed to have a parent
-        let game = game_from_path(
-            path.clone()
-                .parent()
-                .unwrap()
-                .join("game.json")
-                .to_str()
-                .unwrap_or(""),
-        )?;
-        executable = game.name;
-    }
-
-    let path = path.join(executable);
-
-    if !path.exists() {
-        return Err(anyhow!("Game executable not found"));
-    }
-
-    // Chmod +x the executable
-    let mut perms = path.metadata()?.permissions();
-    perms.set_mode(0o755);
-
-    std::fs::set_permissions(path.clone(), perms)?;
-
-    // Launch the game and silence stdout (allow the game to print to stderr)
-    let mut child = Command::new(path.clone());
-
-    child.stdout(Stdio::null());
-    // Unfortunately this will bypass the log crate, so no pretty logging for games
-    child.stderr(std::process::Stdio::inherit());
-    child.current_dir(path.parent().unwrap()); // This unwrap is safe because it is guaranteed to have a parent
-
-    let mut child = child.spawn().expect("Failed to launch game");
-    child.wait().await.expect("Failed to launch game");
-
-    tokio::time::sleep(Duration::from_millis(200)).await;
-    Ok(())
+    // This parent().unwrap() is safe because the path is guaranteed to have a parent
+    let game = game_from_path(&path.parent().unwrap().join("game.json"))?;
+    Ok(game.name)
 }
 
 /**
@@ -574,9 +677,8 @@ pub async fn user(uid: String) -> Result<User, Error> {
  * This function will return an error if the file does not exist, is a directory, or if the file
  * cannot be read.
  */
-fn game_from_path(path: &str) -> Result<DevcadeGame, Error> {
-    log!(Level::Trace, "Reading game from path {}", path);
-    let path = Path::new(path);
+fn game_from_path(path: &Path) -> Result<DevcadeGame, Error> {
+    log!(Level::Trace, "Reading game from path {:?}", path);
     if !path.exists() {
         return Err(anyhow!("Path does not exist"));
     }
