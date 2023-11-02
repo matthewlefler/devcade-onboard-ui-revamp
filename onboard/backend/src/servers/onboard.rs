@@ -1,6 +1,6 @@
 use crate::command::handle;
 use crate::servers::open_server;
-use devcade_onboard_types::{Request, RequestBody, Response};
+use devcade_onboard_types::{Request, RequestBody, Response, ResponseBody};
 use futures_util::future;
 use log::{log, Level};
 use std::sync::Arc;
@@ -44,7 +44,10 @@ pub async fn main(command_pipe: &str) -> ! {
                     request_id: command.request_id,
                     body,
                 };
-                log::debug!("Sending: {response}");
+                match &response.body {
+                    ResponseBody::Pong => log::trace!("Sending: {response}"),
+                    _ => log::debug!("Sending: {response}"),
+                }
                 let mut response = serde_json::to_vec(&response)?;
                 response.push(b'\n');
 
