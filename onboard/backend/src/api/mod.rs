@@ -1,27 +1,35 @@
 use crate::env::{api_url, devcade_path};
 use crate::nfc::NFC_CLIENT;
-use crate::servers;
 use anyhow::{anyhow, Error};
 use devcade_onboard_types::{
     schema::{DevcadeGame, MinimalGame, Tag, User},
     Map, Player, Value,
 };
-use lazy_static::lazy_static;
 use log::{log, Level};
 
 use base64::Engine;
+use lazy_static::lazy_static;
+use libflatpak::{gio, prelude::*, Installation, Transaction};
 use serde::Serialize;
 use std::cell::Cell;
+use std::collections::{HashMap, HashSet};
 use std::os::unix::fs::PermissionsExt;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::Stdio;
 use std::sync::Mutex;
 use std::time::Duration;
+use tokio::fs;
 use tokio::process::Command;
+use tokio::sync::oneshot;
 
 lazy_static! {
     static ref CURRENT_GAME: Mutex<Cell<DevcadeGame>> =
         Mutex::new(Cell::new(DevcadeGame::default()));
+    // basically just checks if a user 'devcade' exists. If so, assumes that this is running on the
+    // machine, and saves to the homedir. Otherwise, saves to the cwd.
+    static ref ON_MACHINE: bool = Path::new("/home/devcade").exists();
+    static ref DB: tokio::sync::Mutex<HashMap<String, HashMap<String, String>>> = tokio::sync::Mutex::new(HashMap::new());
+    static ref DB_MODIFIED: tokio::sync::Mutex<HashSet<String>> = tokio::sync::Mutex::new(HashSet::new());
 }
 
 /**
@@ -145,9 +153,12 @@ mod route {
  * This function will return an error if the request fails, or if the JSON cannot be deserialized
  */
 pub async fn game_list() -> Result<Vec<DevcadeGame>, Error> {
-    let games =
+    let games: Vec<DevcadeGame> =
         network::request_json(format!("{}/{}", api_url(), route::game_list()).as_str()).await?;
-    Ok(games)
+    Ok(games
+        .into_iter()
+        .filter(|game| game.hash.is_some())
+        .collect::<Vec<DevcadeGame>>())
 }
 
 /**
@@ -260,6 +271,120 @@ pub async fn nfc_user(association_id: String) -> Result<Map<String, Value>, Erro
         .map_err(|err| anyhow!("Couldn't get NFC user: {:?}", err))
 }
 
+async fn install_flatpak_bundle_async(bundle_path: PathBuf) -> Result<String, Error> {
+    let (tx, rx) = oneshot::channel();
+    std::thread::spawn(move || {
+        tx.send(install_flatpak_bundle(&bundle_path))
+            .expect("Server thread died before we could send flatpak install response?")
+    });
+    match rx.await {
+        Ok(result) => result,
+        Err(err) => Err(err.into()),
+    }
+}
+
+fn install_flatpak_bundle(bundle_path: &Path) -> Result<String, Error> {
+    let transaction = Transaction::for_installation(
+        &Installation::new_user(None::<&gio::Cancellable>)?,
+        None::<&gio::Cancellable>,
+    )?;
+    transaction.set_no_pull(false);
+    transaction.set_no_interaction(true);
+    transaction.add_default_dependency_sources();
+    transaction.add_install_bundle(&gio::File::for_path(bundle_path), None)?;
+    transaction.set_reinstall(true);
+    let (tx_app_id, rx_app_id) = std::sync::mpsc::channel::<String>();
+    transaction.connect_ready(move |transaction| {
+        // Return false to abort!
+        let mut app_name = None::<String>;
+        for op in transaction.operations() {
+            log::debug!(
+                "Processing operation for bundle {:?}",
+                op.bundle_path().map(|path| path.to_string())
+            );
+            if let Some(metadata) = op.metadata() {
+                log::debug!("Checking metadata: {}", metadata.to_data().as_str());
+                let name = metadata
+                    .string("Application", "name")
+                    .map(|name| name.to_string());
+                if let Ok(name) = &name {
+                    log::info!("Found an app name {name}");
+                    app_name = Some(name.clone());
+                }
+                log::debug!("Name of bundle is {name:?}");
+                match is_install_allowed(&metadata) {
+                    Ok(true) => {
+                        log::debug!("All permissions look OK on app {name:?}");
+                    }
+                    Ok(false) => {
+                        log::error!("Aborting installation of {name:?}");
+                        return false;
+                    }
+                    Err(err) => {
+                        log::error!("Aborting installation of {name:?} due to error {err}");
+                        return false;
+                    }
+                }
+                // if let Ok(name) = metadata.string("Application", "name") {}
+                // println!(
+                //     "Found metadata for {:?}: {}",
+                //     op.bundle_path(),
+                //     metadata.to_data().as_str()
+                // );
+            } else {
+                println!("no data for {:?}", op.bundle_path());
+            }
+        }
+        tx_app_id.send(app_name.unwrap()).unwrap();
+        // abort anyways, just testing :)
+        true
+    });
+    transaction.run(None::<&gio::Cancellable>)?;
+    Ok(rx_app_id.recv().unwrap())
+    //Ok("todo".to_owned())
+}
+
+fn is_install_allowed(metadata: &gio::glib::KeyFile) -> Result<bool, Error> {
+    if !metadata.has_group("Context") {
+        return Ok(true);
+    }
+    let allowed_permissions = HashMap::from([
+        ("shared", HashSet::from(["network", "ipc"])),
+        ("sockets", HashSet::from(["x11", "pulseaudio"])),
+        ("devices", HashSet::from(["dri"])),
+        (
+            "filesystems",
+            HashSet::from(["/tmp/devcade/persistence.sock", "/tmp/devcade/game.sock"]),
+        ),
+    ]);
+
+    for (realm, allowed_capabilities) in allowed_permissions.iter() {
+        if !metadata.has_key("Context", realm)? {
+            continue;
+        }
+        for capability in metadata
+            .string_list("Context", realm)?
+            .iter()
+            .map(|entry| entry.to_str())
+        {
+            if !allowed_capabilities.contains(capability) {
+                // Disallowed/unknown cap!
+                log::error!("Unknown capability {realm}={capability} is not allowed!");
+                return Ok(false);
+            }
+        }
+    }
+
+    for realm in metadata.keys("Context")?.iter().map(|entry| entry.to_str()) {
+        if !allowed_permissions.contains_key(realm) {
+            log::error!("Unknown realm {realm} is not allowed!");
+            return Ok(false);
+        }
+    }
+
+    Ok(true)
+}
+
 /**
  * Download's a game's zip file from the API and unzips it into the game's directory. If the game is
  * already downloaded, it will check if the hash is the same. If it is, it will not download the game
@@ -268,35 +393,30 @@ pub async fn nfc_user(association_id: String) -> Result<Map<String, Value>, Erro
  * # Errors
  * This function will return an error if the request fails, or if the filesystem cannot be written to.
  */
-pub async fn download_game(game_id: String) -> Result<(), Error> {
+pub async fn download_game(game_id: String) -> Result<DevcadeGame, Error> {
     log::debug!("Downloading a game!");
-    let path = Path::new(devcade_path().as_str())
-        .join(game_id.clone())
-        .join("game.json");
+    let game_dir = Path::new(devcade_path().as_str()).join(game_id.clone());
+    let game_json_path = game_dir.join("game.json");
 
-    let game = match get_game(game_id.as_str()).await {
+    let local_game = game_from_path(&game_json_path);
+    let mut game = match get_game(game_id.as_str()).await {
         Ok(game) => {
             log::debug!("Fetched game meta!");
             game
         }
         Err(err) => {
             log::warn!("Couldn't request live info on game! Falling back to local file! {err:?}");
-            game_from_path(&path).expect("Game not downloaded and we're offline!")
+            local_game
+                .as_ref()
+                .expect("Game not downloaded and we're offline!")
+                .clone()
         }
     };
-    if Command::new("flatpak")
-        .arg("info")
-        .arg(flatpak_id_for_game(&game))
-        .stdout(Stdio::null())
-        .stderr(Stdio::inherit())
-        .spawn()
-        .unwrap()
-        .wait()
-        .await
-        .unwrap()
-        .success()
-    {
-        return Ok(());
+    // Is the current hash == the remote hash?
+    if let Ok(local_game) = local_game {
+        if local_game.hash == game.hash {
+            return Ok(local_game);
+        }
     }
 
     log!(Level::Info, "Downloading game {}...", game.name);
@@ -306,82 +426,16 @@ pub async fn download_game(game_id: String) -> Result<(), Error> {
     )
     .await?;
 
-    log!(Level::Info, "Unzipping game {}...", game.name);
-    log!(Level::Trace, "Zip file size: {} bytes", bytes.len());
+    log!(Level::Info, " game {}...", game.name);
+    log!(Level::Trace, "Flatpak bundle size: {} bytes", bytes.len());
 
-    // Unzip the game into the game's directory
-    let mut zip = zip::ZipArchive::new(std::io::Cursor::new(bytes))?;
+    // // install flatpak
+    tokio::fs::create_dir_all(&game_dir).await?;
+    let bundle_path = game_dir.join("bundle.flatpak").to_owned();
+    tokio::fs::write(&bundle_path, &bytes).await?;
 
-    for i in 0..zip.len() {
-        let mut file = match zip.by_index(i) {
-            Ok(f) => f,
-            Err(e) => {
-                log!(Level::Warn, "Error getting file from zip: {}", e);
-                continue;
-            }
-        };
-        let out_path = Path::new(devcade_path().as_str())
-            .join(game.id.clone())
-            .join(file.name());
-        log!(
-            Level::Trace,
-            "Unzipping file {} to {}",
-            file.name(),
-            out_path.to_str().unwrap()
-        );
-        if file.name().ends_with('/') {
-            match std::fs::create_dir_all(&out_path) {
-                Ok(_) => {}
-                Err(e) => {
-                    log!(
-                        Level::Warn,
-                        "Error creating directory {}: {}",
-                        out_path.to_str().unwrap(),
-                        e
-                    );
-                }
-            }
-        } else {
-            if let Some(p) = out_path.parent() {
-                if !p.exists() {
-                    match std::fs::create_dir_all(p) {
-                        Ok(_) => {}
-                        Err(e) => {
-                            log!(
-                                Level::Warn,
-                                "Error creating directory {}: {}",
-                                p.to_str().unwrap(),
-                                e
-                            );
-                        }
-                    };
-                }
-            }
-            let mut outfile = match std::fs::File::create(&out_path) {
-                Ok(f) => f,
-                Err(e) => {
-                    log!(
-                        Level::Warn,
-                        "Error creating file {}: {}",
-                        out_path.to_str().unwrap(),
-                        e
-                    );
-                    continue;
-                }
-            };
-            match std::io::copy(&mut file, &mut outfile) {
-                Ok(_) => {}
-                Err(e) => {
-                    log!(
-                        Level::Warn,
-                        "Error copying file {}: {}",
-                        out_path.to_str().unwrap(),
-                        e
-                    );
-                }
-            };
-        }
-    }
+    game.flatpak_app_id = Some(install_flatpak_bundle_async(bundle_path).await?);
+    log::info!("Hi, flatpak app id {:?}", game.flatpak_app_id);
 
     // Write the game's JSON file to the game's directory (this is used later to get the games from
     // the filesystem)
@@ -390,130 +444,22 @@ pub async fn download_game(game_id: String) -> Result<(), Error> {
         "Writing game.json file for game {}...",
         game.name
     );
-    log!(Level::Trace, "Game json path: {}", path.to_str().unwrap());
+    log!(
+        Level::Trace,
+        "Game json path: {}",
+        game_json_path.to_str().unwrap()
+    );
     let json = serde_json::to_string(&game)?;
-    std::fs::create_dir_all(path.parent().unwrap()).unwrap();
-    match std::fs::write(&path, json) {
+    match tokio::fs::write(&game_json_path, json).await {
         Ok(_) => {}
         Err(e) => {
             log!(Level::Warn, "Error writing game.json file: {}", e);
             return Err(e.into());
         }
     };
+    log::debug!("Downloaded game {game:?}");
 
-    build_flatpak(&game, path.parent().unwrap()).await?;
-
-    Ok(())
-}
-
-#[derive(Serialize, Debug, Clone)]
-#[serde(rename_all = "kebab-case")]
-struct FlatpakManifest {
-    app_id: String,
-    runtime: String,
-    runtime_version: String,
-    sdk: String,
-    command: String,
-    finish_args: Vec<String>,
-    modules: Vec<FlatpakModule>,
-}
-
-#[derive(Serialize, Debug, Clone)]
-#[serde(rename_all = "kebab-case")]
-struct FlatpakModule {
-    name: String,
-    #[serde(rename = "buildsystem")]
-    build_system: String,
-    build_commands: Vec<String>,
-    sources: Vec<FlatpakSource>,
-}
-
-#[derive(Serialize, Debug, Clone)]
-struct FlatpakSource {
-    r#type: FlatpakSourceType,
-    path: String,
-}
-
-#[derive(Serialize, Debug, Clone)]
-#[serde(rename_all = "lowercase")]
-enum FlatpakSourceType {
-    Dir,
-}
-
-fn flatpak_id_for_game(game: &DevcadeGame) -> String {
-    // - not allowed in middle components
-    let game_id = &game.id.replace('-', "_");
-    let game_hash_bytes = base64::engine::general_purpose::STANDARD
-        .decode(&game.hash)
-        .unwrap();
-    let game_hash_str = hex::encode(game_hash_bytes);
-
-    format!("edu.rit.csh.devcade.generated_game.id_{game_id}.hash_{game_hash_str}")
-}
-
-async fn build_flatpak(game: &DevcadeGame, game_dir: &Path) -> Result<(), Error> {
-    let game_id = &game.id;
-    log::debug!("Preparing to build flatpak for {game_id} @ {game_dir:?}");
-    let executable = locate_executable(&game_dir.join("publish")).await?;
-
-    {
-        let executable_path = game_dir.join("publish").join(&executable);
-        // Chmod +x the executable
-        let mut perms = executable_path.metadata()?.permissions();
-        perms.set_mode(0o755);
-        tokio::fs::set_permissions(executable_path.clone(), perms).await?;
-    }
-
-    let flatpak_manifest = FlatpakManifest {
-        app_id: flatpak_id_for_game(game),
-        runtime: "org.freedesktop.Platform".to_owned(),
-        runtime_version: "22.08".to_owned(),
-        sdk: "org.freedesktop.Sdk".to_owned(),
-        command: format!("/app/publish/{executable}"),
-        finish_args: vec![
-            "--share=ipc".to_owned(),
-            "--socket=x11".to_owned(),
-            "--socket=pulseaudio".to_owned(),
-            "--share=network".to_owned(),
-            "--device=dri".to_owned(),
-            "--filesystem=/tmp/devcade/persistence.sock".to_owned(),
-        ],
-        modules: vec![FlatpakModule {
-            name: game_id.to_string(),
-            build_system: "simple".to_owned(),
-            build_commands: vec!["cp -r . /app/publish".to_owned()],
-            sources: vec![FlatpakSource {
-                r#type: FlatpakSourceType::Dir,
-                path: "publish".to_owned(),
-            }],
-        }],
-    };
-
-    log::debug!("Writing flatpak yaml");
-    let flatpak_path = game_dir.join("flatpak.yml");
-    tokio::fs::write(&flatpak_path, serde_yaml::to_string(&flatpak_manifest)?).await?;
-
-    log::debug!("Building flatpak...");
-    Command::new("flatpak-builder")
-        .arg(format!(
-            "--state-dir={}",
-            game_dir.join("state-dir").to_str().unwrap()
-        ))
-        .arg("--force-clean")
-        .arg("--user")
-        .arg("--install")
-        .arg(game_dir.join("build").to_str().unwrap())
-        .arg(flatpak_path.to_str().unwrap())
-        .stdout(std::process::Stdio::inherit())
-        .stderr(std::process::Stdio::inherit())
-        .spawn()
-        .unwrap()
-        .wait()
-        .await
-        .unwrap();
-    log::debug!("Built flatpak!");
-
-    Ok(())
+    Ok(game)
 }
 
 /**
@@ -538,11 +484,10 @@ pub async fn launch_game(game_id: String) -> Result<(), Error> {
     log!(Level::Trace, "Game path: {}", path.to_str().unwrap());
 
     // Downloads game if we don't already have it
-    download_game(game_id.clone()).await?;
+    let game = download_game(game_id.clone()).await?;
 
-    let game = game_from_path(&path.parent().unwrap().join("game.json"))?;
     // flush data every time a new game is opened (in case previous launched game forgor)
-    match servers::persistence::flush().await {
+    match persistence_flush().await {
         Ok(_) => {}
         Err(e) => log::warn!("Failed to flush save cache: {e}"),
     }
@@ -551,7 +496,7 @@ pub async fn launch_game(game_id: String) -> Result<(), Error> {
     // Launch the game and silence stdout (allow the game to print to stderr)
     Command::new("flatpak")
         .arg("run")
-        .arg(flatpak_id_for_game(&game))
+        .arg(game.flatpak_app_id.unwrap())
         // Unfortunately this will bypass the log crate, so no pretty logging for games
         .stdout(Stdio::inherit())
         .stderr(std::process::Stdio::inherit())
@@ -569,7 +514,7 @@ pub async fn launch_game(game_id: String) -> Result<(), Error> {
 
 async fn locate_executable(path: &Path) -> Result<String, Error> {
     // Infer executable name from *.runtimeconfig.json
-    for entry in std::fs::read_dir(path.clone())? {
+    for entry in std::fs::read_dir(path)? {
         let entry = match entry {
             Ok(entry) => entry,
             Err(_) => continue,
@@ -701,4 +646,130 @@ async fn game_from_minimal(game: MinimalGame) -> Result<DevcadeGame, Error> {
 
 pub fn current_game() -> DevcadeGame {
     CURRENT_GAME.lock().unwrap().get_mut().clone()
+}
+
+// currently saves to the devcade machine (or local machine if running locally) in the future,
+// should ideally use a remote database / something else.
+pub async fn persistence_save(group: &str, key: &str, value: &str) -> Result<(), anyhow::Error> {
+    log::trace!("saving data to {}/{} ({})", group, key, value);
+    let (path, group) = from_group(group);
+    let full_key = format!("{}/{}", path, group);
+
+    let mut data = DB.lock().await;
+    let mut mod_list = DB_MODIFIED.lock().await;
+
+    let inner = get_submap_or_load(&mut data, full_key.clone()).await?;
+
+    inner.insert(key.to_string(), value.to_string());
+    mod_list.insert(full_key);
+
+    Ok(())
+}
+
+/**
+ * Load a value from using a group and key
+ * group will start with a game_id, but can be further subdivided by the game to
+ * */
+pub async fn persistence_load(group: &str, key: &str) -> Result<String, anyhow::Error> {
+    log::trace!("loading data from {}/{}", group, key);
+    let (path, file_name) = from_group(group);
+    let full_key = format!("{}/{}", path, file_name);
+
+    let mut data = DB.lock().await;
+
+    let inner = get_submap_or_load(&mut data, full_key.clone()).await?;
+
+    inner
+        .get(&key.to_string())
+        .ok_or_else(|| anyhow!("Could not find key {} in group {}", key, full_key))
+        .cloned()
+}
+
+/**
+ * Flush all pending writes to the filesystem.
+ * */
+pub async fn persistence_flush() -> Result<(), anyhow::Error> {
+    let mut data = DB.lock().await;
+    let mut mod_list = DB_MODIFIED.lock().await;
+
+    log::debug!(
+        "Flushing data in db to file ({} modified groups)",
+        mod_list.len()
+    );
+
+    for key in mod_list.iter() {
+        let inner = get_submap_or_load(&mut data, key.clone()).await?;
+        let file_name = format!("{}.save", key);
+        log::debug!("Flushing to {}", file_name);
+        let path = Path::new(&file_name);
+        let dir = path.parent().expect("path failed to have parents");
+        if !dir.exists() {
+            fs::create_dir_all(dir).await?;
+        }
+        fs::write(path, serde_json::to_string(inner)?.as_bytes()).await?;
+    }
+
+    mod_list.clear();
+
+    Ok(())
+}
+
+/**
+ * Flushes all DB changes, and clears the in-memory cache. This shouldn't need to be done often but
+ * can be done if some games are storing too much data and we need to save memory. I don't see this
+ * actually needing use unless someone is maliciously (or stupidly) trying to store GBs of data at
+ * a time.
+ * */
+pub async fn clear_db() -> Result<(), anyhow::Error> {
+    log::info!("Flushing and clearing DB cache");
+    persistence_flush().await?;
+
+    let mut data = DB.lock().await;
+    data.clear();
+
+    Ok(())
+}
+
+fn from_group(group: &str) -> (String, String) {
+    let save_path = Path::new(if *ON_MACHINE {
+        "/home/devcade/.save"
+    } else {
+        "./.save"
+    });
+
+    let mut parts: Vec<String> = group.split('/').map(|a| a.to_string()).collect();
+    let group = parts.pop().unwrap_or_default();
+    let save_path = save_path.join(parts.join("/"));
+    (save_path.to_str().unwrap_or("").to_string(), group)
+}
+
+/**
+ * Gets the sub-map at a specified path, and returns the cached version, the version on the
+ * filesystem, or a new empty HashMap, in order of preference.
+ * */
+async fn get_submap_or_load(
+    db: &mut HashMap<String, HashMap<String, String>>,
+    group: String,
+) -> Result<&mut HashMap<String, String>, anyhow::Error> {
+    let file_name = format!("{}.save", group);
+    if !db.contains_key(&group) {
+        if Path::new(&file_name).exists() {
+            let map = serde_json::from_str::<HashMap<String, String>>(
+                fs::read_to_string(file_name).await?.as_str(),
+            )?;
+            db.insert(group.clone(), map);
+        } else {
+            db.insert(group.clone(), HashMap::new());
+        }
+    }
+    Ok(db.get_mut(&group).unwrap())
+}
+
+/**
+ * Gets the total number of K, V pairs across the entire cache, as a rough proxy for how large the
+ * current cache is.
+ * */
+pub async fn db_cache_size() -> usize {
+    let data = DB.lock().await;
+    data.values().map(|hm| hm.len()).sum()
 }

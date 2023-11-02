@@ -22,6 +22,11 @@ pub mod command;
 pub mod nfc;
 
 /**
+ * Module for reading flatpak bundles
+ */
+pub mod flatpak;
+
+/**
  * Module for safely getting environment variables, logging any errors that occur and providing
  * default values.
  */
@@ -67,7 +72,7 @@ pub mod env {
         };
 
         match url {
-            Ok(url) => format!("https://{url}"),
+            Ok(url) => format!("http://{url}"), // TODO: https
             Err(e) => {
                 if unsafe { PRODUCTION } {
                     log!(Level::Error, "Error getting DEVCADE_API_DOMAIN: {}", e);

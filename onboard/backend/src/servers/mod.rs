@@ -26,11 +26,11 @@ pub mod path {
     }
 
     /**
-     * Get the path to the pipe that the persistence thread will write to
+     * Get the path to the pipe that the game thread will write to
      * */
     #[must_use]
-    pub fn persistence_pipe() -> String {
-        format!("{}/persistence.sock", devcade_path())
+    pub fn game_pipe() -> String {
+        format!("{}/game.sock", devcade_path())
     }
 }
 
@@ -40,10 +40,10 @@ pub mod path {
 pub mod onboard;
 
 /**
- * The persistence server is responsible for communicating with the running game and saving /
+ * The game server is responsible for communicating with the running game and saving /
  * loading persistent data.
  * */
-pub mod persistence;
+pub mod game;
 
 /**
  * A struct to hold the handles to the threads spawned by the backend.
@@ -89,10 +89,10 @@ impl ThreadHandles {
     /**
      * Restart the save / load server thread with the given pipe
      * */
-    pub fn restart_persistence(&mut self, command_pipe: String) {
-        log!(Level::Info, "Starting persistence thread ...");
+    pub fn restart_game(&mut self, command_pipe: String) {
+        log!(Level::Info, "Starting game thread ...");
         self.game_sl = Some(tokio::spawn(async move {
-            persistence::main(command_pipe.as_str()).await;
+            game::main(command_pipe.as_str()).await;
         }));
     }
 

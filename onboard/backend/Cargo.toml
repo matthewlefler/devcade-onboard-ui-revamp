@@ -25,3 +25,4 @@ devcade_onboard_types = { path = "../types" }
 serde_yaml = "0.9.25"
 base64 = "0.21.4"
 hex = "0.4.3"
+libflatpak = "0.3.0"
