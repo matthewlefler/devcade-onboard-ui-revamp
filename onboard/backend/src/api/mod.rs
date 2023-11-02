@@ -342,7 +342,7 @@ fn is_install_allowed(metadata: &gio::glib::KeyFile) -> Result<bool, Error> {
     let allowed_permissions = HashMap::from([
         ("shared", HashSet::from(["network", "ipc"])),
         ("sockets", HashSet::from(["x11", "pulseaudio"])),
-        ("devices", HashSet::from(["dri"])),
+        ("devices", HashSet::from(["dri", "input"])),
         (
             "filesystems",
             HashSet::from(["/tmp/devcade/persistence.sock", "/tmp/devcade/game.sock"]),
@@ -488,6 +488,7 @@ pub async fn launch_game(game_id: String) -> Result<(), Error> {
     Command::new("flatpak")
         .arg("run")
         .arg("--user")
+        .arg("--device=input")
         .arg(game.flatpak_app_id.unwrap())
         // Unfortunately this will bypass the log crate, so no pretty logging for games
         .stdout(Stdio::inherit())
