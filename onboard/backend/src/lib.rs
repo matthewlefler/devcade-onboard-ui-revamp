@@ -22,6 +22,11 @@ pub mod command;
 pub mod nfc;
 
 /**
+ * Module for reading flatpak bundles
+ */
+pub mod flatpak;
+
+/**
  * Module for safely getting environment variables, logging any errors that occur and providing
  * default values.
  */

@@ -2,9 +2,8 @@ use crate::api::{self, nfc_user};
 
 use crate::api::{
     download_banner, download_game, download_icon, game_list, game_list_from_fs, launch_game,
-    nfc_tags, tag_games, tag_list, user,
+    nfc_tags, persistence_flush, persistence_load, persistence_save, tag_games, tag_list, user,
 };
-use crate::servers;
 use devcade_onboard_types::{RequestBody, ResponseBody};
 
 /**
@@ -77,19 +76,19 @@ pub async fn handle(req: RequestBody) -> ResponseBody {
         },
         RequestBody::Save(group, key, value) => {
             let group = format!("{}/{}", api::current_game().id, group);
-            match servers::persistence::save(group.as_str(), key.as_str(), value.as_str()).await {
+            match persistence_save(group.as_str(), key.as_str(), value.as_str()).await {
                 Ok(()) => ResponseBody::Ok,
                 Err(err) => err.into(),
             }
         }
         RequestBody::Load(group, key) => {
             let group = format!("{}/{}", api::current_game().id, group);
-            match servers::persistence::load(group.as_str(), key.as_str()).await {
+            match persistence_load(group.as_str(), key.as_str()).await {
                 Ok(s) => ResponseBody::Object(s),
                 Err(err) => err.into(),
             }
         }
-        RequestBody::Flush => match servers::persistence::flush().await {
+        RequestBody::Flush => match persistence_flush().await {
             Ok(()) => ResponseBody::Ok,
             Err(err) => err.into(),
         },

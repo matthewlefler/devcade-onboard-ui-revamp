@@ -167,7 +167,7 @@ fn from_group(group: &str) -> (String, String) {
         "./.save"
     });
 
-    let mut parts: Vec<String> = group.split("/").map(|a| a.to_string()).collect();
+    let mut parts: Vec<String> = group.split('/').map(|a| a.to_string()).collect();
     let group = parts.pop().unwrap_or(String::new());
     let save_path = save_path.join(parts.join("/"));
     (save_path.to_str().unwrap_or("").to_string(), group)

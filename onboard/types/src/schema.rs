@@ -95,7 +95,7 @@ pub struct DevcadeGame {
      * The hash of the game, used to verify the integrity of the game, and to determine whether the
      * game has been updated.
      */
-    pub hash: String,
+    pub hash: Option<String>,
 
     /**
      * The game's ID, used to identify the game. This will not change even if the game is updated.
@@ -121,6 +121,9 @@ pub struct DevcadeGame {
      * The user that uploaded the game.
      */
     pub user: User,
+
+    /// Flatpak app id for the game
+    pub flatpak_app_id: Option<String>,
 }
 
 /**
