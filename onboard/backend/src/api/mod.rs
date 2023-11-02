@@ -7,13 +7,10 @@ use devcade_onboard_types::{
 };
 use log::{log, Level};
 
-use base64::Engine;
 use lazy_static::lazy_static;
 use libflatpak::{gio, prelude::*, Installation, Transaction};
-use serde::Serialize;
 use std::cell::Cell;
 use std::collections::{HashMap, HashSet};
-use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
 use std::process::Stdio;
 use std::sync::Mutex;
@@ -325,18 +322,12 @@ fn install_flatpak_bundle(bundle_path: &Path) -> Result<String, Error> {
                         return false;
                     }
                 }
-                // if let Ok(name) = metadata.string("Application", "name") {}
-                // println!(
-                //     "Found metadata for {:?}: {}",
-                //     op.bundle_path(),
-                //     metadata.to_data().as_str()
-                // );
             } else {
                 println!("no data for {:?}", op.bundle_path());
             }
         }
         tx_app_id.send(app_name.unwrap()).unwrap();
-        // abort anyways, just testing :)
+        // looks like we're good!
         true
     });
     transaction.run(None::<&gio::Cancellable>)?;
@@ -496,6 +487,7 @@ pub async fn launch_game(game_id: String) -> Result<(), Error> {
     // Launch the game and silence stdout (allow the game to print to stderr)
     Command::new("flatpak")
         .arg("run")
+        .arg("--user")
         .arg(game.flatpak_app_id.unwrap())
         // Unfortunately this will bypass the log crate, so no pretty logging for games
         .stdout(Stdio::inherit())
@@ -510,44 +502,6 @@ pub async fn launch_game(game_id: String) -> Result<(), Error> {
 
     tokio::time::sleep(Duration::from_millis(200)).await;
     Ok(())
-}
-
-async fn locate_executable(path: &Path) -> Result<String, Error> {
-    // Infer executable name from *.runtimeconfig.json
-    for entry in std::fs::read_dir(path)? {
-        let entry = match entry {
-            Ok(entry) => entry,
-            Err(_) => continue,
-        };
-        let path = entry.path();
-        if !path.is_file() {
-            continue;
-        }
-
-        if let Some(filename) = path.file_name().map(|s| s.to_str().unwrap_or("")) {
-            if !filename.ends_with(".runtimeconfig.json") {
-                continue;
-            }
-            log!(Level::Debug, "Found runtimeconfig.json file: {}", filename);
-            let executable = filename
-                .strip_suffix(".runtimeconfig.json")
-                .unwrap()
-                .to_string();
-            log!(
-                Level::Debug,
-                "Executable inferred from runtimeconfig.json: {}",
-                executable
-            );
-            return Ok(executable);
-        }
-    }
-
-    // If no *.runtimeconfig.json file is found, look for a file with the same name as the game
-    // (this is the case for games that don't use .NET)
-    // TODO: Some better way to find executable name?
-    // This parent().unwrap() is safe because the path is guaranteed to have a parent
-    let game = game_from_path(&path.parent().unwrap().join("game.json"))?;
-    Ok(game.name)
 }
 
 /**

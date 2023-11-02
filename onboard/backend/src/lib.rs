@@ -72,7 +72,7 @@ pub mod env {
         };
 
         match url {
-            Ok(url) => format!("http://{url}"), // TODO: https
+            Ok(url) => format!("https://{url}"),
             Err(e) => {
                 if unsafe { PRODUCTION } {
                     log!(Level::Error, "Error getting DEVCADE_API_DOMAIN: {}", e);

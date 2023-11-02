@@ -8,21 +8,15 @@ edition = "2021"
 [dependencies]
 anyhow = "1.0.70"
 dotenv = "0.15.0"
-env = "0.0.0"
 env_logger = "0.10.0"
 futures-util = "0.3.27"
 gatekeeper-members = "0.3.0"
 lazy_static = "1.4.0"
-libc = "0.2.140"
 libgatekeeper-sys = "0.4.0"
 log = "0.4.17"
 reqwest = { version = "0.11.15", features = ["blocking", "json"] }
 serde = { version = "1.0.158", features = ["derive"] }
 serde_json = "1.0.94"
 tokio = { version = "1.26.0", features = ["macros", "process", "fs"] }
-zip = "0.6.4"
 devcade_onboard_types = { path = "../types" }
-serde_yaml = "0.9.25"
-base64 = "0.21.4"
-hex = "0.4.3"
 libflatpak = "0.3.0"
