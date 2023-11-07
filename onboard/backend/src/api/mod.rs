@@ -489,12 +489,24 @@ pub async fn launch_game(game_id: String) -> Result<(), Error> {
         .arg("run")
         .arg("--user")
         .arg("--device=input")
+        .arg("--cwd=/app/publish")
         .arg(game.flatpak_app_id.unwrap())
         // Unfortunately this will bypass the log crate, so no pretty logging for games
         .stdout(Stdio::inherit())
         .stderr(std::process::Stdio::inherit())
         // This unwrap is safe because it is guaranteed to have a parent
         .current_dir(path.parent().unwrap())
+        // Oops, there's kind of secrets in there
+        .env_clear()
+        .envs(std::env::vars().filter(|(ref key, _value)| {
+            key == "DISPLAY"
+                || key == "XAUTHORITY"
+                || key.starts_with("XDG_")
+                || key.starts_with("DBUS_")
+                || key.starts_with("LC_")
+                || key == "LANG"
+                || key == "TERM"
+        }))
         .spawn()
         .expect("Failed to launch game")
         .wait()
