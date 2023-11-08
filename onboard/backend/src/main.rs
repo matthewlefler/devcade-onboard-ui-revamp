@@ -15,7 +15,7 @@ async fn main() -> ! {
         .await
         .expect("Couldn't create devcade dir");
 
-    match dotenv::from_filename("../.env") {
+    match dotenvy::from_filename("../.env") {
         Ok(_) => (),
         Err(e) => {
             log!(Level::Error, "Error loading .env file: {}", e);
