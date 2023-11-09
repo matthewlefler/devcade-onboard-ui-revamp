@@ -273,7 +273,7 @@ impl Display for ResponseBody {
                 write!(f, "Got NFC tag ID '{tag_id:?}'")
             }
             Self::NfcUser(user) => {
-                write!(f, "Got NFC user '{user:?}'")
+                write!(f, "Got NFC user '{:?}'", user["uid"].as_str())
             }
         }
     }

@@ -20,3 +20,5 @@ tokio = { version = "1.26.0", features = ["macros", "process", "fs"] }
 devcade_onboard_types = { path = "../types" }
 libflatpak = "0.3.0"
 dotenvy = "0.15.7"
+sha256 = "1.4.0"
+ringbuffer = "0.15.0"
