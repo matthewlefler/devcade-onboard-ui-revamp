@@ -1,7 +1,9 @@
+use crate::api::current_game;
 use devcade_onboard_types::{Map, Value};
 use gatekeeper_members::GateKeeperMemberListener;
 use lazy_static::lazy_static;
 use libgatekeeper_sys::Nfc;
+use ringbuffer::{AllocRingBuffer, RingBuffer};
 use std::fmt;
 use std::sync::mpsc;
 use std::sync::mpsc::{Receiver, Sender};
@@ -48,6 +50,7 @@ const NFC_DEVICE_NAME: &str = "pn532_uart:/dev/ttyACM0";
 
 impl NfcClient {
     fn run(rx: Receiver<NfcRequest>) {
+        let mut association_ids: AllocRingBuffer<(String, String)> = AllocRingBuffer::new(8);
         loop {
             // Unwrap rationale: If the main thread is crashed, not much we can do
             let mut callback = rx.recv().unwrap();
@@ -71,20 +74,50 @@ impl NfcClient {
                 match callback {
                     NfcRequest::User {
                         callback,
-                        association_id,
+                        association_id: association_handle,
                     } => {
+                        let association_id =
+                            (&association_ids)
+                                .into_iter()
+                                .find_map(|(handle, association_id)| {
+                                    match handle == &association_handle {
+                                        true => Some(association_id),
+                                        false => None,
+                                    }
+                                });
                         callback
                             .send(
-                                listener
-                                    .fetch_user(association_id)
-                                    .ok()
+                                association_id
+                                    .and_then(|association_id| {
+                                        listener.fetch_user(association_id.clone()).ok()
+                                    })
                                     .and_then(|user| user["user"].as_object().cloned()),
                             )
                             .unwrap();
                     }
                     NfcRequest::Tags { callback } => {
+                        let association_id =
+                            listener
+                                .poll_for_user()
+                                .map(|association_id| {
+                                    match (&association_ids).into_iter().find(
+                                        |(_, candidate_association_id)| {
+                                            candidate_association_id == &association_id
+                                        },
+                                    ) {
+                                        Some((handle, _)) => handle.clone(),
+                                        None => {
+                                            let game_uuid = current_game().id;
+                                            let handle = sha256::digest(format!(
+                                                "{association_id}:{game_uuid}"
+                                            ));
+                                            association_ids.push((handle.clone(), association_id));
+                                            handle
+                                        }
+                                    }
+                                });
                         // Unwrap rationale: If the main thread is crashed, not much we can do
-                        callback.send(listener.poll_for_user()).unwrap();
+                        callback.send(association_id).unwrap();
                     }
                 }
 
