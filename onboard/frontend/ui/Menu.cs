@@ -162,7 +162,7 @@ public class Menu : IMenu {
 
                 var res = t.Result.into_result<List<DevcadeGame>>();
                 if (!res.is_ok()) {
-                    logger.Error($"Failed to getch game list: {res.err().unwrap()}");
+                    logger.Error($"Failed to fetch game list: {res.err().unwrap()}");
                     gameTitles = errorList;
                     return;
                 }
@@ -216,11 +216,11 @@ public class Menu : IMenu {
                 // don't download the banner for the default game
                 Client.downloadBanner(game.id);
             } // check if /tmp/ has the banner
-
-            string bannerPath = $"/tmp/devcade/{game.id}/banner.png";
+            
+            string bannerPath = $"{Env.get("DEVCADE_PATH").unwrap_or_else(() => Env.get("HOME").unwrap() + "/.devcade")}/{game.id}/banner.png";
             if (File.Exists(bannerPath)) {
                 try {
-                    Texture2D banner = Texture2D.FromStream(graphics, File.OpenRead(bannerPath));
+                    Texture2D banner = Texture2D.FromStream(graphics, File.OpenRead(bannerPath));   
                     newCard = new MenuCard(i * -1, banner, game);
                 }
                 catch (InvalidOperationException e) {
