@@ -484,11 +484,28 @@ pub async fn launch_game(game_id: String) -> Result<(), Error> {
     }
     CURRENT_GAME.lock().unwrap().set(game.clone());
 
+    // needs to be outside command builder because std::env::vars() is not Send
+    // and even though this creates owned copies of everything, it still doesn't like it.
+    let envs = std::env::vars()
+        .filter(|(ref key, _value)| {
+            key == "DISPLAY"
+                || key == "XAUTHORITY"
+                || key.starts_with("XDG_")
+                || key.starts_with("DBUS_")
+                || key.starts_with("LC_")
+                || key == "LANG"
+                || key == "TERM"
+        })
+        .map(|(k, v)| (k.clone(), v.clone()))
+        .collect::<HashMap<String, String>>();
+
+    log!(Level::Trace, "Game ENV: {:?}", envs);
+
     // Launch the game and silence stdout (allow the game to print to stderr)
     Command::new("flatpak")
         .arg("run")
         .arg("--user")
-        .arg("--device=input")
+        .arg("--device=dri")
         .arg("--cwd=/app/publish")
         .arg(game.flatpak_app_id.unwrap())
         // Unfortunately this will bypass the log crate, so no pretty logging for games
@@ -498,15 +515,7 @@ pub async fn launch_game(game_id: String) -> Result<(), Error> {
         .current_dir(path.parent().unwrap())
         // Oops, there's kind of secrets in there
         .env_clear()
-        .envs(std::env::vars().filter(|(ref key, _value)| {
-            key == "DISPLAY"
-                || key == "XAUTHORITY"
-                || key.starts_with("XDG_")
-                || key.starts_with("DBUS_")
-                || key.starts_with("LC_")
-                || key == "LANG"
-                || key == "TERM"
-        }))
+        .envs(envs)
         .spawn()
         .expect("Failed to launch game")
         .wait()

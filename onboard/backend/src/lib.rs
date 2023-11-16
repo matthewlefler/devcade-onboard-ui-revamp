@@ -29,8 +29,10 @@ pub mod env {
     // TODO Cache env vars? Probably not necessary
     use log::{log, Level};
     use std::env;
+    use std::sync::Mutex;
 
-    static mut PRODUCTION: bool = true;
+    // TODO should be Mutex? Lmao
+    static PRODUCTION: Mutex<bool> = Mutex::new(true);
 
     /**
      * Get the path to the devcade directory. This is where games are installed.
@@ -45,11 +47,12 @@ pub mod env {
             Err(e) => {
                 log!(
                     Level::Warn,
-                    "Error getting DEVCADE_PATH falling back to '/tmp/devcade': {}",
+                    "Error getting DEVCADE_PATH falling back to '$HOME/.devcade': {}",
                     e
                 );
-                env::set_var("DEVCADE_PATH", "/tmp/devcade");
-                String::from("/tmp/devcade")
+                let h = env::var("HOME").unwrap(); // if HOME is not set we have bigger issues
+                env::set_var("DEVCADE_PATH", format!("{}/.devcade", h));
+                format!("{}/.devcade", h)
             }
         }
     }
@@ -60,7 +63,7 @@ pub mod env {
      */
     #[must_use]
     pub fn api_url() -> String {
-        let url = if unsafe { PRODUCTION } {
+        let url = if *PRODUCTION.lock().unwrap() {
             env::var("DEVCADE_API_DOMAIN")
         } else {
             env::var("DEVCADE_DEV_API_DOMAIN")
@@ -69,7 +72,7 @@ pub mod env {
         match url {
             Ok(url) => format!("https://{url}"),
             Err(e) => {
-                if unsafe { PRODUCTION } {
+                if *PRODUCTION.lock().unwrap() {
                     log!(Level::Error, "Error getting DEVCADE_API_DOMAIN: {}", e);
                 } else {
                     log!(Level::Error, "Error getting DEVCADE_DEV_API_DOMAIN: {}", e);
@@ -86,8 +89,6 @@ pub mod env {
     // so there is no way for a race condition to occur.
     pub fn set_production(prod: bool) {
         log!(Level::Info, "Setting production to {}", prod);
-        unsafe {
-            PRODUCTION = prod;
-        }
+        *PRODUCTION.lock().unwrap() = prod;
     }
 }

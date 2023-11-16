@@ -14,7 +14,10 @@ pub async fn handle(req: RequestBody) -> ResponseBody {
         RequestBody::Ping => ResponseBody::Pong,
         RequestBody::GetGameList => match game_list().await {
             Ok(games) => ResponseBody::GameList(games),
-            Err(err) => err.into(),
+            Err(_) => match game_list_from_fs() {
+                Ok(games) => ResponseBody::GameList(games),
+                Err(err) => err.into(),
+            },
         },
         RequestBody::GetGameListFromFs => match game_list_from_fs() {
             Ok(games) => ResponseBody::GameList(games),
