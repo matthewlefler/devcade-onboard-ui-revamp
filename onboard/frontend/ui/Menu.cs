@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 using log4net;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
@@ -141,36 +142,70 @@ public class Menu : IMenu {
         // Reload the .env file every time the games are reloaded to make sure that the demo mode is up to date
         Env.load("../.env");
         itemSelected = 0;
-        try {
-            var gameTask = Client.getGameList();
-            // wait for the task to finish or timeout
-            if (!gameTask.Wait(TimeSpan.FromSeconds(2))) {
-                logger.Error("Failed to fetch game list: Timed out");
-                gameTitles = new List<DevcadeGame> { defaultGame };
-            }
-            else {
-                gameTitles = gameTask.Result.into_result<List<DevcadeGame>>()
-                    .unwrap_or(new List<DevcadeGame> { defaultGame });
-            }
+        
+        var errorList = new List<DevcadeGame> { defaultGame };
+        
+        setTags();
+        
+        // Public access to state is definitely a good idea (this whole thing needs a refactor)
+        Devcade.instance.state = Devcade.MenuState.Loading;
+        Devcade.instance._loading = true;
 
-            setCards(device);
-        }
-        catch (AggregateException e) {
-            logger.Error($"Failed to fetch game list: {e}");
-            return false;
-        }
+        // gameTask is 'never used' but tasks in C# are eager, so it doesn't need to be awaited to run. 
+        Task gameTask = Client.getGameList()
+            .ContinueWith(t => {
+                if (!t.IsCompletedSuccessfully) {
+                    logger.Error($"Failed to fetch game list: {t.Exception}");
+                    gameTitles = errorList;
+                    return;
+                }
 
+                var res = t.Result.into_result<List<DevcadeGame>>();
+                if (!res.is_ok()) {
+                    logger.Error($"Failed to getch game list: {res.err().unwrap()}");
+                    gameTitles = errorList;
+                    return;
+                }
+
+                logger.Info("Got game list, setting titles");
+                gameTitles = res.unwrap();
+            })
+            .ContinueWith(_ => {
+                logger.Info("Setting cards");
+                setCards(device);
+                Devcade.instance.state = Devcade.MenuState.Input;
+                Devcade.instance._loading = false;
+            })
+            .WaitAsync(TimeSpan.FromSeconds(10))
+            .ContinueWith(t => {
+                if (t.IsCompletedSuccessfully) return;
+                // Take timed out, so we need to set the state back to input and game titles to the error list
+                Devcade.instance.state = Devcade.MenuState.Input;
+                Devcade.instance._loading = false;
+                gameTitles = errorList;
+                setCards(device);
+            });
+
+        // Since this is now done asynchronously, the return means nothing.
         return true;
+    }
+
+    public void setTags() {
+        if (tags == null || tags.Count == 0) {
+            logger.Info("Getting tags from API (this should be only once, but maybe every reload of the game list?)");
+            tags = Client.getTags().Result.into_result<List<devcade.Tag>>().unwrap_or(new List<devcade.Tag>());
+            tags.Insert(0, allTag); // Make all tag appear at the top of the list
+        }
+
+        if (tagLists.Keys.Count != 0) return;
+        
+        // tagLists gets cleared every time the games are reloaded?!
+        foreach (Tag tag in tags) {
+            tagLists.Add(tag.name, new List<MenuCard>());
+        }
     }
     
     public void setCards(GraphicsDevice graphics) {
-        // Get all of the tags from the API
-        tags = Client.getTags().Result.into_result<List<devcade.Tag>>().unwrap_or(new List<devcade.Tag>());
-        tags.Insert(0, allTag); // Make all tag appear at the top of the list
-        foreach(devcade.Tag tag in tags) {
-            tagLists.Add(tag.name, new List<MenuCard>());
-        }
-
         for (int i = 0; i < gameTitles.Count; i++) {
             devcade.DevcadeGame game = gameTitles[i];
 
@@ -207,7 +242,7 @@ public class Menu : IMenu {
 
             tagLists[allTag.name].Add(newCard);
         }
-
+        
         // shuffle lists
         Random rand = new Random();
         foreach(string key in tagLists.Keys) {

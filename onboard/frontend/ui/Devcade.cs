@@ -26,14 +26,14 @@ public class Devcade : Game {
     private SpriteFont _devcadeMenuBig;
     private SpriteFont _devcadeMenuTitle;
 
-    private bool _loading;
+    public bool _loading;
 
-    private MenuState state = MenuState.Launch;
+    public MenuState state = MenuState.Launch;
     private float fadeColor;
 
     private KeyboardState lastState;
 
-    private enum MenuState {
+    public enum MenuState {
         Launch,
         Loading,
         Input,
