@@ -62,6 +62,15 @@ To setup and launch a development environment, you can do the following:
 
 There is a file called .env.template in the `./onboard` folder. Fill this in with appropriate values for the backend and frontend.
 
+
+
+### Running outside a container
+
+In onboard/frontend, run dotnet-run
+In onboard/backend, run cargo run
+
+The frontend will log errors about not being able to connect until the backend is up and running
+
 ### Building and Launching the Container
 
 ```

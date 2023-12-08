@@ -1,0 +1,43 @@
+#!/bin/bash
+
+# This script runs and manages the onboard frontend and backend
+
+cd $HOME/publish
+
+backend_pid=-1
+frontend_pid=-1
+
+function cleanup() {
+	if [ -n "$(ps -p $backend_pid -o pid=)" ]; then
+		kill $backend_pid
+		echo -e "Killed backend (pid $backend_pid)"
+	fi
+	if [ -n "$(ps -p $frontend_pid -o pid=)" ]; then
+		kill $frontend_pid
+		echo -e "Killed frontend (pid $frontend_pid)"
+	fi
+	exit 1
+}
+
+./backend &
+backend_pid=$!
+
+./frontend &
+frontend_pid=$!
+
+# run 'cleanup' on exit
+trap 'cleanup' exit
+
+# run forever to keep handle on frontend and backend.
+# if this script is interrupted it will kill both the
+# frontend and backend.
+while [ 1 -eq 1 ]; do
+	sleep 5
+	# if backend or frontend are not running, then kill the other and exit.
+	if [ -z "$(ps -p $backend_pid -o pid=)" ]; then
+		cleanup
+	fi
+	if [ -z "$(ps -p $frontend_pid -o pid=)" ]; then
+		cleanup
+	fi
+done
