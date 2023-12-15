@@ -495,6 +495,7 @@ pub async fn launch_game(game_id: String) -> Result<(), Error> {
                 || key.starts_with("LC_")
                 || key == "LANG"
                 || key == "TERM"
+                || key == "DEVCADE_PATH"
         })
         .map(|(k, v)| (k.clone(), v.clone()))
         .collect::<HashMap<String, String>>();
