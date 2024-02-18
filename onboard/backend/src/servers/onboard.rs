@@ -4,7 +4,7 @@ use devcade_onboard_types::{Request, RequestBody, Response, ResponseBody};
 use futures_util::future;
 use log::{log, Level};
 use std::sync::Arc;
-use tokio::io::AsyncWriteExt;
+use tokio::io::{AsyncWriteExt, Lines, WriteHalf};
 use tokio::sync::Mutex;
 use tokio::task;
 
@@ -24,40 +24,43 @@ pub async fn main(command_pipe: &str) -> ! {
 
     log!(Level::Debug, "Opened command pipe at {}", command_pipe_path);
 
-    open_server(command_pipe_path, async move |mut lines, writer| {
-        let writer = Arc::new(Mutex::new(writer));
-        let mut handles = vec![];
-        while let Some(line) = lines.next_line().await? {
-            let command: Request = serde_json::from_str(&line)?;
+    open_server(
+        command_pipe_path,
+        async move |mut lines: Lines<_>, writer: WriteHalf<_>| {
+            let writer = Arc::new(Mutex::new(writer));
+            let mut handles = vec![];
+            while let Some(line) = lines.next_line().await? {
+                let command: Request = serde_json::from_str(&line)?;
 
-            if let RequestBody::Ping = &command.body {
-                log!(Level::Trace, "Handling command: {}", command);
-            } else {
-                log!(Level::Debug, "Handling command: {}", command);
-            }
-
-            let writer = writer.clone();
-
-            handles.push(task::spawn(async move {
-                let body = handle(command.body).await;
-                let response = Response {
-                    request_id: command.request_id,
-                    body,
-                };
-                match &response.body {
-                    ResponseBody::Pong => log::trace!("Sending: {response}"),
-                    _ => log::debug!("Sending: {response}"),
+                if let RequestBody::Ping = &command.body {
+                    log!(Level::Trace, "Handling command: {}", command);
+                } else {
+                    log!(Level::Debug, "Handling command: {}", command);
                 }
-                let mut response = serde_json::to_vec(&response)?;
-                response.push(b'\n');
 
-                let mut writer = writer.lock().await;
-                writer.write_all(&response).await?;
-                Ok(()) as Result<(), anyhow::Error>
-            }));
-        }
-        future::join_all(handles).await;
-        Ok(())
-    })
+                let writer = writer.clone();
+
+                handles.push(task::spawn(async move {
+                    let body = handle(command.body).await;
+                    let response = Response {
+                        request_id: command.request_id,
+                        body,
+                    };
+                    match &response.body {
+                        ResponseBody::Pong => log::trace!("Sending: {response}"),
+                        _ => log::debug!("Sending: {response}"),
+                    }
+                    let mut response = serde_json::to_vec(&response)?;
+                    response.push(b'\n');
+
+                    let mut writer = writer.lock().await;
+                    writer.write_all(&response).await?;
+                    Ok(()) as Result<(), anyhow::Error>
+                }));
+            }
+            future::join_all(handles).await;
+            Ok(())
+        },
+    )
     .await
 }

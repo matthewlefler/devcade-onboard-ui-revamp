@@ -9,9 +9,8 @@ edition = "2021"
 anyhow = "1.0.70"
 env_logger = "0.10.0"
 futures-util = "0.3.27"
-gatekeeper-members = "0.3.0"
+gatekeeper-members = "0.4.1"
 lazy_static = "1.4.0"
-libgatekeeper-sys = "0.4.0"
 log = "0.4.17"
 reqwest = { version = "0.11.15", features = ["blocking", "json"] }
 serde = { version = "1.0.158", features = ["derive"] }
