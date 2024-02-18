@@ -1,8 +1,7 @@
 use crate::api::current_game;
 use devcade_onboard_types::{Map, Value};
-use gatekeeper_members::GateKeeperMemberListener;
+use gatekeeper_members::{GateKeeperMemberListener, RealmType};
 use lazy_static::lazy_static;
-use libgatekeeper_sys::Nfc;
 use ringbuffer::{AllocRingBuffer, RingBuffer};
 use std::fmt;
 use std::sync::mpsc;
@@ -55,20 +54,21 @@ impl NfcClient {
             // Unwrap rationale: If the main thread is crashed, not much we can do
             let mut callback = rx.recv().unwrap();
             // Unwrap rationale: If we can't allocate memory, we're not long for this world anyways
-            let mut nfc = Nfc::new().unwrap();
-            let mut listener =
-                match GateKeeperMemberListener::new(&mut nfc, NFC_DEVICE_NAME.to_string()) {
-                    Some(listener) => listener,
-                    None => {
-                        log::error!("Couldn't build Gatekeeper listener?");
-                        // Unwrap rationale: If the main thread is crashed, not much we can do
-                        match callback {
-                            NfcRequest::User { callback, .. } => callback.send(None).unwrap(),
-                            NfcRequest::Tags { callback } => callback.send(None).unwrap(),
-                        }
-                        continue;
+            let mut listener = match GateKeeperMemberListener::new(
+                NFC_DEVICE_NAME.to_string(),
+                RealmType::MemberProjects,
+            ) {
+                Some(listener) => listener,
+                None => {
+                    log::error!("Couldn't build Gatekeeper listener?");
+                    // Unwrap rationale: If the main thread is crashed, not much we can do
+                    match callback {
+                        NfcRequest::User { callback, .. } => callback.send(None).unwrap(),
+                        NfcRequest::Tags { callback } => callback.send(None).unwrap(),
                     }
-                };
+                    continue;
+                }
+            };
 
             loop {
                 match callback {
