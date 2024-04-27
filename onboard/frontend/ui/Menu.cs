@@ -57,6 +57,8 @@ public class Menu : IMenu {
 
     private string devcadePath;
 
+    private float yscalingAmount = 0.7f;
+
     public Menu(GraphicsDeviceManager _device) {
         instance = this;
         this._device = _device;
@@ -366,7 +368,7 @@ public class Menu : IMenu {
         float instructSize = font.MeasureString(instructions[0]).Y;
         float yPos = (float)(500 * scalingAmount);
         for (int i = 0; i < instructions.Count; i++) {
-            writeString(_spriteBatch, font, instructions[i], new Vector2(_sWidth / 2.0f, yPos + instructSize * i * 0.7f), 1f);
+            writeString(_spriteBatch, font, instructions[i], new Vector2(_sWidth / 2.0f, yPos + instructSize * i * yscalingAmount), 1f);
         }
     }
 
@@ -378,7 +380,7 @@ public class Menu : IMenu {
         float yPos = (float)(500 * scalingAmount);
 
         for (int i = 0; i < instructions.Count; i++) {
-            writeString(_spriteBatch, font, instructions[i], new Vector2(_sWidth / 2.0f, yPos + instructSize * i * 0.7f), 1f, Color.Red);
+            writeString(_spriteBatch, font, instructions[i], new Vector2(_sWidth / 2.0f, yPos + instructSize * i * yscalingAmount), 1f, Color.Red);
         }
     }
 
@@ -467,7 +469,7 @@ public class Menu : IMenu {
                 descFont,
                 line,
                 new Vector2(descPos.X, (float)(descPos.Y - descTexture.Height * scalingAmount / 5 +
-                                               descHeight * lineNum * 0.7f)),
+                                               descHeight * lineNum * yscalingAmount)),
                 descOpacity
             );
             lineNum++;
