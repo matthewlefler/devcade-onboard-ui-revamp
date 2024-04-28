@@ -58,7 +58,10 @@ public class Menu : IMenu {
     private string devcadePath;
 
     //Determines how far apart each line of text is drawn vertically
-    private float yscalingAmount;
+    private float yscaleInstructions;
+
+    //Both descriptions and error messages
+    private float yscaleDesc;
 
     public Menu(GraphicsDeviceManager _device) {
         instance = this;
@@ -71,7 +74,8 @@ public class Menu : IMenu {
         //     Container.runContainer(args);
         // };
         
-        yscalingAmount = Env.get("Y_SCALING_AMOUNT").map_or(1f, float.Parse);
+        yscaleInstructions = Env.get("Y_SCALE_INSTRUCTIONS").map_or(1f, float.Parse);
+        yscaleDesc = Env.get("Y_SCALE_DESC").map_or(1f, float.Parse);
         devcadePath = Env.get("DEVCADE_PATH").unwrap_or("/tmp/devcade");
         defaultGame = new DevcadeGame {
             name = "Error",
@@ -371,7 +375,7 @@ public class Menu : IMenu {
         float instructSize = font.MeasureString(instructions[0]).Y;
         float yPos = (float)(500 * scalingAmount);
         for (int i = 0; i < instructions.Count; i++) {
-            writeString(_spriteBatch, font, instructions[i], new Vector2(_sWidth / 2.0f, yPos + instructSize * i * yscalingAmount), 1f);
+            writeString(_spriteBatch, font, instructions[i], new Vector2(_sWidth / 2.0f, yPos + instructSize * i * yscaleInstructions), 1f);
         }
     }
 
@@ -383,7 +387,7 @@ public class Menu : IMenu {
         float yPos = (float)(500 * scalingAmount);
 
         for (int i = 0; i < instructions.Count; i++) {
-            writeString(_spriteBatch, font, instructions[i], new Vector2(_sWidth / 2.0f, yPos + instructSize * i * yscalingAmount), 1f, Color.Red);
+            writeString(_spriteBatch, font, instructions[i], new Vector2(_sWidth / 2.0f, yPos + instructSize * i * yscaleDesc), 1f, Color.Red);
         }
     }
 
@@ -472,7 +476,7 @@ public class Menu : IMenu {
                 descFont,
                 line,
                 new Vector2(descPos.X, (float)(descPos.Y - descTexture.Height * scalingAmount / 5 +
-                                               descHeight * lineNum * yscalingAmount)),
+                                               descHeight * lineNum * yscaleDesc)),
                 descOpacity
             );
             lineNum++;
