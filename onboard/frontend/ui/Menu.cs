@@ -57,7 +57,8 @@ public class Menu : IMenu {
 
     private string devcadePath;
 
-    private float yscalingAmount = 0.7f;
+    //Determines how far apart each line of text is drawn vertically
+    private float yscalingAmount;
 
     public Menu(GraphicsDeviceManager _device) {
         instance = this;
@@ -69,6 +70,8 @@ public class Menu : IMenu {
         //     logger.Info("Running game");
         //     Container.runContainer(args);
         // };
+        
+        yscalingAmount = Env.get("Y_SCALING_AMOUNT").map_or(1f, float.Parse);
         devcadePath = Env.get("DEVCADE_PATH").unwrap_or("/tmp/devcade");
         defaultGame = new DevcadeGame {
             name = "Error",
