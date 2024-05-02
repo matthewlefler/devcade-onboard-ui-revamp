@@ -74,8 +74,8 @@ public class Menu : IMenu {
         //     Container.runContainer(args);
         // };
         
-        yscaleInstructions = Env.get("Y_SCALE_INSTRUCTIONS").map_or(1f, float.Parse);
-        yscaleDesc = Env.get("Y_SCALE_DESC").map_or(1f, float.Parse);
+        yscaleInstructions = Env.get("Y_SCALE_INSTRUCTIONS").map_or(0.4f, float.Parse);
+        yscaleDesc = Env.get("Y_SCALE_DESC").map_or(0.4f, float.Parse);
         devcadePath = Env.get("DEVCADE_PATH").unwrap_or("/tmp/devcade");
         defaultGame = new DevcadeGame {
             name = "Error",
@@ -382,14 +382,15 @@ public class Menu : IMenu {
 
     public void drawError(SpriteBatch _spriteBatch, SpriteFont font) {
         const string error = "Error: Could not get game list. Is API Down? Press both black buttons to reload.";
-        var instructions = wrapText(error, 35);
-        float instructSize = font.MeasureString(instructions[0]).Y;
+        var wrappedError = wrapText(error, 35); 
+        float errorSize = font.MeasureString(wrappedError[0]).Y;
         float yPos = (float)(500 * scalingAmount);
 
-        for (int i = 0; i < instructions.Count; i++) {
-            writeString(_spriteBatch, font, instructions[i], new Vector2(_sWidth / 2.0f, yPos + instructSize * i * yscaleDesc), 1f, Color.Red);
+        for (int i = 0; i < wrappedError.Count; i++) {
+            writeString(_spriteBatch, font, wrappedError[i], new Vector2(_sWidth / 2.0f, yPos + errorSize * i * yscaleDesc), 1f, Color.Red);
         }
     }
+
 
     public void drawLoading(SpriteBatch _spriteBatch, Texture2D loadingSpin, float col) {
         if (loadingCol > 4) {
