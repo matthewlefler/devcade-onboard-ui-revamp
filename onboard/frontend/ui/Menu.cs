@@ -57,6 +57,12 @@ public class Menu : IMenu {
 
     private string devcadePath;
 
+    //Determines how far apart each line of text is drawn vertically
+    private float yscaleInstructions;
+
+    //Both descriptions and error messages
+    private float yscaleDesc;
+
     public Menu(GraphicsDeviceManager _device) {
         instance = this;
         this._device = _device;
@@ -67,6 +73,9 @@ public class Menu : IMenu {
         //     logger.Info("Running game");
         //     Container.runContainer(args);
         // };
+        
+        yscaleInstructions = Env.get("Y_SCALE_INSTRUCTIONS").map_or(0.4f, float.Parse);
+        yscaleDesc = Env.get("Y_SCALE_DESC").map_or(0.4f, float.Parse);
         devcadePath = Env.get("DEVCADE_PATH").unwrap_or("/tmp/devcade");
         defaultGame = new DevcadeGame {
             name = "Error",
@@ -362,43 +371,26 @@ public class Menu : IMenu {
     }
 
     public void drawInstructions(SpriteBatch _spriteBatch, SpriteFont font) {
-        List<string> instructions = wrapText("Press the Red button to play! Press both Black Buttons to refresh", 25);
-        float instructSize = font.MeasureString("Press the Red button to play! Press both Black Buttons to refresh").Y;
-        int lineNum = 0;
-
-        foreach (string line in instructions) {
-            writeString(_spriteBatch,
-                font,
-                line,
-                new Vector2(_sWidth / 2.0f,
-                    (int)(500 * scalingAmount) +
-                    instructSize * lineNum), // 500 is the height of the title, this string goes right beneath that
-                1f
-            );
-            lineNum++;
+        List<string> instructions = wrapText("Press the Red button to play! Press both Black Buttons to refresh", 35);
+        float instructSize = font.MeasureString(instructions[0]).Y;
+        float yPos = (float)(500 * scalingAmount);
+        for (int i = 0; i < instructions.Count; i++) {
+            writeString(_spriteBatch, font, instructions[i], new Vector2(_sWidth / 2.0f, yPos + instructSize * i * yscaleInstructions), 1f);
         }
     }
 
 
     public void drawError(SpriteBatch _spriteBatch, SpriteFont font) {
         const string error = "Error: Could not get game list. Is API Down? Press both black buttons to reload.";
-        var instructions = wrapText(error, 25);
-        float instructSize = font.MeasureString(error).Y;
-        int lineNum = 0;
+        var wrappedError = wrapText(error, 35); 
+        float errorSize = font.MeasureString(wrappedError[0]).Y;
+        float yPos = (float)(500 * scalingAmount);
 
-        foreach (string line in instructions) {
-            writeString(_spriteBatch,
-                font,
-                line,
-                new Vector2(_sWidth / 2.0f,
-                    (int)(500 * scalingAmount) +
-                    instructSize * lineNum), // 500 is the height of the title, this string goes right beneath that
-                1f,
-                Color.Red
-            );
-            lineNum++;
+        for (int i = 0; i < wrappedError.Count; i++) {
+            writeString(_spriteBatch, font, wrappedError[i], new Vector2(_sWidth / 2.0f, yPos + errorSize * i * yscaleDesc), 1f, Color.Red);
         }
     }
+
 
     public void drawLoading(SpriteBatch _spriteBatch, Texture2D loadingSpin, float col) {
         if (loadingCol > 4) {
@@ -476,7 +468,7 @@ public class Menu : IMenu {
 
         // Wraps the description text to fit within the box
         // Then draws the description
-        List<string> wrapDesc = wrapText(gameSelected().description, 25);
+        List<string> wrapDesc = wrapText(gameSelected().description, 35);
         float descHeight = descFont.MeasureString(gameSelected().description).Y;
 
         int lineNum = 0;
@@ -485,7 +477,7 @@ public class Menu : IMenu {
                 descFont,
                 line,
                 new Vector2(descPos.X, (float)(descPos.Y - descTexture.Height * scalingAmount / 5 +
-                                               descHeight * lineNum)),
+                                               descHeight * lineNum * yscaleDesc)),
                 descOpacity
             );
             lineNum++;
@@ -517,29 +509,26 @@ public class Menu : IMenu {
         );
     }
 
-    public static List<string> wrapText(string desc, int lineLimit) {
-        // This function should take in a description and return a list of lines to print to the screen
-        string[] words = desc.Split(' '); // Split the description up by words
-        List<string> lines = new() { ' '.ToString() }; // Create a list to return 
+    public static List<string> wrapText(string text, int lineLimit) {
+        List<string> lines = new List<string>();
+        StringBuilder currentLine = new StringBuilder();
+        string[] words = text.Split(' ');
 
-        int currentLine = 0;
-        StringBuilder currentLineStr = new();
         foreach (string word in words) {
-            // For each word in the description, we add it to a line. 
-            currentLineStr.Append(word + ' ');
-            // Once that line is over the limit of  characters, we move to the next line
-            if (currentLineStr.Length <= lineLimit) {
-                continue;
+            if (currentLine.Length + word.Length + 1 > lineLimit) {
+                lines.Add(currentLine.ToString());
+                currentLine.Clear();
             }
+            currentLine.Append(word + " ");
+        }
 
-            lines[currentLine] = currentLineStr.ToString();
-            currentLineStr.Clear();
-            currentLine++;
-            lines.Add(' '.ToString());
+        if (currentLine.Length > 0) {
+            lines.Add(currentLine.ToString());
         }
 
         return lines;
     }
+
 
     public void writeString(SpriteBatch _spriteBatch, SpriteFont font, string str, Vector2 pos, float opacity,
         Color color) {
