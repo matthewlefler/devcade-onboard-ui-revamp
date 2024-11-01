@@ -1,8 +1,9 @@
 use crate::api::{self, nfc_user};
 
 use crate::api::{
-    download_banner, download_game, download_icon, game_list, game_list_from_fs, launch_game,
-    nfc_tags, persistence_flush, persistence_load, persistence_save, tag_games, tag_list, user,
+    download_banner, download_game, download_icon, game_list, game_list_from_fs, kill_current_game,
+    launch_game, nfc_tags, persistence_flush, persistence_load, persistence_save, tag_games,
+    tag_list, user,
 };
 use devcade_onboard_types::{RequestBody, ResponseBody};
 
@@ -46,6 +47,10 @@ pub async fn handle(req: RequestBody) -> ResponseBody {
             Ok(_) => ResponseBody::Ok,
             Err(err) => err.into(),
         },
+        RequestBody::KillGame => match kill_current_game().await {
+            Ok(_) => ResponseBody::Ok,
+            Err(err) => err.into(),
+        },
         RequestBody::SetProduction(prod) => {
             crate::env::set_production(prod);
             ResponseBody::Ok
@@ -78,14 +83,14 @@ pub async fn handle(req: RequestBody) -> ResponseBody {
             Err(err) => err.into(),
         },
         RequestBody::Save(group, key, value) => {
-            let group = format!("{}/{}", api::current_game().id, group);
+            let group = format!("{}/{}", api::current_game().unwrap().id, group);
             match persistence_save(group.as_str(), key.as_str(), value.as_str()).await {
                 Ok(()) => ResponseBody::Ok,
                 Err(err) => err.into(),
             }
         }
         RequestBody::Load(group, key) => {
-            let group = format!("{}/{}", api::current_game().id, group);
+            let group = format!("{}/{}", api::current_game().unwrap().id, group);
             match persistence_load(group.as_str(), key.as_str()).await {
                 Ok(s) => ResponseBody::Object(s),
                 Err(err) => err.into(),

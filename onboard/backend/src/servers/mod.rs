@@ -53,6 +53,7 @@ pub struct ThreadHandles {
      * The handle to the onboard server thread
      */
     onboard: Option<tokio::task::JoinHandle<()>>,
+
     /**
      * The handle to the game server thread (handles save/load with the currently running game)
      */
@@ -100,14 +101,11 @@ impl ThreadHandles {
      * Check if the onboard server thread has errored and return the error if it has
      */
     pub fn onboard_error(&mut self) -> Option<JoinError> {
-        let handle = self.onboard.take();
-        if let Some(handle) = handle {
-            return if handle.is_finished() {
-                Some(handle.now_or_never()?.err()?)
-            } else {
-                self.onboard = Some(handle);
-                None
-            };
+        if let Some(handle) = &self.onboard {
+            if handle.is_finished() {
+                let handle = self.onboard.take().unwrap();
+                return handle.now_or_never()?.err();
+            }
         }
         None
     }
@@ -116,14 +114,11 @@ impl ThreadHandles {
      * Check if the game thread has errored and return the error if it has
      */
     pub fn game_error(&mut self) -> Option<JoinError> {
-        let handle = self.game_sl.take();
-        if let Some(handle) = handle {
-            return if handle.is_finished() {
-                Some(handle.now_or_never()?.err()?)
-            } else {
-                self.game_sl = Some(handle);
-                None
-            };
+        if let Some(handle) = &self.game_sl {
+            if handle.is_finished() {
+                let handle = self.game_sl.take().unwrap();
+                return handle.now_or_never()?.err();
+            }
         }
         None
     }
@@ -131,15 +126,12 @@ impl ThreadHandles {
     /**
      * Check if the gatekeeper thread has errored and return the error if it has
      */
-    pub fn _gatekeeper_error(&mut self) -> Option<JoinError> {
-        let handle = self.gatekeeper.take();
-        if let Some(handle) = handle {
-            return if handle.is_finished() {
-                Some(handle.now_or_never()?.err()?)
-            } else {
-                self.gatekeeper = Some(handle);
-                None
-            };
+    pub fn gatekeeper_error(&mut self) -> Option<JoinError> {
+        if let Some(handle) = &self.gatekeeper {
+            if handle.is_finished() {
+                let handle = self.gatekeeper.take().unwrap();
+                return handle.now_or_never()?.err();
+            }
         }
         None
     }

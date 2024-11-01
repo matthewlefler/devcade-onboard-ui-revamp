@@ -28,6 +28,7 @@ public class Request {
         SetProduction,
 
         LaunchGame,
+        KillGame,
     }
 
     public uint request_id { get; private set; }
@@ -38,7 +39,7 @@ public class Request {
         this.request_id = _id++;
         this.type = type;
         this.data = type switch {
-            RequestType.Ping or RequestType.GetGameList or RequestType.GetGameListFromFs or RequestType.GetTagList =>
+            RequestType.Ping or RequestType.GetGameList or RequestType.GetGameListFromFs or RequestType.GetTagList or RequestType.KillGame =>
                 null,
             RequestType.SetProduction => prod ?? true,
             _ => string_id ?? ""
@@ -80,6 +81,10 @@ public class Request {
 
     public static Request LaunchGame(string game_id) {
         return new Request(RequestType.LaunchGame, game_id);
+    }
+
+    public static Request KillGame() {
+        return new Request(RequestType.KillGame);
     }
 
     public static Request SetProduction(bool prod) {

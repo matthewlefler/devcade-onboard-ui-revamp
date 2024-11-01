@@ -1,4 +1,5 @@
 use backend::env::devcade_path;
+use backend::nfc::NFC_CLIENT;
 use backend::servers::path::{game_pipe, onboard_pipe};
 use backend::servers::ThreadHandles;
 use log::{log, Level};
@@ -11,10 +12,6 @@ async fn main() -> ! {
         compile_error!("This project only supports Linux.\nTo build for linux, run `cargo build --target x86_64-unknown-linux-gnu`");
     }
 
-    fs::create_dir_all(devcade_path())
-        .await
-        .expect("Couldn't create devcade dir");
-
     match dotenvy::from_filename("../.env") {
         Ok(_) => (),
         Err(e) => {
@@ -23,13 +20,15 @@ async fn main() -> ! {
     }
     env_logger::init();
 
+    fs::create_dir_all(devcade_path())
+        .await
+        .expect("Couldn't create devcade dir");
+
     let mut handles: ThreadHandles = ThreadHandles::new();
 
     handles.restart_onboard(onboard_pipe());
 
     handles.restart_game(game_pipe());
-
-    // TODO Gatekeeper / Authentication
 
     // Main loop
     loop {
@@ -43,9 +42,9 @@ async fn main() -> ! {
             log!(Level::Error, "Game thread has panicked: {}", err);
             handles.restart_game(game_pipe());
         }
-        if let Some(err) = handles._gatekeeper_error() {
-            log!(Level::Error, "Gatekeeper thread has panicked: {}", err);
-            // TODO Restart gatekeeper thread (once implemented)
+        if let Some(err) = NFC_CLIENT.nfc_error() {
+            log!(Level::Error, "Gatekeeper thread has panicked: {:?}", err);
+            NFC_CLIENT.restart();
         }
     }
 }

@@ -9,10 +9,8 @@ use log::{log, Level};
 
 use lazy_static::lazy_static;
 use libflatpak::{gio, prelude::*, Installation, Transaction};
-use std::cell::Cell;
 use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
-use std::process::Stdio;
 use std::sync::Mutex;
 use std::time::Duration;
 use tokio::fs;
@@ -20,8 +18,8 @@ use tokio::process::Command;
 use tokio::sync::oneshot;
 
 lazy_static! {
-    static ref CURRENT_GAME: Mutex<Cell<DevcadeGame>> =
-        Mutex::new(Cell::new(DevcadeGame::default()));
+    static ref CURRENT_GAME: Mutex<Option<DevcadeGame>> =
+        Mutex::new(None);
     // basically just checks if a user 'devcade' exists. If so, assumes that this is running on the
     // machine, and saves to the homedir. Otherwise, saves to the cwd.
     static ref ON_MACHINE: bool = Path::new("/home/devcade").exists();
@@ -453,6 +451,24 @@ pub async fn download_game(game_id: String) -> Result<DevcadeGame, Error> {
     Ok(game)
 }
 
+fn generate_clean_env() -> HashMap<String, String> {
+    // needs to be outside command builder because std::env::vars() is not Send
+    // and even though this creates owned copies of everything, it still doesn't like it.
+    std::env::vars()
+        .filter(|(ref key, _value)| {
+            key == "DISPLAY"
+                || key == "XAUTHORITY"
+                || key.starts_with("XDG_")
+                || key.starts_with("DBUS_")
+                || key.starts_with("LC_")
+                || key == "LANG"
+                || key == "TERM"
+                || key == "DEVCADE_PATH"
+        })
+        .map(|(k, v)| (k.clone(), v.clone()))
+        .collect::<HashMap<String, String>>()
+}
+
 /**
  * Launch a game by its ID. This will check if the game is downloaded, and if it is, it will launch
  * the game. This returns a `JoinHandle`, which should be used to check for game exit and notify the
@@ -482,48 +498,36 @@ pub async fn launch_game(game_id: String) -> Result<(), Error> {
         Ok(_) => {}
         Err(e) => log::warn!("Failed to flush save cache: {e}"),
     }
-    CURRENT_GAME.lock().unwrap().set(game.clone());
+    *CURRENT_GAME.lock().unwrap() = Some(game.clone());
 
-    // needs to be outside command builder because std::env::vars() is not Send
-    // and even though this creates owned copies of everything, it still doesn't like it.
-    let envs = std::env::vars()
-        .filter(|(ref key, _value)| {
-            key == "DISPLAY"
-                || key == "XAUTHORITY"
-                || key.starts_with("XDG_")
-                || key.starts_with("DBUS_")
-                || key.starts_with("LC_")
-                || key == "LANG"
-                || key == "TERM"
-                || key == "DEVCADE_PATH"
-        })
-        .map(|(k, v)| (k.clone(), v.clone()))
-        .collect::<HashMap<String, String>>();
-
+    let envs = generate_clean_env();
     log!(Level::Trace, "Game ENV: {:?}", envs);
 
     // Launch the game and silence stdout (allow the game to print to stderr)
-    Command::new("flatpak")
+    let mut child = Command::new("flatpak")
         .arg("run")
         .arg("--user")
         .arg("--device=dri")
         .arg("--cwd=/app/publish")
-        .arg(game.flatpak_app_id.unwrap())
-        // Unfortunately this will bypass the log crate, so no pretty logging for games
-        .stdout(Stdio::inherit())
-        .stderr(std::process::Stdio::inherit())
+        .arg(game.flatpak_app_id.clone().unwrap())
         // This unwrap is safe because it is guaranteed to have a parent
         .current_dir(path.parent().unwrap())
         // Oops, there's kind of secrets in there
         .env_clear()
         .envs(envs)
         .spawn()
-        .expect("Failed to launch game")
-        .wait()
-        .await
         .expect("Failed to launch game");
 
+    let wait_result = child.wait().await;
+    *CURRENT_GAME.lock().unwrap() = None;
+    wait_result.expect("Failed to launch game");
+
+    log::info!("Game finished!");
+
     tokio::time::sleep(Duration::from_millis(200)).await;
+
+    kill_game(game).await?;
+
     Ok(())
 }
 
@@ -621,8 +625,27 @@ async fn game_from_minimal(game: MinimalGame) -> Result<DevcadeGame, Error> {
     .await
 }
 
-pub fn current_game() -> DevcadeGame {
-    CURRENT_GAME.lock().unwrap().get_mut().clone()
+pub fn current_game() -> Option<DevcadeGame> {
+    CURRENT_GAME.lock().unwrap().clone()
+}
+
+async fn kill_game(game: DevcadeGame) -> Result<(), anyhow::Error> {
+    Command::new("flatpak")
+        .arg("kill")
+        .arg(game.flatpak_app_id.clone().unwrap())
+        .spawn()?
+        .wait()
+        .await?;
+    Ok(())
+}
+
+pub async fn kill_current_game() -> Result<(), anyhow::Error> {
+    if let Some(current_game) = current_game() {
+        kill_game(current_game).await?;
+        Ok(())
+    } else {
+        Err(anyhow!("Tried to kill game, but there wasn't one running!"))
+    }
 }
 
 // currently saves to the devcade machine (or local machine if running locally) in the future,

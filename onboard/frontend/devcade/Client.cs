@@ -303,6 +303,15 @@ public static class Client {
     }
 
     /// <summary>
+    /// Sends a request to the backend to kill the currently running game.
+    /// </summary>
+    /// <returns>A Task that will be completed once the game has exited</returns>
+    public static Task<Response> killGame() {
+        logger.Debug($"Killing game");
+        return sendRequest(Request.KillGame());
+    }
+
+    /// <summary>
     /// Sends a request to the backend to set the production mode.
     /// </summary>
     /// <param name="prod">Whether the backend should use the production or development database</param>

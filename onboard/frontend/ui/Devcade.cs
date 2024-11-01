@@ -38,7 +38,8 @@ public class Devcade : Game {
         Loading,
         Input,
         Descritpion,
-        Tags
+        Tags,
+        LaunchingGame
     }
 
     private Texture2D cardTexture;
@@ -52,6 +53,8 @@ public class Devcade : Game {
 
     // If we can't fetch the game list (like if the API is down)
     private bool _cantFetch;
+
+    private double? _holdingSupervisor = null;
 
     public Devcade() {
         this.graphics = new GraphicsDeviceManager(this);
@@ -191,6 +194,8 @@ public class Devcade : Game {
         if (!menu.reloadGames(GraphicsDevice, false)) {
             state = MenuState.Loading;
             _cantFetch = true; 
+        } else {
+            _cantFetch = false;
         }
 
         // Create instances related to the tags menu
@@ -224,19 +229,45 @@ public class Devcade : Game {
 
                 break;
 
+            case MenuState.LaunchingGame:
+                if (fadeColor < 1f) {
+                    fadeColor += (float)(gameTime.ElapsedGameTime.TotalSeconds);
+                }
+
+                if (myState.IsKeyDown(Keys.Space) ||
+                    (Input.GetButton(1, Input.ArcadeButtons.Menu) &&
+                     Input.GetButtonDown(2, Input.ArcadeButtons.Menu)) ||
+                    (Input.GetButtonDown(1, Input.ArcadeButtons.Menu) &&
+                     Input.GetButton(2, Input.ArcadeButtons.Menu))) {
+                    if (_holdingSupervisor == null) {
+                        _holdingSupervisor = gameTime.TotalGameTime.TotalMilliseconds + 3000;
+                        logger.Info("Starting a supervisor button timer!");
+                    }
+                    if (_holdingSupervisor <= gameTime.TotalGameTime.TotalMilliseconds) {
+                        logger.Info("Requesting game death!");
+                        Client.killGame();
+                        _holdingSupervisor = null;
+                    }
+                } else if (_holdingSupervisor != null) {
+                    logger.Info("Cancelling a supervisor button timer!");
+                    _holdingSupervisor = null;
+                }
+
+                break;
+
+
             case MenuState.Loading:
 
                 if (_cantFetch && (myState.IsKeyDown(Keys.Space) ||
-                                (Input.GetButton(1, Input.ArcadeButtons.Menu) &&
-                                Input.GetButtonDown(2, Input.ArcadeButtons.Menu)) ||
-                                (Input.GetButtonDown(1, Input.ArcadeButtons.Menu) &&
-                                Input.GetButton(2, Input.ArcadeButtons.Menu)))) {
+                    (Input.GetButton(1, Input.ArcadeButtons.Menu) &&
+                     Input.GetButtonDown(2, Input.ArcadeButtons.Menu)) ||
+                    (Input.GetButtonDown(1, Input.ArcadeButtons.Menu) &&
+                     Input.GetButton(2, Input.ArcadeButtons.Menu)))) {
                     try {
                         menu.reloadGames(GraphicsDevice);
                         _cantFetch = false;
                         state = MenuState.Input;
-                    }
-                    catch (AggregateException e) {
+                    } catch (AggregateException e) {
                         logger.Error($"Failed to fetch games: {e}");
                         state = MenuState.Loading;
                         _cantFetch = true;
@@ -301,7 +332,7 @@ public class Devcade : Game {
                 if (((myState.IsKeyDown(Keys.Up)) || // Keyboard up
                      Input.GetButton(1, Input.ArcadeButtons.StickUp) || // or joystick up
                      Input.GetButton(2,
-                         Input.ArcadeButtons.StickUp))) // of either player																			 // and not at top of list
+                         Input.ArcadeButtons.StickUp))) // of either player                                       // and not at top of list
                 {
                     menu.beginAnimDown();
                 }
@@ -363,7 +394,7 @@ public class Devcade : Game {
 
                     fadeColor = 0f;
                     _loading = true;
-                    state = MenuState.Loading;
+                    state = MenuState.LaunchingGame;
                 }
                 else if ((myState.IsKeyDown(Keys.RightShift) &&
                           lastState.IsKeyUp(Keys.RightShift)) || // Keyboard Rshift
@@ -423,6 +454,7 @@ public class Devcade : Game {
                 break;
 
             case MenuState.Loading:
+            case MenuState.LaunchingGame:
                 menu.drawLoading(this.spriteBatch, loadingSpin, fadeColor);
                 menu.drawTitle(this.spriteBatch, titleTextureWhite, fadeColor);
                 if (_cantFetch)

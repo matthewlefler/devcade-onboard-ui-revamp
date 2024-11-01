@@ -75,6 +75,7 @@ pub enum RequestBody {
     SetProduction(bool), // Sets prod / dev api url
 
     LaunchGame(String), // String is the game
+    KillGame,
     // ---
 
     // --- Persistence ---
@@ -107,6 +108,7 @@ impl RequestBody {
             Self::GetGameListFromTag(String::new()),
             Self::SetProduction(false),
             Self::LaunchGame(String::new()),
+            Self::KillGame,
             Self::Save(String::new(), String::new(), String::new()),
             Self::Load(String::new(), String::new()),
             Self::Flush,
@@ -204,6 +206,9 @@ impl Display for RequestBody {
             }
             Self::LaunchGame(game_id) => {
                 write!(f, "Launch game with id '{game_id}'")
+            }
+            Self::KillGame => {
+                write!(f, "Kill currently running game")
             }
             Self::SetProduction(prod) => {
                 write!(
