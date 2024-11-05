@@ -3,9 +3,10 @@ use devcade_onboard_types::{Map, Value};
 use gatekeeper_members::{GateKeeperMemberListener, RealmType};
 use lazy_static::lazy_static;
 use ringbuffer::{AllocRingBuffer, RingBuffer};
-use std::fmt;
+use std::any::Any;
 use std::sync::mpsc;
 use std::sync::mpsc::{Receiver, Sender};
+use std::sync::Arc;
 use std::thread;
 use std::thread::JoinHandle;
 use std::time::Duration;
@@ -15,7 +16,8 @@ use tokio::sync::Mutex;
 type NfcCallback = oneshot::Sender<Option<String>>;
 pub struct NfcClient {
     request_queue: Mutex<Sender<NfcRequest>>,
-    thread: JoinHandle<()>,
+    thread: std::sync::Mutex<Option<JoinHandle<()>>>,
+    receiver: Arc<std::sync::Mutex<Receiver<NfcRequest>>>,
 }
 
 enum NfcRequest {
@@ -35,12 +37,12 @@ lazy_static! {
 impl Default for NfcClient {
     fn default() -> Self {
         let (tx, rx) = mpsc::channel();
-        let thread = thread::spawn(|| {
-            NfcClient::run(rx);
-        });
+        let rx = Arc::new(std::sync::Mutex::new(rx));
+
         NfcClient {
-            thread,
+            thread: std::sync::Mutex::new(Some(NfcClient::start_thread(Arc::clone(&rx)))),
             request_queue: tx.into(),
+            receiver: rx,
         }
     }
 }
@@ -48,11 +50,36 @@ impl Default for NfcClient {
 const NFC_DEVICE_NAME: &str = "pn532_uart:/dev/ttyACM0";
 
 impl NfcClient {
-    fn run(rx: Receiver<NfcRequest>) {
+    fn start_thread(rx: Arc<std::sync::Mutex<Receiver<NfcRequest>>>) -> JoinHandle<()> {
+        thread::spawn(move || {
+            NfcClient::run(rx);
+        })
+    }
+
+    pub fn restart(&self) {
+        let mut handle_guard = self.thread.lock().unwrap();
+        assert!(handle_guard.is_none());
+        *handle_guard = Some(Self::start_thread(Arc::clone(&self.receiver)));
+    }
+
+    pub fn nfc_error(&self) -> Option<Box<dyn Any + Send + 'static>> {
+        let mut handle_guard = match self.thread.lock() {
+            Ok(handle) => handle,
+            Err(_) => return Some(Box::new("Couldn't acquire NFC thread lock!")),
+        };
+        if let Some(handle) = &*handle_guard {
+            if handle.is_finished() {
+                return handle_guard.take().unwrap().join().err();
+            }
+        }
+        None
+    }
+
+    fn run(rx: Arc<std::sync::Mutex<Receiver<NfcRequest>>>) {
         let mut association_ids: AllocRingBuffer<(String, String)> = AllocRingBuffer::new(8);
         loop {
             // Unwrap rationale: If the main thread is crashed, not much we can do
-            let mut callback = rx.recv().unwrap();
+            let mut callback = rx.lock().unwrap().recv().unwrap();
             // Unwrap rationale: If we can't allocate memory, we're not long for this world anyways
             let mut listener = match GateKeeperMemberListener::new(
                 NFC_DEVICE_NAME.to_string(),
@@ -107,7 +134,7 @@ impl NfcClient {
                                     ) {
                                         Some((handle, _)) => handle.clone(),
                                         None => {
-                                            let game_uuid = current_game().id;
+                                            let game_uuid = current_game().unwrap().id;
                                             let handle = sha256::digest(format!(
                                                 "{association_id}:{game_uuid}"
                                             ));
@@ -121,7 +148,7 @@ impl NfcClient {
                     }
                 }
 
-                if let Ok(new_request) = rx.recv_timeout(Duration::from_secs(30)) {
+                if let Ok(new_request) = rx.lock().unwrap().recv_timeout(Duration::from_secs(30)) {
                     callback = new_request;
                 } else {
                     break;
@@ -154,14 +181,3 @@ impl NfcClient {
         }
     }
 }
-
-#[derive(Debug)]
-struct NfcThreadError;
-
-impl fmt::Display for NfcThreadError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "NfcThreadError")
-    }
-}
-
-impl std::error::Error for NfcThreadError {}

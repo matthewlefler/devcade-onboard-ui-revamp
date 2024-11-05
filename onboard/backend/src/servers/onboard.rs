@@ -30,6 +30,7 @@ pub async fn main(command_pipe: &str) -> ! {
             let writer = Arc::new(Mutex::new(writer));
             let mut handles = vec![];
             while let Some(line) = lines.next_line().await? {
+                log::trace!("Received onboard command: {line}");
                 let command: Request = serde_json::from_str(&line)?;
 
                 if let RequestBody::Ping = &command.body {
