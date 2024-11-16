@@ -97,71 +97,71 @@ public class Devcade : Game {
         // no cargo test in C# :(
 
         // Run in thread so we don't block the main thread
-        new Thread(() => {
-            try {
-                List<Tag> tags = new();
-                var tagResult = Client.getTags();
-                tagResult.ContinueWith(res => {
-                    if (!res.IsCompletedSuccessfully) {
-                        logger.Warn("Failed to fetch tags (Task failed)");
-                        return;
-                    }
+        // new Thread(() => {
+        //     try {
+        //         List<Tag> tags = new();
+        //         var tagResult = Client.getTags();
+        //         tagResult.ContinueWith(res => {
+        //             if (!res.IsCompletedSuccessfully) {
+        //                 logger.Warn("Failed to fetch tags (Task failed)");
+        //                 return;
+        //             }
 
-                    var tagRes = res.Result.into_result<List<Tag>>();
-                    if (tagRes.is_err()) {
-                        logger.Warn($"Failed to fetch tags (API error): {tagRes.unwrap_err()}");
-                        return;
-                    }
+        //             var tagRes = res.Result.into_result<List<Tag>>();
+        //             if (tagRes.is_err()) {
+        //                 logger.Warn($"Failed to fetch tags (API error): {tagRes.unwrap_err()}");
+        //                 return;
+        //             }
 
-                    tags = tagRes.unwrap();
-                    logger.Debug($"Successfully fetched tags (Got {tags.Count} tags)");
-                }).Wait();
+        //             tags = tagRes.unwrap();
+        //             logger.Debug($"Successfully fetched tags (Got {tags.Count} tags)");
+        //         }).Wait();
 
-                List<DevcadeGame> games = new();
-                var gamesByTagResult = Client.getGamesWithTag(tags[0]);
-                gamesByTagResult.ContinueWith(res => {
-                    if (!res.IsCompletedSuccessfully) {
-                        logger.Warn("Failed to fetch games by tag (Task failed)");
-                        return;
-                    }
+        //         List<DevcadeGame> games = new();
+        //         var gamesByTagResult = Client.getGamesWithTag(tags[0]);
+        //         gamesByTagResult.ContinueWith(res => {
+        //             if (!res.IsCompletedSuccessfully) {
+        //                 logger.Warn("Failed to fetch games by tag (Task failed)");
+        //                 return;
+        //             }
 
-                    var gamesRes = res.Result.into_result<List<DevcadeGame>>();
-                    if (gamesRes.is_err()) {
-                        logger.Warn($"Failed to fetch games by tag (API error): {gamesRes.unwrap_err()}");
-                        return;
-                    }
+        //             var gamesRes = res.Result.into_result<List<DevcadeGame>>();
+        //             if (gamesRes.is_err()) {
+        //                 logger.Warn($"Failed to fetch games by tag (API error): {gamesRes.unwrap_err()}");
+        //                 return;
+        //             }
 
-                    games = gamesRes.unwrap();
-                    logger.Debug($"Successfully fetched games by tag (Got {games.Count} games)");
-                }).Wait();
+        //             games = gamesRes.unwrap();
+        //             logger.Debug($"Successfully fetched games by tag (Got {games.Count} games)");
+        //         }).Wait();
 
-                logger.Debug($"The following games have the tag {tags[0].name}:");
-                foreach (DevcadeGame game in games) {
-                    logger.Debug($"- {game.name}");
-                }
+        //         logger.Debug($"The following games have the tag {tags[0].name}:");
+        //         foreach (DevcadeGame game in games) {
+        //             logger.Debug($"- {game.name}");
+        //         }
 
-                User joe = new();
-                var userResult = Client.getUser("joeneil"); // Who else would I use but myself?
-                userResult.ContinueWith(res => {
-                    if (!res.IsCompletedSuccessfully) {
-                        logger.Warn("Failed to fetch user (Task failed)");
-                        return;
-                    }
+        //         User joe = new();
+        //         var userResult = Client.getUser("joeneil"); // Who else would I use but myself?
+        //         userResult.ContinueWith(res => {
+        //             if (!res.IsCompletedSuccessfully) {
+        //                 logger.Warn("Failed to fetch user (Task failed)");
+        //                 return;
+        //             }
                     
-                    var userRes = res.Result.into_result<User>();
-                    if (userRes.is_err()) {
-                        logger.Warn($"Failed to fetch user (API error): {userRes.unwrap_err()}");
-                        return;
-                    }
+        //             var userRes = res.Result.into_result<User>();
+        //             if (userRes.is_err()) {
+        //                 logger.Warn($"Failed to fetch user (API error): {userRes.unwrap_err()}");
+        //                 return;
+        //             }
                     
-                    joe = userRes.unwrap();
-                    logger.Debug($"Successfully fetched user (Got user {joe.id} aka {joe.first_name} {joe.last_name})");
-                }).Wait();
-            } catch (Exception e) {
-                // This is just a test, so we don't want to crash the game
-                logger.Warn("Failed to test API routes", e);
-            }
-        }).Start();
+        //             joe = userRes.unwrap();
+        //             logger.Debug($"Successfully fetched user (Got user {joe.id} aka {joe.first_name} {joe.last_name})");
+        //         }).Wait();
+        //     } catch (Exception e) {
+        //         // This is just a test, so we don't want to crash the game
+        //         logger.Warn("Failed to test API routes", e);
+        //     }
+        // }).Start();
         
         // End of testing API routes
         
