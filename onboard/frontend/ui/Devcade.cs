@@ -236,8 +236,6 @@ public class Devcade : Game {
 
                 if (myState.IsKeyDown(Keys.Space) ||
                     (Input.GetButton(1, Input.ArcadeButtons.Menu) &&
-                     Input.GetButtonDown(2, Input.ArcadeButtons.Menu)) ||
-                    (Input.GetButtonDown(1, Input.ArcadeButtons.Menu) &&
                      Input.GetButton(2, Input.ArcadeButtons.Menu))) {
                     if (_holdingSupervisor == null) {
                         _holdingSupervisor = gameTime.TotalGameTime.TotalMilliseconds + 3000;
