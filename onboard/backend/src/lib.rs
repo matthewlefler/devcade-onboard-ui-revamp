@@ -1,6 +1,3 @@
-#![feature(async_closure)]
-#![feature(path_file_prefix)]
-
 /**
  * All the servers run by the backend that communicate with other processes on devcade
  */

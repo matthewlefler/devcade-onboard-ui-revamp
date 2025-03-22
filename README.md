@@ -15,8 +15,6 @@ And the following fron `./onboard/backend`:
 ```
 cargo build --release --target x86_64-unknown-linux-gnu
 ```
-Note: The backend requires the nightly compiler to build, as it uses features that have not been merged into stable rustc
-
 To put it on the DCU, compress the `publish` folder located at `./onboard/frontend/bin/Release/netcoreapp3.1/linux-x64` and `scp` that to the DCU.
 You'll also want to `scp` `./onboard/backend/target/release` to the DCU. 
 
@@ -66,7 +64,7 @@ There is a file called .env.template in the `./onboard` folder. Fill this in wit
 
 ### Running outside a container
 
-In onboard/frontend, run dotnet-run
+In onboard/frontend, run dotnet run
 In onboard/backend, run cargo run
 
 The frontend will log errors about not being able to connect until the backend is up and running
