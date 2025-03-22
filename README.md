@@ -11,7 +11,7 @@ To build and run on the DCU, do the following from `./onboard/frontend`:
 ```
 dotnet publish -c Release -r linux-x64 --no-self-contained
 ```
-And the following fron `./onboard/backend`:
+And the following from `./onboard/backend`:
 ```
 cargo build --release --target x86_64-unknown-linux-gnu
 ```
