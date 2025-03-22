@@ -18,40 +18,6 @@ cargo build --release --target x86_64-unknown-linux-gnu
 To put it on the DCU, compress the `publish` folder located at `./onboard/frontend/bin/Release/netcoreapp3.1/linux-x64` and `scp` that to the DCU.
 You'll also want to `scp` `./onboard/backend/target/release` to the DCU. 
 
-## The DCU
-
-### Prereqs
-
-Debian >=10
-
-A user named `devcade`
-
-`apt install xterm openbox compton` and friends (I dont actually know what all is installed)
-
-### Daemon
-
-_daemons are always watching. They are always with you. So is Willard._
-
-The Devcade DCU is running Debian 10 with a very _very_ simple Xorg server setup. It has [xlogin](https://github.com/joukewitteveen/xlogin) configured to launch the onboarding program, along with said xorg server, as the `devcade` user.
-
-You can find everything(tm) you need to set up the Devcade DCU in `/dcu`. This repo has a submodule, `xlogin` that can be cloned down with `git submodule update --init --recursive`.
-
-1. Run the `update_onboard.sh` script in `HACKING/`
-
-2. `cp dcu/.xinitrc /home/devcade/`
-
-2. `mkdir /home/devcade/.config/openbox && cp dcu/rc.xml /home/devcade/.config/openbox/rc.xml`
-
-3. To install `xlogin`, do the following
-
-```
-cd dcu/xlogin
-sudo make install
-sudo systemctl enable --now xlogin@devcade
-```
-
-_Helpful Tip: Remember to `chmod +x onboard`. You may get weird syntax errors if you don't_
-
 ## HACKING
 
 To setup and launch a development environment, you can do the following:
@@ -61,13 +27,13 @@ To setup and launch a development environment, you can do the following:
 There is a file called .env.template in the `./onboard` folder. Fill this in with appropriate values for the backend and frontend.
 
 
-
 ### Running outside a container
 
-In onboard/frontend, run dotnet run
-In onboard/backend, run cargo run
+In onboard/frontend, run `dotnet run`
 
-The frontend will log errors about not being able to connect until the backend is up and running
+In onboard/backend, run `cargo run`
+
+The frontend will log warnings about not being able to connect until the backend is up and running
 
 ### Building and Launching the Container
 
