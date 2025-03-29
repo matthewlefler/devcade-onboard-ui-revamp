@@ -1,0 +1,22 @@
+[gd_scene load_steps=3 format=3 uid="uid://1pi1bov4mn64"]
+
+[ext_resource type="Script" uid="uid://dnfisdn7tx8c4" path="res://TestGui.cs" id="1_rsbb1"]
+[ext_resource type="Texture2D" uid="uid://c73kxs0gtawat" path="res://icon.svg" id="2_xhewd"]
+
+[node name="test_gui" type="Control" node_paths=PackedStringArray("gridContainer")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_rsbb1")
+gridContainer = NodePath("GridContainer")
+
+[node name="GridContainer" type="GridContainer" parent="."]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Sprite2D" type="Sprite2D" parent="GridContainer"]
+texture = ExtResource("2_xhewd")

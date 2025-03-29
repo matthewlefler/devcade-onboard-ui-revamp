@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3 uid="uid://br86segmlm7yg"]
+
+[ext_resource type="Script" uid="uid://cuu0nbc2glagm" path="res://Main.cs" id="1_ig7tw"]
+[ext_resource type="PackedScene" uid="uid://1pi1bov4mn64" path="res://test_gui.tscn" id="2_0xm2m"]
+
+[node name="main_node" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_ig7tw")
+initialGuiScene = ExtResource("2_0xm2m")

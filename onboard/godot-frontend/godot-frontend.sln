@@ -1,0 +1,19 @@
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "godot-frontend", "godot-frontend.csproj", "{709739FE-739C-4914-8722-33C64CF694FC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+	Debug|Any CPU = Debug|Any CPU
+	ExportDebug|Any CPU = ExportDebug|Any CPU
+	ExportRelease|Any CPU = ExportRelease|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{709739FE-739C-4914-8722-33C64CF694FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{709739FE-739C-4914-8722-33C64CF694FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{709739FE-739C-4914-8722-33C64CF694FC}.ExportDebug|Any CPU.ActiveCfg = ExportDebug|Any CPU
+		{709739FE-739C-4914-8722-33C64CF694FC}.ExportDebug|Any CPU.Build.0 = ExportDebug|Any CPU
+		{709739FE-739C-4914-8722-33C64CF694FC}.ExportRelease|Any CPU.ActiveCfg = ExportRelease|Any CPU
+		{709739FE-739C-4914-8722-33C64CF694FC}.ExportRelease|Any CPU.Build.0 = ExportRelease|Any CPU
+	EndGlobalSection
+EndGlobal
