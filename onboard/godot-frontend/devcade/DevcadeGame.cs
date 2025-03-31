@@ -159,6 +159,14 @@ public class Tag {
         }
         return false;
     }
+    /// <summary>
+    /// two tags with the same name will have the same hash code
+    /// </summary>
+    /// <returns> the hash code of this tag </returns>
+    public override int GetHashCode()
+    {
+        return this.name.GetHashCode();
+    }
 }
 
 /// <summary>

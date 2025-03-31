@@ -32,6 +32,10 @@ public partial class GuiManager : Control
     /// </summary>
     public List<DevcadeGame> gameTitles;
 
+    //////////
+    // TAGS //
+    //////////
+
     /// <summary>
     /// a list of all the tags
     /// </summary>
@@ -44,9 +48,10 @@ public partial class GuiManager : Control
     private static Tag allTag = new Tag("All Games", "View all available games");
     public Tag currentTag = allTag;
 
+
     public bool loading { get; private set; } = true;
 
-    Node guiScene;
+    GuiInterface guiScene;
     private bool guiSceneReady = false;
 
     private static readonly DevcadeGame defaultGame = new DevcadeGame {
@@ -66,10 +71,25 @@ public partial class GuiManager : Control
     {
         // spawn initial gui scene
         var guiScene = initialGuiScene.Instantiate();
-        this.guiScene = guiScene;
+        
+        // make sure it implements the GuiInterface
+        GuiInterface gui = guiScene as GuiInterface;
+        
+        if(gui != null) 
+        {
+            this.guiScene = gui;
+        }
+        else
+        {
+            GD.PrintErr("Assert Failed: gui scene root node script does not implement the GuiInterface interface");
+            throw new ApplicationException("Assert Failed: the gui scene's root node script does not implement the GuiInterface interface");
+        } 
+
         AddChild(guiScene);
         // and set that the gui scene is ready
         guiSceneReady = true;
+
+        reloadGameList();
     }
 
 
@@ -87,8 +107,6 @@ public partial class GuiManager : Control
 
         // start client (backend networked communicator)
         Client.init();
-
-        reloadGameList();
     }
 
     private void reloadGameList()
@@ -128,7 +146,7 @@ public partial class GuiManager : Control
                 loadBanners();
                 
 
-                updateGUI();
+                initGUI();
                 this.loading = false;
             });
     }
@@ -190,32 +208,17 @@ public partial class GuiManager : Control
     public void setTag(Tag newTag)
     {
         currentTag = newTag;
-        updateGUI();
+        guiScene.setTag(currentTag);
     }
 
     /// <summary>
-    /// updates the gui with the most recent data
+    /// initilizes a gui object with the taglist and game list
     /// </summary>
     /// <exception cref="ApplicationException"> throws if the current GUI does not implement the GuiInterface </exception>
-    private void updateGUI()
+    private void initGUI()
     {
-        if(!guiSceneReady)
-        {
-            return;
-        }
-
-        GuiInterface gui = guiScene as GuiInterface;
-
-        if(gui != null) 
-        {
-            gui.setGameList(tagLists[currentTag.name], this);
-            gui.setTagList(tagList);
-        }       
-        else
-        {
-            GD.PrintErr("Assert Failed: gui scene root node script does not implement the GuiInterface interface");
-            throw new ApplicationException("Assert Failed: the gui scene's root node script does not implement the GuiInterface interface");
-        } 
+        guiScene.setGameList(tagLists[currentTag.name], this);
+        guiScene.setTagList(tagList);
     }
 
     /// <summary>

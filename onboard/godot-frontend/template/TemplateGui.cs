@@ -31,6 +31,14 @@ public partial class TemplateGui : Control, GuiInterface
     private bool tagListOutOfDate = false;
 
     /// <summary>
+    /// a dictionary of buttons to games, 
+    /// used for accessing a games based on the button, 
+    /// which is useful in this case for when the current tag changes
+    /// and it is needed to hide all the buttons/games that do not have that tag
+    /// </summary>
+    private Dictionary<AspectRatioContainer, DevcadeGame> gameContainers = new Dictionary<AspectRatioContainer, DevcadeGame>();
+
+    /// <summary>
     /// this varible is used so that updating the ui elements that represent the game's 
     /// is done after the scene is instatiated, and the rest of the required nodes exist
     /// </summary>
@@ -97,10 +105,9 @@ public partial class TemplateGui : Control, GuiInterface
 
         if(gameListOutOfDate == true)
         {
-            foreach(Node node in gameContainer.GetChildren())
-            {
-                gameContainer.RemoveChild(node);
-            }
+            // clear the dict, as the old data is no longer current
+            gameContainers = new Dictionary<AspectRatioContainer, DevcadeGame>();
+
             // for each game create a new texture button with the texture set to the banner if it exists
             // put it in an aspectRatioContainer so the aspect ratio is saved on scaling,
             // sets the size flags so that each aspectRatioContainer takes up the same space
@@ -113,6 +120,7 @@ public partial class TemplateGui : Control, GuiInterface
 
                 if(game.banner != null)
                 {
+                    // this is slow, save textures some where, so they don't have to be recalced vvery time?
                     TextureButton textureButton = new TextureButton();
                     textureButton.IgnoreTextureSize = true;
                     textureButton.StretchMode = TextureButton.StretchModeEnum.Scale;
@@ -146,8 +154,7 @@ public partial class TemplateGui : Control, GuiInterface
                     // lambda function is required to "bind" the parameter 
                     // to the function called when the button is pressed
                     button.Pressed += () => launchGame(game);
-                }
-                
+                }                
                 
                 button.CustomMinimumSize = new Vector2(10, 10);
 
@@ -159,10 +166,15 @@ public partial class TemplateGui : Control, GuiInterface
                 
                 gameContainer.AddChild(aspectRatioContainer);
 
+                // make the first button focused by default,
+                // makes using the arrow keys and joysticks to navigate easy
                 if(i == 0)
                 {
                     button.CallDeferred("grab_focus");
                 }
+
+                // add the new button and its corresponding game to the dictionary
+                gameContainers.Add(aspectRatioContainer, game);
             }
 
             gameListOutOfDate = false;
@@ -180,7 +192,7 @@ public partial class TemplateGui : Control, GuiInterface
                 Tag tag = tagList[i];
                 Button button = new Button();
 
-                button.Pressed += () => setTag(tag);
+                button.Pressed += () => setCurrentTag(tag);
 
                 button.Text = tag.name;
 
@@ -219,7 +231,7 @@ public partial class TemplateGui : Control, GuiInterface
     /// sets the current tag variable in the model to the given tag
     /// </summary>
     /// <param name="tag"> the new tag </param>
-    private void setTag(Tag tag)
+    private void setCurrentTag(Tag tag)
     {
         model.setTag(tag);
     }
@@ -308,5 +320,20 @@ public partial class TemplateGui : Control, GuiInterface
     {
         this.tagList = tags;
         tagListOutOfDate = true;
+    }
+
+    public void setTag(Tag tag)
+    {
+        foreach(AspectRatioContainer container in gameContainer.GetChildren())
+        {
+            if(gameContainers[container].tags.Contains(tag))
+            {
+                container.Show();
+            }
+            else 
+            {
+                container.Hide();
+            }
+        }
     }
 }
