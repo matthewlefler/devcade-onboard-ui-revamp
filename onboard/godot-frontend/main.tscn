@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://br86segmlm7yg"]
 
-[ext_resource type="Script" uid="uid://cuu0nbc2glagm" path="res://Main.cs" id="1_ig7tw"]
-[ext_resource type="PackedScene" uid="uid://1pi1bov4mn64" path="res://test_gui.tscn" id="2_0xm2m"]
+[ext_resource type="Script" uid="uid://cuu0nbc2glagm" path="res://GuiManager.cs" id="1_ig7tw"]
+[ext_resource type="PackedScene" uid="uid://1pi1bov4mn64" path="res://template/template_gui.tscn" id="2_0xm2m"]
 
 [node name="main_node" type="Control"]
 layout_mode = 3

@@ -15,6 +15,16 @@ run/main_scene="uid://br86segmlm7yg"
 config/features=PackedStringArray("4.4", "C#", "GL Compatibility")
 config/icon="res://icon.svg"
 
+[display]
+
+window/size/viewport_width=900
+window/size/viewport_height=1600
+window/stretch/mode="canvas_items"
+window/viewport_width=900
+window/viewport_height=1600
+window/size/width=900
+window/size/height=1600
+
 [dotnet]
 
 project/assembly_name="godot-frontend"

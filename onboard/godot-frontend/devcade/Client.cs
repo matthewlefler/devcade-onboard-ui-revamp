@@ -18,13 +18,13 @@ using util;
 public static class Client {
 
     public static event EventHandler<DevcadeGame> onBannerFinished = (_, _) => {
-        // logger.Trace("onBannerFinished Invoked");
+        logger.Trace("onBannerFinished Invoked");
     };
     public static event EventHandler<DevcadeGame> onIconFinished = (_, _) => {
-        // logger.Trace("onIconFinished Invoked");
+        logger.Trace("onIconFinished Invoked");
     };
     public static event EventHandler<DevcadeGame> onGameFinished = (_, _) => {
-        // logger.Trace("onGameFinished Invoked");
+        logger.Trace("onGameFinished Invoked");
     };
     
     /**
@@ -41,7 +41,7 @@ public static class Client {
     
     private static bool connected;
     
-    // private static readonly ILog logger = LogManager.GetLogger(MethodBase.GetCurrentMethod()?.DeclaringType?.FullName);
+    private static readonly ILog logger = LogManager.GetLogger(MethodBase.GetCurrentMethod()?.DeclaringType?.FullName);
     
     // Thread handle for the client
     private static readonly Thread clientThread;
@@ -71,15 +71,15 @@ public static class Client {
     /// Static constructor for the client, initializes the client thread and path variables
     /// </summary>
     static Client() {
-        // logger.Info("Initializing Devcade Client");
+        logger.Info("Initializing Devcade Client");
         workingDir = Env.get("DEVCADE_PATH").match(
             v => v,
             () => {
-                // logger.Warn("DEVCADE_PATH not set, using default");
+                logger.Warn("DEVCADE_PATH not set, using default");
                 GD.Print("DEVCADE_PATH not set, using default");
                 return "/tmp/devcade";
             });
-        // logger.Info("DEVCADE_PATH: " + workingDir);
+        logger.Info("DEVCADE_PATH: " + workingDir);
 
         clientThread = new Thread(start) {
             IsBackground = true
@@ -93,7 +93,7 @@ public static class Client {
     /// </summary>
     [DoesNotReturn]
     private static void start() {
-        // logger.Info("Starting Devcade Client");
+        logger.Info("Starting Devcade Client");
         GD.Print("Starting Devcade Client");
         
         // Open the read/write pipe to the backend
@@ -103,19 +103,19 @@ public static class Client {
             if (!socketResult.is_err()) {
                 break;
             }
-            // logger.Warn($"Failed to open backend socket, retrying in 500ms: {socketResult.unwrap_err()}");
+            logger.Warn($"Failed to open backend socket, retrying in 500ms: {socketResult.unwrap_err()}");
             GD.Print("Failed to open backend socket, retrying in 500ms: " + socketResult.unwrap_err());
             Thread.Sleep(500);
         }
 
-        // logger.Info($"Opened read pipe: {workingDir}/onboard.sock");
+        logger.Info($"Opened read pipe: {workingDir}/onboard.sock");
 
         repeatPing(5000, 5000);
 
         // Start the main loop
         while (true) {
             if (brokenPipe) {
-                // logger.Debug("Attempting to fix broken pipe");
+                logger.Debug("Attempting to fix broken pipe");
                 fixPipes();
                 Thread.Sleep(500);
             }
@@ -128,13 +128,13 @@ public static class Client {
                 continue;
             }
             
-            // logger.Trace("Received message: " + message);
+            logger.Trace("Received message: " + message);
             
             // Parse the message
             Response res = Response.deserialize(message);
 
             if (!tasks.ContainsKey(res.request_id)) {
-                // logger.Warn("Received response for unknown request id: " + res.request_id);
+                logger.Warn("Received response for unknown request id: " + res.request_id);
                 continue;
             }
             
@@ -150,33 +150,33 @@ public static class Client {
             // Log the response
             switch (res.type) {
                 case Response.ResponseType.Pong:
-                    // logger.Trace($"Received pong response for request {res.request_id}");
+                    logger.Trace($"Received pong response for request {res.request_id}");
                     break;
                 case Response.ResponseType.Err:
                     // Result is always an error here, so type parameter doesn't matter
-                    // logger.Error($"Received error response for request {res.request_id}: {res.into_result<uint>().unwrap_err()}");
+                    logger.Error($"Received error response for request {res.request_id}: {res.into_result<uint>().unwrap_err()}");
                     break;
                 case Response.ResponseType.Ok:
-                    // logger.Debug($"Received ok response for request {res.request_id}");
+                    logger.Debug($"Received ok response for request {res.request_id}");
                     break;
                 case Response.ResponseType.Game:
-                    // logger.Debug($"Received game response for request {res.request_id}");
+                    logger.Debug($"Received game response for request {res.request_id}");
                     break;
                 case Response.ResponseType.GameList:
-                    // logger.Debug($"Received game list response for request {res.request_id} (contained {res.unwrap<List<DevcadeGame>>().Count} games)");
+                    logger.Debug($"Received game list response for request {res.request_id} (contained {res.unwrap<List<DevcadeGame>>().Count} games)");
                     break;
                 case Response.ResponseType.TagList:
-                    // logger.Debug($"Received tag list response for request {res.request_id} (contained {res.unwrap<List<Tag>>().Count} tags)");
+                    logger.Debug($"Received tag list response for request {res.request_id} (contained {res.unwrap<List<Tag>>().Count} tags)");
                     break;
                 case Response.ResponseType.Tag:
-                    // logger.Debug($"Received tag response for request {res.request_id}");
+                    logger.Debug($"Received tag response for request {res.request_id}");
                     break;
                 case Response.ResponseType.User:
-                    // logger.Debug($"Received user response for request {res.request_id}");
+                    logger.Debug($"Received user response for request {res.request_id}");
                     break;
                 default:
-                    // logger.Warn($"Received unknown response type for request {res.request_id}: {res.type}");
-                    // logger.Warn("Did you forget to add a case to the switch statement?");
+                    logger.Warn($"Received unknown response type for request {res.request_id}: {res.type}");
+                    logger.Warn("Did you forget to add a case to the switch statement?");
                     break;
             }
         }
@@ -214,7 +214,7 @@ public static class Client {
         try {
             return reader.ReadLine() ?? "";
         } catch (Exception e) {
-            // logger.Error("Failed to read from read pipe: " + e);
+            logger.Error("Failed to read from read pipe: " + e);
             brokenPipe = true;
             return "";
         }
@@ -239,7 +239,7 @@ public static class Client {
     /// </summary>
     /// <returns>A Task that will be completed when the backend responds, containing a list of games or an error</returns>
     public static Task<Response> getGameList() {
-        // logger.Debug("Getting game list");
+        logger.Debug("Getting game list");
         return sendRequest(Request.GetGameList());
     }
     
@@ -249,7 +249,7 @@ public static class Client {
     /// <param name="id">The id of the game to fetch</param>
     /// <returns>A Task that will be completed when the backend responds, containing a game or an error</returns>
     public static Task<Response> getGame(string id) {
-        // logger.Debug($"Getting game with id {id}");
+        logger.Debug($"Getting game with id {id}");
         return sendRequest(Request.GetGame(id));
     }
     
@@ -260,7 +260,7 @@ public static class Client {
     /// <param name="id">The id of the game to download the banner for</param>
     /// <returns>A Task that will be completed once the banner has been downloaded</returns>
     public static Task downloadBanner(string id) {
-        // logger.Debug($"Downloading banner for game with id {id}");
+        logger.Debug($"Downloading banner for game with id {id}");
         return sendRequest(Request.DownloadBanner(id))
             .ContinueWith(response => {
                 onBannerFinished.Invoke(null, getGame(id).Result.into_option<DevcadeGame>().unwrap_or(new DevcadeGame()));
@@ -274,7 +274,7 @@ public static class Client {
     /// <param name="id">The id of the game to download the icon for</param>
     /// <returns>A Task that will be completed once the icon has been downloaded</returns>
     public static Task downloadIcon(string id) {
-        // logger.Debug($"Downloading icon for game with id {id}");
+        logger.Debug($"Downloading icon for game with id {id}");
         return sendRequest(Request.DownloadIcon(id))
             .ContinueWith(_ => {
                 onIconFinished.Invoke(null, getGame(id).Result.into_option<DevcadeGame>().unwrap_or(new DevcadeGame()));
@@ -288,7 +288,7 @@ public static class Client {
     /// <param name="id">The id of the game to download</param>
     /// <returns>A Task that will be completed once the game has been downloaded</returns>
     public static Task downloadGame(string id) {
-        // logger.Debug($"Downloading game with id {id}");
+        logger.Debug($"Downloading game with id {id}");
         return sendRequest(Request.DownloadGame(id))
             .ContinueWith(_ => {
                 onGameFinished.Invoke(null, getGame(id).Result.into_option<DevcadeGame>().unwrap_or(new DevcadeGame()));
@@ -302,7 +302,7 @@ public static class Client {
     /// <param name="id">The id of the game to launch</param>
     /// <returns>A Task that will be completed once the game has exited</returns>
     public static Task<Response> launchGame(string id) {
-        // logger.Debug($"Launching game with id {id}");
+        logger.Debug($"Launching game with id {id}");
         return sendRequest(Request.LaunchGame(id));
     }
 
@@ -311,7 +311,7 @@ public static class Client {
     /// </summary>
     /// <returns>A Task that will be completed once the game has exited</returns>
     public static Task<Response> killGame() {
-        // logger.Debug($"Killing game");
+        logger.Debug($"Killing game");
         return sendRequest(Request.KillGame());
     }
 
@@ -322,7 +322,7 @@ public static class Client {
     /// <returns>A Task that will be completed when the backend has responded</returns>
     public static Task setProduction(bool prod) {
         string prodStr = prod ? "Production" : "Development";
-        // logger.Info($"Setting API to {prodStr}");
+        logger.Info($"Setting API to {prodStr}");
         return sendRequest(Request.SetProduction(prod)).ContinueWith(res => {
             if (res.Result.type == Response.ResponseType.Ok) {
                 isProduction = prod;
@@ -332,19 +332,19 @@ public static class Client {
     
     public static Task<Response> getTags() {
         Request req = Request.GetTagList();
-        // logger.Debug($"Getting tags list (id {req.request_id})");
+        logger.Debug($"Getting tags list (id {req.request_id})");
         return sendRequest(req);
     }
 
     public static Task<Response> getTag(string name) {
         Request req = Request.GetTag(name);
-        // logger.Debug($"Getting tag with name '{name}' (id {req.request_id})");
+        logger.Debug($"Getting tag with name '{name}' (id {req.request_id})");
         return sendRequest(req);
     }
     
     public static Task<Response> getGamesWithTag(string name) {
         Request req = Request.GetGameListFromTag(name);
-        // logger.Debug($"Getting games with tag '{name}' (id {req.request_id})");
+        logger.Debug($"Getting games with tag '{name}' (id {req.request_id})");
         return sendRequest(req);
     }
     
@@ -354,7 +354,7 @@ public static class Client {
     
     public static Task<Response> getUser(string username) {
         Request req = Request.getUser(username);
-        // logger.Debug($"Getting user with username '{username}' (id {req.request_id})");
+        logger.Debug($"Getting user with username '{username}' (id {req.request_id})");
         return sendRequest(req);
     }
 
@@ -370,14 +370,14 @@ public static class Client {
                 .ContinueWith(res => {
                     if (res is { IsCompletedSuccessfully: true, Result.type: Response.ResponseType.Pong }) {
                         DateTime end = DateTime.Now;
-                        // logger.Trace($"Ping successful ({(int)Math.Round((end - start).TotalMilliseconds)}ms)");
+                        logger.Trace($"Ping successful ({(int)Math.Round((end - start).TotalMilliseconds)}ms)");
                         if (!connected) {
                             sendQueuedRequests();
                         }
                         connected = true;
                     }
                     else {
-                        // logger.Error($"Failed to ping backend (no response after {_timeoutMillis}ms)");
+                        logger.Error($"Failed to ping backend (no response after {_timeoutMillis}ms)");
                         connected = false;
                     }
                 })
@@ -409,7 +409,7 @@ public static class Client {
             try {
                 write(req.serialize());
             } catch (Exception e) {
-                // logger.Error($"Failed to send request {req.request_id} to backend: {e.Message}");
+                logger.Error($"Failed to send request {req.request_id} to backend: {e.Message}");
                 connected = false;
                 brokenPipe = true;
                 return Task.FromResult(Response.fromError(req.request_id, e.Message));
@@ -438,7 +438,7 @@ public static class Client {
         try {
             write(req.serialize());
         } catch (Exception e) {
-            // logger.Error($"Failed to send request {req.request_id} to backend: {e.Message}");
+            logger.Error($"Failed to send request {req.request_id} to backend: {e.Message}");
             connected = false;
             brokenPipe = true;
             return Task.FromResult(Response.fromError(req.request_id, e.Message));
@@ -460,7 +460,7 @@ public static class Client {
             try {
                 t.TrySetCanceled();
             } catch (Exception e) {
-                // logger.Error("Failed to cancel task: " + e);
+                logger.Error("Failed to cancel task: " + e);
             }
         }
     }
@@ -483,11 +483,11 @@ public static class Client {
         var socketResult = tryOpenSocket($"{workingDir}/onboard.sock");
         if (socketResult.is_ok()) { 
             brokenPipe = false;
-            // logger.Info("Reconnected to backend");
+            logger.Info("Reconnected to backend");
             return true;
         }
 
-        // logger.Warn("Failed to reconnect to backend (is it running?)");
+        logger.Warn("Failed to reconnect to backend (is it running?)");
         return false;
     }
 }

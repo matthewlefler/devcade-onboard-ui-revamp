@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using Godot;
+
 namespace onboard.devcade;
 
 /// <summary>
@@ -47,8 +49,27 @@ public class DevcadeGame {
     /// The user that uploaded the game.
     /// </summary>
     public User user { get; set; }
+
+    /// <summary>
+    /// The banner associated with this game.
+    /// Will have the value null if the banner cannot be found
+    /// </summary>
+    public Texture2D banner { get; set; }
+
     
-    public DevcadeGame(string author, string description, string hash, string id, string name, List<Tag> tags, string upload_date, User user) {
+    /// <summary>
+    /// An instance of a game with all parameters filled out
+    /// </summary>
+    /// <param name="author"> The user that uploaded the game. </param>
+    /// <param name="description"> The description of the game, as provided by the author. </param>
+    /// <param name="hash"> The hash of the game, used to verify the integrity of the game, and to determine whether the game has been updated. </param>
+    /// <param name="id"> The game's ID, used to identify the game. This will not change even if the game is updated. </param>
+    /// <param name="name"> The name of the game, as provided by the author. </param>
+    /// <param name="tags"> The tags associated with the game, used to categorize and filter games. </param>
+    /// <param name="upload_date"> The date the game was uploaded, in the format YYYY-MM-DD. </param>
+    /// <param name="user"> The user that uploaded the game. </param>
+    /// <param name="banner"> The banner associated with this game. </param>
+    public DevcadeGame(string author, string description, string hash, string id, string name, List<Tag> tags, string upload_date, User user, Texture2D banner) {
         this.author = author;
         this.description = description;
         this.hash = hash;
@@ -57,8 +78,27 @@ public class DevcadeGame {
         this.tags = tags;
         this.upload_date = upload_date;
         this.user = user;
+        this.banner = banner;
     }
+
+    /// <summary>
+    /// An instance of a game with all parameters filled out, except for the banner
+    /// </summary>
+    /// <param name="author"> The user that uploaded the game. </param>
+    /// <param name="description"> The description of the game, as provided by the author. </param>
+    /// <param name="hash"> The hash of the game, used to verify the integrity of the game, and to determine whether the game has been updated. </param>
+    /// <param name="id"> The game's ID, used to identify the game. This will not change even if the game is updated. </param>
+    /// <param name="name"> The name of the game, as provided by the author. </param>
+    /// <param name="tags"> The tags associated with the game, used to categorize and filter games. </param>
+    /// <param name="upload_date"> The date the game was uploaded, in the format YYYY-MM-DD. </param>
+    /// <param name="user"> The user that uploaded the game. </param>
+    public DevcadeGame(string author, string description, string hash, string id, string name, List<Tag> tags, string upload_date, User user) 
+    : this(author, description, hash, id, name, tags, upload_date, user, null) { }
+
     
+    /// <summary>
+    /// The default constructor, fills out all the fields as empty 
+    /// </summary>
     public DevcadeGame() {
         this.author = "";
         this.description = "";
@@ -68,8 +108,14 @@ public class DevcadeGame {
         this.tags = new List<Tag>();
         this.upload_date = "";
         this.user = new User();
+        this.banner = null;
     }
     
+    /// <summary>
+    /// Check if this game contains the given tag.
+    /// </summary>
+    /// <param name="tag"> The tag name to check. </param>
+    /// <returns> Whether this game has the given tag as one of its tags. </returns>
     public bool containsTag(string tag) {
         return tags.Any(t => t.name == tag);
     }
@@ -97,6 +143,21 @@ public class Tag {
     public Tag() {
         this.name = "";
         this.description = "";
+    }
+
+    /// <summary>
+    /// checks if another object is equal to this object
+    /// </summary>
+    /// <param name="obj"> the other object </param>
+    /// <returns> true if the other object is a tag and their names match, otherwise false </returns>
+    public override bool Equals(object obj)
+    {
+        Tag otherTag = obj as Tag;
+        if(otherTag != null) 
+        {
+            return this.name.Equals(otherTag.name);
+        }
+        return false;
     }
 }
 

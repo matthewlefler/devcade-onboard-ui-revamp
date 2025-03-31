@@ -1,0 +1,338 @@
+[gd_scene load_steps=3 format=3 uid="uid://dq613q3dfdkf1"]
+
+[ext_resource type="Texture2D" uid="uid://dnop72fayimvp" path="res://missing_texture.png" id="1_f3o2d"]
+[ext_resource type="Texture2D" uid="uid://c73kxs0gtawat" path="res://icon.svg" id="2_tb50y"]
+
+[node name="Control" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="TabContainer" type="TabContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+current_tab = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="TabContainer"]
+layout_mode = 2
+theme_override_constants/separation = 2
+metadata/_tab_index = 0
+
+[node name="Label" type="Label" parent="TabContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 100
+text = "hello"
+horizontal_alignment = 1
+
+[node name="GridContainer" type="GridContainer" parent="TabContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/h_separation = 15
+theme_override_constants/v_separation = 15
+columns = 3
+
+[node name="AspectRatioContainer" type="AspectRatioContainer" parent="TabContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="TextureButton" type="TextureButton" parent="TabContainer/VBoxContainer/GridContainer/AspectRatioContainer"]
+layout_mode = 2
+texture_normal = ExtResource("1_f3o2d")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="AspectRatioContainer2" type="AspectRatioContainer" parent="TabContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="TextureButton" type="TextureButton" parent="TabContainer/VBoxContainer/GridContainer/AspectRatioContainer2"]
+layout_mode = 2
+texture_normal = ExtResource("1_f3o2d")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="AspectRatioContainer3" type="AspectRatioContainer" parent="TabContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="TextureButton" type="TextureButton" parent="TabContainer/VBoxContainer/GridContainer/AspectRatioContainer3"]
+layout_mode = 2
+texture_normal = ExtResource("1_f3o2d")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="AspectRatioContainer4" type="AspectRatioContainer" parent="TabContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="TextureButton" type="TextureButton" parent="TabContainer/VBoxContainer/GridContainer/AspectRatioContainer4"]
+layout_mode = 2
+texture_normal = ExtResource("1_f3o2d")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="AspectRatioContainer5" type="AspectRatioContainer" parent="TabContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="TextureButton" type="TextureButton" parent="TabContainer/VBoxContainer/GridContainer/AspectRatioContainer5"]
+layout_mode = 2
+texture_normal = ExtResource("1_f3o2d")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="AspectRatioContainer6" type="AspectRatioContainer" parent="TabContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="TextureButton" type="TextureButton" parent="TabContainer/VBoxContainer/GridContainer/AspectRatioContainer6"]
+layout_mode = 2
+texture_normal = ExtResource("1_f3o2d")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="AspectRatioContainer7" type="AspectRatioContainer" parent="TabContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="TextureButton" type="TextureButton" parent="TabContainer/VBoxContainer/GridContainer/AspectRatioContainer7"]
+layout_mode = 2
+texture_normal = ExtResource("1_f3o2d")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="AspectRatioContainer8" type="AspectRatioContainer" parent="TabContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="TextureButton" type="TextureButton" parent="TabContainer/VBoxContainer/GridContainer/AspectRatioContainer8"]
+layout_mode = 2
+texture_normal = ExtResource("1_f3o2d")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="AspectRatioContainer9" type="AspectRatioContainer" parent="TabContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="TextureButton" type="TextureButton" parent="TabContainer/VBoxContainer/GridContainer/AspectRatioContainer9"]
+layout_mode = 2
+texture_normal = ExtResource("1_f3o2d")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="AspectRatioContainer10" type="AspectRatioContainer" parent="TabContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="TextureButton" type="TextureButton" parent="TabContainer/VBoxContainer/GridContainer/AspectRatioContainer10"]
+layout_mode = 2
+texture_normal = ExtResource("1_f3o2d")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="AspectRatioContainer11" type="AspectRatioContainer" parent="TabContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="TextureButton" type="TextureButton" parent="TabContainer/VBoxContainer/GridContainer/AspectRatioContainer11"]
+layout_mode = 2
+texture_normal = ExtResource("1_f3o2d")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="AspectRatioContainer12" type="AspectRatioContainer" parent="TabContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="TextureButton" type="TextureButton" parent="TabContainer/VBoxContainer/GridContainer/AspectRatioContainer12"]
+layout_mode = 2
+texture_normal = ExtResource("1_f3o2d")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="AspectRatioContainer13" type="AspectRatioContainer" parent="TabContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="TextureButton" type="TextureButton" parent="TabContainer/VBoxContainer/GridContainer/AspectRatioContainer13"]
+layout_mode = 2
+texture_normal = ExtResource("1_f3o2d")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="AspectRatioContainer14" type="AspectRatioContainer" parent="TabContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="TextureButton" type="TextureButton" parent="TabContainer/VBoxContainer/GridContainer/AspectRatioContainer14"]
+layout_mode = 2
+texture_normal = ExtResource("1_f3o2d")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="AspectRatioContainer15" type="AspectRatioContainer" parent="TabContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="TextureButton" type="TextureButton" parent="TabContainer/VBoxContainer/GridContainer/AspectRatioContainer15"]
+layout_mode = 2
+texture_normal = ExtResource("1_f3o2d")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="AspectRatioContainer16" type="AspectRatioContainer" parent="TabContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="TextureButton" type="TextureButton" parent="TabContainer/VBoxContainer/GridContainer/AspectRatioContainer16"]
+layout_mode = 2
+texture_normal = ExtResource("1_f3o2d")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="AspectRatioContainer17" type="AspectRatioContainer" parent="TabContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="TextureButton" type="TextureButton" parent="TabContainer/VBoxContainer/GridContainer/AspectRatioContainer17"]
+layout_mode = 2
+texture_normal = ExtResource("1_f3o2d")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="AspectRatioContainer18" type="AspectRatioContainer" parent="TabContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="TextureButton" type="TextureButton" parent="TabContainer/VBoxContainer/GridContainer/AspectRatioContainer18"]
+layout_mode = 2
+texture_normal = ExtResource("1_f3o2d")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="AspectRatioContainer19" type="AspectRatioContainer" parent="TabContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="TextureButton" type="TextureButton" parent="TabContainer/VBoxContainer/GridContainer/AspectRatioContainer19"]
+layout_mode = 2
+texture_normal = ExtResource("1_f3o2d")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="AspectRatioContainer20" type="AspectRatioContainer" parent="TabContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="TextureButton" type="TextureButton" parent="TabContainer/VBoxContainer/GridContainer/AspectRatioContainer20"]
+layout_mode = 2
+texture_normal = ExtResource("1_f3o2d")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="AspectRatioContainer21" type="AspectRatioContainer" parent="TabContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="TextureButton" type="TextureButton" parent="TabContainer/VBoxContainer/GridContainer/AspectRatioContainer21"]
+layout_mode = 2
+texture_normal = ExtResource("1_f3o2d")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="AspectRatioContainer22" type="AspectRatioContainer" parent="TabContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="TextureButton" type="TextureButton" parent="TabContainer/VBoxContainer/GridContainer/AspectRatioContainer22"]
+layout_mode = 2
+texture_normal = ExtResource("1_f3o2d")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="AspectRatioContainer23" type="AspectRatioContainer" parent="TabContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="TextureButton" type="TextureButton" parent="TabContainer/VBoxContainer/GridContainer/AspectRatioContainer23"]
+layout_mode = 2
+texture_normal = ExtResource("1_f3o2d")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="AspectRatioContainer24" type="AspectRatioContainer" parent="TabContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="TextureButton" type="TextureButton" parent="TabContainer/VBoxContainer/GridContainer/AspectRatioContainer24"]
+layout_mode = 2
+texture_normal = ExtResource("1_f3o2d")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="AspectRatioContainer25" type="AspectRatioContainer" parent="TabContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="TextureButton" type="TextureButton" parent="TabContainer/VBoxContainer/GridContainer/AspectRatioContainer25"]
+layout_mode = 2
+texture_normal = ExtResource("2_tb50y")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="AspectRatioContainer26" type="AspectRatioContainer" parent="TabContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="TextureButton" type="TextureButton" parent="TabContainer/VBoxContainer/GridContainer/AspectRatioContainer26"]
+layout_mode = 2
+texture_normal = ExtResource("1_f3o2d")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="AspectRatioContainer27" type="AspectRatioContainer" parent="TabContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="TextureButton" type="TextureButton" parent="TabContainer/VBoxContainer/GridContainer/AspectRatioContainer27"]
+layout_mode = 2
+texture_normal = ExtResource("1_f3o2d")
+ignore_texture_size = true
+stretch_mode = 0

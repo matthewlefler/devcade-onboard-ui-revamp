@@ -1,0 +1,43 @@
+[gd_scene load_steps=3 format=3 uid="uid://1pi1bov4mn64"]
+
+[ext_resource type="Script" uid="uid://dnfisdn7tx8c4" path="res://template/TemplateGui.cs" id="1_rsbb1"]
+[ext_resource type="Texture2D" uid="uid://dnop72fayimvp" path="res://missing_texture.png" id="2_rsbb1"]
+
+[node name="test_gui" type="Control" node_paths=PackedStringArray("gameContainer", "tabContainer")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 2.0
+offset_right = 2.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_rsbb1")
+gameContainer = NodePath("TabContainer/Games")
+tabContainer = NodePath("TabContainer/Tags")
+missingTexture = ExtResource("2_rsbb1")
+
+[node name="TabContainer" type="TabContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/side_margin = 15
+theme_override_font_sizes/font_size = 56
+current_tab = 0
+
+[node name="Games" type="GridContainer" parent="TabContainer"]
+layout_mode = 2
+theme_override_constants/h_separation = 5
+theme_override_constants/v_separation = 5
+columns = 3
+metadata/_tab_index = 0
+
+[node name="Tags" type="GridContainer" parent="TabContainer"]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 1
