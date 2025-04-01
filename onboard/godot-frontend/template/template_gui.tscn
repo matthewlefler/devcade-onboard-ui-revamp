@@ -1,7 +1,6 @@
-[gd_scene load_steps=5 format=3 uid="uid://1pi1bov4mn64"]
+[gd_scene load_steps=4 format=3 uid="uid://1pi1bov4mn64"]
 
 [ext_resource type="Script" uid="uid://dnfisdn7tx8c4" path="res://template/TemplateGui.cs" id="1_rsbb1"]
-[ext_resource type="Texture2D" uid="uid://dnop72fayimvp" path="res://missing_texture.png" id="2_rsbb1"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_yuvhl"]
 bg_color = Color(0.196078, 0.196078, 0.196078, 0.741176)
@@ -31,7 +30,6 @@ descriptionPanel = NodePath("Panel")
 desriptionLabel = NodePath("Panel/MarginContainer/Panel/MarginContainer/VBoxContainer/MarginContainer/description")
 titleLabel = NodePath("Panel/MarginContainer/Panel/MarginContainer/VBoxContainer/title")
 lauchGameButton = NodePath("Panel/MarginContainer/Panel/MarginContainer/VBoxContainer/MarginContainer2/launchGame")
-missingTexture = ExtResource("2_rsbb1")
 
 [node name="TabContainer" type="TabContainer" parent="."]
 layout_mode = 1

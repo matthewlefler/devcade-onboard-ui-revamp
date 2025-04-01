@@ -100,9 +100,12 @@ public partial class TemplateGui : Control, GuiInterface
 
     public override void _Input(InputEvent @event)
     {
-        // if the back (blue) button is pressed
-        if(@event.IsActionPressed("A2") || @event.IsActionPressed("Menu"))
+        // add any input that happends once per a given keypress here
+
+        // if the back (blue) button is pressed or the Menu (black) button is pressed
+        if(@event.IsActionPressed("Player1_A2") || @event.IsActionPressed("Player1_Menu") || @event.IsActionPressed("Player2_A2") || @event.IsActionPressed("Player2_Menu"))
         {
+            // and the description panel is visible, hide it
             if(descriptionPanel.IsVisibleInTree())
             {
                 descriptionPanel.Hide();
@@ -115,7 +118,6 @@ public partial class TemplateGui : Control, GuiInterface
                 (lastButtonContainerPressed.GetChild(0) as BaseButton).GrabFocus();
             }
         }
-        // add any input that happends once per a given keypress here
     }
 
     // private double timeout = 5;
@@ -127,7 +129,7 @@ public partial class TemplateGui : Control, GuiInterface
         // some examples of uses are:
         //      timers based on how long a button is held
         //      global animations
-        //      in this case, update the game list if it is old
+        //      in this case, update the game list if it is out of date / old
 
         if(gameListOutOfDate == true)
         {
@@ -153,7 +155,7 @@ public partial class TemplateGui : Control, GuiInterface
 
                     // make a monochrome variant of the banner that is slightly darker too 
                     Texture2D monochromeBanner = makeMonochrome(game.banner);
-                    monochromeBanner = changeBrightness(monochromeBanner, -0.2f);
+                    monochromeBanner = changeBrightness(monochromeBanner, +0.4f);
 
                     // make a color variant that is darker too
                     Texture2D darkerBanner = changeBrightness(game.banner, -0.2f);
@@ -386,6 +388,17 @@ public partial class TemplateGui : Control, GuiInterface
 
     public void setTag(Tag tag)
     {
+        // because the games do not have the allTag within their tag list, 
+        // a special case is required to handle this instance
+        if(tag == GuiManager.allTag)
+        {
+            foreach(AspectRatioContainer container in gameContainer.GetChildren())
+            {
+                container.Show();
+            }
+            return;
+        }
+
         foreach(AspectRatioContainer container in gameContainer.GetChildren())
         {
             if(gameContainers[container].tags.Contains(tag))
@@ -397,5 +410,21 @@ public partial class TemplateGui : Control, GuiInterface
                 container.Hide();
             }
         }
+    }
+
+    /// <summary>
+    /// unhides the root node of the scene, there-by making the rest of the scene visible
+    /// </summary>
+    public void show()
+    {
+        this.show();
+    }
+
+    /// <summary>
+    /// hides the root node of the scene, there-by making the rest of the scene hidden
+    /// </summary>
+    public void hide()
+    {
+        this.hide();
     }
 }

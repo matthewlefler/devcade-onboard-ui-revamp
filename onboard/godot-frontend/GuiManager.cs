@@ -14,8 +14,24 @@ namespace GodotFrontend;
 
 public partial class GuiManager : Control
 {
+    /// <summary>
+    /// the initial GUI scene to show when devcade starts up
+    /// </summary>
     [Export]
     public PackedScene initialGuiScene;
+
+    /// <summary>
+    /// the root node of the loading screen
+    /// the control node to hide when not showing the loading animation
+    /// </summary>
+    [Export]
+    public Control loadingScreen;
+
+    /// <summary>
+    /// the node to animate when showing the loading animation
+    /// </summary>
+    [Export]
+    public AnimatedSprite2D loadingAnimation;
 
     // logger for currently unknown purposes??
     //
@@ -42,14 +58,23 @@ public partial class GuiManager : Control
     /// A dictionary of tags to lists of games that have that tag
     /// </summary>
     private Dictionary<string, List<DevcadeGame>> tagLists = new Dictionary<string, List<DevcadeGame>>();
-    private static Tag allTag = new Tag("All Games", "View all available games");
+    public readonly static Tag allTag = new Tag("All Games", "View all available games");
     public Tag currentTag = allTag;
 
+    /// <summary>
+    /// true if the game list is being reloaded from the backend
+    /// </summary>
+    public bool reloadingGameList { get; private set; } = false;
 
-    public bool loading { get; private set; } = true;
-
+    /// <summary>
+    /// the current GUI scene being shown
+    /// </summary>
     GuiInterface guiScene;
-    private bool guiSceneReady = false;
+
+    /// <summary>
+    /// the root node of the GUI scene
+    /// </summary>
+    CanvasItem guiSceneRootNode;
 
     private static readonly DevcadeGame defaultGame = new DevcadeGame {
         name = "Error",
@@ -66,11 +91,20 @@ public partial class GuiManager : Control
     /// </summary>
     public override void _Ready()
     {
+        // hide the loading screen by default
+        hideLoadingAnimation();
+
         // spawn initial gui scene
-        var guiScene = initialGuiScene.Instantiate();
+        this.guiSceneRootNode = initialGuiScene.Instantiate() as CanvasItem;
+
+        if(guiSceneRootNode == null)
+        {
+            GD.PrintErr("Assert Failed: gui scene root node is not a node that derives from the CanvasItem node");
+            throw new ApplicationException("Assert Failed: gui scene root node is not a node that derives from the CanvasItem node");
+        }
         
         // make sure it implements the GuiInterface interface
-        GuiInterface gui = guiScene as GuiInterface;
+        GuiInterface gui = guiSceneRootNode as GuiInterface;
         if(gui != null) 
         {
             this.guiScene = gui;
@@ -82,10 +116,9 @@ public partial class GuiManager : Control
         } 
         
         // add the new scene instance as a child of this node
-        AddChild(guiScene);
-        // and set that the gui scene is ready
-        guiSceneReady = true;
+        AddChild(guiSceneRootNode);
 
+        // and reload the game list
         reloadGameList();
     }
 
@@ -111,9 +144,9 @@ public partial class GuiManager : Control
         // aka when a game is running
         // see: https://thegodotbarn.com/contributions/question/178/how-to-make-games-recognize-background-input
 
-        // if(Input.IsActionPressed("ui_accept"))
+        // if(Input.IsActionPressed("Player1_Menu") && Input.IsActionPressed("Player2_Menu"))
         // {
-        //     GD.Print("enter");
+        //     GD.Print("timing out: " + timer)
         //     timer -= delta;
         //     if(timer <= 0.0) 
         //     {
@@ -128,7 +161,9 @@ public partial class GuiManager : Control
         // }
     }
 
-
+    /// <summary>
+    /// the constructor of a class will run before the _Ready() function is called
+    /// </summary>
     public GuiManager()
     {
         // load the .env file (contains the enviorment variables)
@@ -140,6 +175,10 @@ public partial class GuiManager : Control
 
     private Task reloadGameList()
     {
+        showLoadingAnimation();        
+
+        this.reloadingGameList = true;
+
         tagLists = new Dictionary<string, List<DevcadeGame>> { { allTag.name, new List<DevcadeGame>() } };
         tagList = new List<Tag>() { allTag };
 
@@ -173,8 +212,12 @@ public partial class GuiManager : Control
 
                 loadBanners();
 
+                // initialize the GUI
                 initGUI();
-                this.loading = false;
+
+                hideLoadingAnimation();        
+
+                this.reloadingGameList = false;
             });
         return gameTask;
     }
@@ -229,6 +272,30 @@ public partial class GuiManager : Control
     }
 
     /// <summary>
+    /// Shows the loading animation,
+    /// this hides the GUI, 
+    /// shows the node that is the root of the animation tree,
+    /// and starts the animation.
+    /// </summary>
+    public void showLoadingAnimation()
+    {
+        loadingScreen.CallDeferred("show");
+        loadingAnimation.CallDeferred("play", "default", 1.0f, false);
+    }
+
+    /// <summary>
+    /// Hides the loading animation,
+    /// this shows the GUI, 
+    /// hides the node that is the root of the animation tree,
+    /// and stops the animation.
+    /// </summary>
+    public void hideLoadingAnimation()
+    {
+        loadingScreen.CallDeferred("hide");
+        loadingAnimation.CallDeferred("stop");
+    }
+
+    /// <summary>
     /// updates the current tag in use
     /// and updates the game list to be only the games that have the current tag
     /// </summary>
@@ -255,18 +322,19 @@ public partial class GuiManager : Control
     /// <param name="game"> the game to launch </param>
     public void launchGame(DevcadeGame game) 
     {
-        this.loading = true;
+        this.reloadingGameList = true;
         GD.Print("launching game: " + game.name);
 
         Client.launchGame(
             game.id).ContinueWith(res => {
                 if (res.IsCompletedSuccessfully) {
                     // set some state that a game is running?
+                    GD.Print("done?");
                 }
                 else {
                     logger.Error("Failed to launch game: " + res.Exception);
                     GD.Print("Failed to launch game: " + res.Exception);
-                    this.loading = false;
+                    this.reloadingGameList = false;
                 }
         });
     }

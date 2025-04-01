@@ -1,9 +1,14 @@
-[gd_scene load_steps=3 format=3 uid="uid://br86segmlm7yg"]
+[gd_scene load_steps=6 format=3 uid="uid://br86segmlm7yg"]
 
 [ext_resource type="Script" uid="uid://cuu0nbc2glagm" path="res://GuiManager.cs" id="1_ig7tw"]
 [ext_resource type="PackedScene" uid="uid://1pi1bov4mn64" path="res://template/template_gui.tscn" id="2_0xm2m"]
+[ext_resource type="Texture2D" uid="uid://cm8hlcb1in1rd" path="res://CSHAssets/transparent-logo-white.png" id="3_1bvp3"]
+[ext_resource type="SpriteFrames" uid="uid://cwsn76nuho5hi" path="res://CSHAssets/loadingAnimation.tres" id="3_h2yge"]
 
-[node name="main_node" type="Control"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1bvp3"]
+bg_color = Color(0.0235294, 0.0235294, 0.0235294, 1)
+
+[node name="main_node" type="Control" node_paths=PackedStringArray("loadingScreen", "loadingAnimation")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -12,3 +17,44 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_ig7tw")
 initialGuiScene = ExtResource("2_0xm2m")
+loadingScreen = NodePath("loadingScreen")
+loadingAnimation = NodePath("loadingScreen/VBoxContainer/CenterContainer/loadingAnimation")
+
+[node name="loadingScreen" type="Panel" parent="."]
+top_level = true
+z_index = 1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_1bvp3")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="loadingScreen"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="loadingScreen/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 50
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 50
+theme_override_constants/margin_bottom = 10
+
+[node name="TextureRect" type="TextureRect" parent="loadingScreen/VBoxContainer/MarginContainer"]
+layout_mode = 2
+texture = ExtResource("3_1bvp3")
+expand_mode = 5
+
+[node name="CenterContainer" type="CenterContainer" parent="loadingScreen/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 6
+
+[node name="loadingAnimation" type="AnimatedSprite2D" parent="loadingScreen/VBoxContainer/CenterContainer"]
+sprite_frames = ExtResource("3_h2yge")
