@@ -1,9 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 
 using log4net;
@@ -22,7 +19,7 @@ public partial class GuiManager : Control
 
     // logger for currently unknown purposes??
     //
-    // deos not run, exits with an error msg:
+    // deos not run, writes an error msg, but does not block output:
     // log4net:ERROR Exception while reading ConfigurationSettings. Check your .config file is well formed XML. log4net:ERROR Exception while reading ConfigurationSettings. Check your .config file is well formed XML.
     //
     private static ILog logger = LogManager.GetLogger("onboard.ui.Devcade");
@@ -92,6 +89,21 @@ public partial class GuiManager : Control
         reloadGameList();
     }
 
+    public override void _Process(double delta)
+    {
+        // frontend reset button, reloads all the games from the backend
+        if(Input.IsActionPressed("Player1_Menu") && Input.IsActionPressed("Player2_Menu"))
+        {
+            reloadGameList();
+        }
+
+        // switch between dev and normal mode
+        if(Input.IsActionPressed("Player1_B4") && Input.IsActionPressed("Player2_B4"))
+        {
+            Client.setProduction(!Client.isProduction).ContinueWith(_ => { reloadGameList(); });
+        }
+    }
+
 
     public GuiManager()
     {
@@ -109,7 +121,7 @@ public partial class GuiManager : Control
         Client.init();
     }
 
-    private void reloadGameList()
+    private Task reloadGameList()
     {
         tagLists = new Dictionary<string, List<DevcadeGame>> { { allTag.name, new List<DevcadeGame>() } };
         tagList = new List<Tag>() { allTag };
@@ -143,11 +155,11 @@ public partial class GuiManager : Control
                 GD.Print("setting cards");
 
                 loadBanners();
-                
 
                 initGUI();
                 this.loading = false;
             });
+        return gameTask;
     }
 
     private void loadBanners()
