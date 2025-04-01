@@ -55,8 +55,6 @@ public partial class TemplateGui : Control, GuiInterface
     [Export]
     public BaseButton lauchGameButton;
 
-    public Texture2D missingTextureMonochrome;
-
     private List<Tag> tagList = new List<Tag>();
 
     private bool tagListOutOfDate = false;
@@ -94,8 +92,6 @@ public partial class TemplateGui : Control, GuiInterface
     {
         descriptionPanel.Hide();
         lauchGameButton.Pressed += lauchCurrentGame;
-
-        missingTextureMonochrome = makeMonochrome(missingTexture);
 
         Vector2I screenDims = DisplayServer.ScreenGetSize();
         screenHeight = screenDims.Y;
