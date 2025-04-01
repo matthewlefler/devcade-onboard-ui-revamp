@@ -3,7 +3,6 @@ using System;
 
 using onboard.devcade;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace GodotFrontend;
 
@@ -20,7 +19,19 @@ public partial class TemplateGui : Control, GuiInterface
     public Control gameContainer;    
 
     [Export]
-    public Control tabContainer;  
+    public Control tagContainer; 
+
+    [Export]
+    public Panel descriptionPanel;
+    
+    [Export]
+    public Label desriptionLabel; 
+
+    [Export]
+    public Label titleLabel;
+
+    [Export]
+    public BaseButton lauchGameButton;
     
     [Export]
     public Texture2D missingTexture;
@@ -29,6 +40,12 @@ public partial class TemplateGui : Control, GuiInterface
     private List<Tag> tagList = new List<Tag>();
 
     private bool tagListOutOfDate = false;
+
+    /// <summary>
+    /// The last pressed button's aspectratiocontainer
+    /// Used for saving focus when the a description of a game is shown.
+    /// </summary>
+    private AspectRatioContainer lastButtonContainerPressed = null;
 
     /// <summary>
     /// a dictionary of buttons to games, 
@@ -55,6 +72,9 @@ public partial class TemplateGui : Control, GuiInterface
     /// </summary>
     public override void _Ready()
     {
+        descriptionPanel.Hide();
+        lauchGameButton.Pressed += lauchCurrentGame;
+
         missingTextureMonochrome = makeMonochrome(missingTexture);
 
         Vector2I screenDims = DisplayServer.ScreenGetSize();
@@ -64,6 +84,21 @@ public partial class TemplateGui : Control, GuiInterface
 
     public override void _Input(InputEvent @event)
     {
+        // if the blue button is pressed
+        if(@event.IsActionPressed("A2") || @event.IsActionPressed("Menu"))
+        {
+            if(descriptionPanel.IsVisibleInTree())
+            {
+                descriptionPanel.Hide();
+                
+                // make the description's game button focused again
+                // this is a bit cursed and could be done in a better way
+                // but as there is only one child of each aspect ratio container
+                // and it has to be a button of some kind
+                // this should not fail
+                (lastButtonContainerPressed.GetChild(0) as BaseButton).GrabFocus();
+            }
+        }
         // add any input that happends once per a given keypress here
     }
 
@@ -80,7 +115,7 @@ public partial class TemplateGui : Control, GuiInterface
 
 
         // TODO:
-        // add supervisor button
+        // add supervisor button (pt. 2 lol)
         // looks like it'll require a library as 
         // the godot engine properly handles inputs and
         // does not read inputs when not in foucus
@@ -149,18 +184,22 @@ public partial class TemplateGui : Control, GuiInterface
                     button = textButton;
                 }
 
-                if(game.name != "Error")
-                {
-                    // lambda function is required to "bind" the parameter 
-                    // to the function called when the button is pressed
-                    button.Pressed += () => launchGame(game);
-                }                
                 
                 button.CustomMinimumSize = new Vector2(10, 10);
 
                 var aspectRatioContainer = new AspectRatioContainer();
                 aspectRatioContainer.SizeFlagsVertical = SizeFlags.ExpandFill;
                 aspectRatioContainer.SizeFlagsHorizontal = SizeFlags.ExpandFill;
+
+                if(game.name != "Error")
+                {
+                    // lambda function is required to "bind" the parameter 
+                    // to the function called when the button is pressed
+                    button.Pressed += () => { 
+                        lastButtonContainerPressed = aspectRatioContainer; 
+                        showDescription(game);
+                    };
+                } 
 
                 aspectRatioContainer.AddChild(button);
                 
@@ -171,6 +210,7 @@ public partial class TemplateGui : Control, GuiInterface
                 if(i == 0)
                 {
                     button.CallDeferred("grab_focus");
+                    lastButtonContainerPressed = aspectRatioContainer;
                 }
 
                 // add the new button and its corresponding game to the dictionary
@@ -182,9 +222,9 @@ public partial class TemplateGui : Control, GuiInterface
 
         if(tagListOutOfDate == true)
         {
-            foreach(Node node in tabContainer.GetChildren())
+            foreach(Node node in tagContainer.GetChildren())
             {
-                tabContainer.RemoveChild(node);
+                tagContainer.RemoveChild(node);
             }
 
             for (int i = 0; i < tagList.Count; i++)
@@ -196,7 +236,7 @@ public partial class TemplateGui : Control, GuiInterface
 
                 button.Text = tag.name;
 
-                tabContainer.AddChild(button);
+                tagContainer.AddChild(button);
             }
             tagListOutOfDate = false;
         }
@@ -215,6 +255,35 @@ public partial class TemplateGui : Control, GuiInterface
         this.model = model;
 
         gameListOutOfDate = true;
+    }
+
+    /// <summary>
+    /// shows the description for a game
+    /// the description includes 
+    /// the title, description, and a button to launch the game
+    /// </summary>
+    /// <param name="game"></param>
+    private void showDescription(DevcadeGame game)
+    {
+        titleLabel.Text = game.name;
+        desriptionLabel.Text = game.description;
+        
+        // set the action to run when the launch button is pressed
+        // also make this button grab focus
+        lauchGameButton.GrabFocus();
+
+        descriptionPanel.Show();
+    }
+    
+    /// <summary>
+    /// lauches the game that is referenced by the button in the aspect ratio container
+    /// in th the lastButtonContainerPressed variable, 
+    /// this is used to lauch a game from a description page
+    /// </summary>
+    private void lauchCurrentGame()
+    {
+        DevcadeGame gameToLaunch = gameContainers[lastButtonContainerPressed];
+        launchGame(gameToLaunch);
     }
 
     /// <summary>

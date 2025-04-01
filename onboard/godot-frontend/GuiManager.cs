@@ -72,9 +72,8 @@ public partial class GuiManager : Control
         // spawn initial gui scene
         var guiScene = initialGuiScene.Instantiate();
         
-        // make sure it implements the GuiInterface
+        // make sure it implements the GuiInterface interface
         GuiInterface gui = guiScene as GuiInterface;
-        
         if(gui != null) 
         {
             this.guiScene = gui;
@@ -84,7 +83,8 @@ public partial class GuiManager : Control
             GD.PrintErr("Assert Failed: gui scene root node script does not implement the GuiInterface interface");
             throw new ApplicationException("Assert Failed: the gui scene's root node script does not implement the GuiInterface interface");
         } 
-
+        
+        // add the new scene instance as a child of this node
         AddChild(guiScene);
         // and set that the gui scene is ready
         guiSceneReady = true;
@@ -115,7 +115,6 @@ public partial class GuiManager : Control
         tagList = new List<Tag>() { allTag };
 
         gameTitles = errorList;
-
 
         Task gameTask = Client.getGameList()
             .ContinueWith(t => {
