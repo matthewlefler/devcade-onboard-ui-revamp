@@ -16,26 +16,45 @@ public partial class TemplateGui : Control, GuiInterface
     GuiManager model;
     public List<DevcadeGame> gameTitles;
 
+    /// <summary>
+    /// the container that holds the buttons that represent the games
+    /// which are analogous to the menucards in the old frontend 
+    /// </summary>
     [Export]
-    public Control gameContainer;    
+    public GridContainer gameContainer;    
 
+    /// <summary>
+    /// holds the tag buttons 
+    /// </summary>
     [Export]
-    public Control tagContainer; 
+    public GridContainer tagContainer; 
 
+    /// <summary>
+    /// the overall parent panel 
+    /// that holds all the ui nodes related to the description
+    /// used to hide/show the description
+    /// </summary>
     [Export]
     public Panel descriptionPanel;
     
+    /// <summary>
+    /// the label that holds the actual description text (DevcadeGame.description)
+    /// </summary>
     [Export]
     public Label desriptionLabel; 
 
+    /// <summary>
+    /// a label to show the title of the game when the description is shown
+    /// </summary>
     [Export]
     public Label titleLabel;
 
+    /// <summary>
+    /// the button when showing the description that is connected to lauching the game
+    /// </summary>
     [Export]
     public BaseButton lauchGameButton;
-    
-    [Export]
-    public Texture2D missingTexture;
+
     public Texture2D missingTextureMonochrome;
 
     private List<Tag> tagList = new List<Tag>();
@@ -85,7 +104,7 @@ public partial class TemplateGui : Control, GuiInterface
 
     public override void _Input(InputEvent @event)
     {
-        // if the blue button is pressed
+        // if the back (blue) button is pressed
         if(@event.IsActionPressed("A2") || @event.IsActionPressed("Menu"))
         {
             if(descriptionPanel.IsVisibleInTree())
@@ -93,7 +112,7 @@ public partial class TemplateGui : Control, GuiInterface
                 descriptionPanel.Hide();
                 
                 // make the description's game button focused again
-                // this is a bit cursed and could be done in a better way
+                // this is a bit cursed and could be done in a better way,
                 // but as there is only one child of each aspect ratio container
                 // and it has to be a button of some kind
                 // this should not fail
@@ -114,31 +133,6 @@ public partial class TemplateGui : Control, GuiInterface
         //      global animations
         //      in this case, update the game list if it is old
 
-
-        // TODO:
-        // add supervisor button (pt. 2 lol)
-        // looks like it'll require a library as 
-        // the godot engine properly handles inputs and
-        // does not read inputs when not in foucus
-        // aka when a game is running
-        // see: https://thegodotbarn.com/contributions/question/178/how-to-make-games-recognize-background-input
-
-        // if(Input.IsActionPressed("ui_accept"))
-        // {
-        //     GD.Print("enter");
-        //     timer -= delta;
-        //     if(timer <= 0.0) 
-        //     {
-        //         // if the timer has timed out
-        //         // kill the currently running game
-        //         killCurrentlyRunningGame();
-        //     }
-        // }
-        // else
-        // {
-        //     timer = timeout;
-        // }
-
         if(gameListOutOfDate == true)
         {
             // clear the dict, as the old data is no longer current
@@ -156,17 +150,19 @@ public partial class TemplateGui : Control, GuiInterface
 
                 if(game.banner != null)
                 {
-                    // this is slow, save textures some where, so they don't have to be recalced vvery time?
+                    // this is slow, save textures some where, so they don't have to be re-calculated every time?
                     TextureButton textureButton = new TextureButton();
                     textureButton.IgnoreTextureSize = true;
                     textureButton.StretchMode = TextureButton.StretchModeEnum.Scale;
 
+                    // make a monochrome variant of the banner that is slightly darker too 
                     Texture2D monochromeBanner = makeMonochrome(game.banner);
-                    monochromeBanner = changeBrightness(monochromeBanner, -0.1f);
+                    monochromeBanner = changeBrightness(monochromeBanner, -0.2f);
 
+                    // make a color variant that is darker too
                     Texture2D darkerBanner = changeBrightness(game.banner, -0.2f);
 
-                    textureButton.TextureDisabled = missingTexture;
+                    textureButton.TextureDisabled = darkerBanner;
                     textureButton.TextureNormal   = monochromeBanner;
                     textureButton.TextureHover    = game.banner;
                     textureButton.TexturePressed  = darkerBanner;

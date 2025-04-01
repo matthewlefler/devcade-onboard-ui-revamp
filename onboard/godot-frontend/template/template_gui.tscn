@@ -54,6 +54,7 @@ metadata/_tab_index = 0
 [node name="Tags" type="GridContainer" parent="TabContainer"]
 visible = false
 layout_mode = 2
+columns = 3
 metadata/_tab_index = 1
 
 [node name="Panel" type="Panel" parent="."]

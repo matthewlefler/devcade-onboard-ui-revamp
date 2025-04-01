@@ -102,6 +102,30 @@ public partial class GuiManager : Control
         {
             Client.setProduction(!Client.isProduction).ContinueWith(_ => { setTag(allTag); reloadGameList(); });
         }
+
+        // TODO:
+        // add supervisor button (pt. 2 lol)
+        // looks like it'll require a library as 
+        // the godot engine properly handles inputs and
+        // does not read inputs when not in foucus
+        // aka when a game is running
+        // see: https://thegodotbarn.com/contributions/question/178/how-to-make-games-recognize-background-input
+
+        // if(Input.IsActionPressed("ui_accept"))
+        // {
+        //     GD.Print("enter");
+        //     timer -= delta;
+        //     if(timer <= 0.0) 
+        //     {
+        //         // if the timer has timed out
+        //         // kill the currently running game
+        //         killCurrentlyRunningGame();
+        //     }
+        // }
+        // else
+        // {
+        //     timer = timeout;
+        // }
     }
 
 
