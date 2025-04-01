@@ -100,20 +100,13 @@ public partial class GuiManager : Control
         // switch between dev and normal mode
         if(Input.IsActionPressed("Player1_B4") && Input.IsActionPressed("Player2_B4"))
         {
-            Client.setProduction(!Client.isProduction).ContinueWith(_ => { reloadGameList(); });
+            Client.setProduction(!Client.isProduction).ContinueWith(_ => { setTag(allTag); reloadGameList(); });
         }
     }
 
 
     public GuiManager()
     {
-        // init this, (the model) 
-
-        // init initial GUI scene
-            // gui should set up its:
-            // buttons, text labels, etc. 
-            // !set init focus!
-
         // load the .env file (contains the enviorment variables)
         Env.load("../.env");
 

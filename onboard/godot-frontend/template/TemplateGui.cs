@@ -7,8 +7,9 @@ using System.Collections.Generic;
 namespace GodotFrontend;
 
 /// <summary>
-/// this is somewhat of a template class to show how to use the GuiInterface
-/// and create a simple UI
+/// this is somewhat simple GUI that implements all the basic functions 
+/// to show how to create a simple UI script
+/// all logic for creating buttons and adding functions to the buttons is done here
 /// </summary>
 public partial class TemplateGui : Control, GuiInterface
 {
