@@ -26,15 +26,4 @@ interface GuiInterface
     /// </summary>
     /// <param name="tag"></param>
     public void setTag(Tag tag);
-
-    /// <summary>
-    /// show the GUI scene
-    /// </summary>
-    public void show();
-
-    /// <summary>
-    /// hide the GUI scene
-    /// </summary>
-    public void hide();
-
 }

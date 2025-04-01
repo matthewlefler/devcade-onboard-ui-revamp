@@ -411,20 +411,4 @@ public partial class TemplateGui : Control, GuiInterface
             }
         }
     }
-
-    /// <summary>
-    /// unhides the root node of the scene, there-by making the rest of the scene visible
-    /// </summary>
-    public void show()
-    {
-        this.show();
-    }
-
-    /// <summary>
-    /// hides the root node of the scene, there-by making the rest of the scene hidden
-    /// </summary>
-    public void hide()
-    {
-        this.hide();
-    }
 }
