@@ -1,0 +1,129 @@
+[gd_scene load_steps=6 format=3 uid="uid://bs2l3u3gpwk3a"]
+
+[ext_resource type="Script" uid="uid://bytphx3biwmpk" path="res://GUIs/orignial/OriginalGUI.cs" id="1_eo6uj"]
+[ext_resource type="Texture2D" uid="uid://gsf5hvgxlwu8" path="res://CSHAssets/OnboardBackgroundGradient.png" id="2_4c0jd"]
+[ext_resource type="Texture2D" uid="uid://lqrfprpd7kh3" path="res://CSHAssets/transparent-logo.png" id="2_xc2fw"]
+[ext_resource type="FontFile" uid="uid://cnha1ohwbh3ts" path="res://CSHAssets/VT323-Regular.ttf" id="4_mmnpk"]
+[ext_resource type="Texture2D" uid="uid://f61vcor4mcvi" path="res://CSHAssets/description.png" id="5_0ghq1"]
+
+[node name="Original" type="Control" node_paths=PackedStringArray("gameContainer", "description", "descriptionLabel", "titleLabel")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_eo6uj")
+gameContainer = NodePath("gamesContainer")
+description = NodePath("MarginContainer")
+descriptionLabel = NodePath("MarginContainer/TextureRect2/MarginContainer/VBoxContainer/description")
+titleLabel = NodePath("MarginContainer/TextureRect2/MarginContainer/VBoxContainer/title")
+cardSpacing = 0.535
+gameButtonsSize = Vector2(700, 700)
+
+[node name="TextureRect" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_4c0jd")
+expand_mode = 5
+
+[node name="VBoxContainer" type="VBoxContainer" parent="TextureRect"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 25.0
+offset_bottom = 25.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="TextureRect/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 5
+
+[node name="DevcadeIcon" type="TextureRect" parent="TextureRect/VBoxContainer/MarginContainer"]
+layout_mode = 2
+texture = ExtResource("2_xc2fw")
+expand_mode = 5
+
+[node name="controlHelpText" type="Label" parent="TextureRect/VBoxContainer"]
+custom_minimum_size = Vector2(10, 10)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_mmnpk")
+theme_override_font_sizes/font_size = 52
+text = "Press the Red Button to play!
+Press both black buttons to refresh"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="MarginContainer2" type="MarginContainer" parent="TextureRect/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 10
+
+[node name="tagContainer" type="GridContainer" parent="TextureRect/VBoxContainer/MarginContainer2"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 65
+theme_override_constants/margin_top = 90
+theme_override_constants/margin_right = 65
+theme_override_constants/margin_bottom = 85
+
+[node name="TextureRect2" type="TextureRect" parent="MarginContainer"]
+layout_mode = 2
+texture = ExtResource("5_0ghq1")
+expand_mode = 1
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/TextureRect2"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 45
+theme_override_constants/margin_top = 25
+theme_override_constants/margin_right = 45
+theme_override_constants/margin_bottom = 25
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/TextureRect2/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 50
+
+[node name="title" type="Label" parent="MarginContainer/TextureRect2/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_mmnpk")
+theme_override_font_sizes/font_size = 121
+text = "Title"
+horizontal_alignment = 1
+
+[node name="description" type="Label" parent="MarginContainer/TextureRect2/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_mmnpk")
+theme_override_font_sizes/font_size = 37
+text = "Description"
+
+[node name="gamesContainer" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+grow_vertical = 2

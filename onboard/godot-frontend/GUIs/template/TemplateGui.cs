@@ -66,7 +66,7 @@ public partial class TemplateGui : Control, GuiInterface
     private AspectRatioContainer lastButtonContainerPressed = null;
 
     /// <summary>
-    /// a dictionary of buttons to games, 
+    /// a dictionary of the buttons' containers to games, 
     /// used for accessing a games based on the button, 
     /// which is useful in this case for when the current tag changes
     /// and it is needed to hide all the buttons/games that do not have that tag
@@ -151,7 +151,7 @@ public partial class TemplateGui : Control, GuiInterface
                     // this is slow, save textures some where, so they don't have to be re-calculated every time?
                     TextureButton textureButton = new TextureButton();
                     textureButton.IgnoreTextureSize = true;
-                    textureButton.StretchMode = TextureButton.StretchModeEnum.Scale;
+                    textureButton.StretchMode = TextureButton.StretchModeEnum.KeepAspectCentered;
 
                     // make a monochrome variant of the banner that is slightly darker too 
                     Texture2D monochromeBanner = makeMonochrome(game.banner);
@@ -238,9 +238,12 @@ public partial class TemplateGui : Control, GuiInterface
     }
 
     /// <summary>
-    /// this function is called by the Main.cs script, and sets/resets the games
-    /// as well as saving a reference to the Main.cs script so that other functions,
+    /// this function is called by the GuiManager.cs script, and sets/resets the games
+    /// as well as saving a reference to the GuiManager.cs script so that other functions,
     /// such as the launch game function, can be run
+    /// 
+    /// the boolean gameListOutOfDate is used because this function is called from an async context,
+    /// and Godot requires Object.CallDeferred("{function name}"); in such contexts which looked weird
     /// </summary>
     /// <param name="gameTitles"> the list of devcade games </param>
     /// <param name="model"> the manager object </param>

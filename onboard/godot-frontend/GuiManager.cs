@@ -9,6 +9,7 @@ using onboard.devcade;
 using onboard.util;
 
 using Godot;
+using System.Threading;
 
 namespace GodotFrontend;
 
@@ -325,11 +326,13 @@ public partial class GuiManager : Control
         this.reloadingGameList = true;
         GD.Print("launching game: " + game.name);
 
+        showLoadingAnimation();
+
         Client.launchGame(
             game.id).ContinueWith(res => {
                 if (res.IsCompletedSuccessfully) {
-                    // set some state that a game is running?
-                    GD.Print("done?");
+                    // runs after the game completes running
+                    hideLoadingAnimation();
                 }
                 else {
                     logger.Error("Failed to launch game: " + res.Exception);
