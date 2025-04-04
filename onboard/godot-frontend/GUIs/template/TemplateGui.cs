@@ -391,17 +391,6 @@ public partial class TemplateGui : Control, GuiInterface
 
     public void setTag(Tag tag)
     {
-        // because the games do not have the allTag within their tag list, 
-        // a special case is required to handle this instance
-        if(tag == GuiManager.allTag)
-        {
-            foreach(AspectRatioContainer container in gameContainer.GetChildren())
-            {
-                container.Show();
-            }
-            return;
-        }
-
         foreach(AspectRatioContainer container in gameContainer.GetChildren())
         {
             if(gameContainers[container].tags.Contains(tag))

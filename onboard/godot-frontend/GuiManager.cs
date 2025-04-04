@@ -206,6 +206,12 @@ public partial class GuiManager : Control
                 GD.Print("Got game list, setting titles");
 
                 gameTitles = res.unwrap();
+
+                // each game does not have the "all tag"
+                // adding it removes the requirement for an extra condition in each gui's code
+                gameTitles.ForEach(game => {
+                    game.tags.Add(allTag);
+                });
             })
             .ContinueWith(_ => {
                 logger.Info("Setting cards");
@@ -267,8 +273,6 @@ public partial class GuiManager : Control
                     tagList.Add(tag);
                 }
             }
-            
-            tagLists[allTag.name].Add(game);
         }
     }
 

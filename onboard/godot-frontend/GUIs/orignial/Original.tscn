@@ -22,13 +22,14 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_eo6uj")
-gameContainer = NodePath("gamesContainer")
+gameContainer = NodePath("VBoxContainer/CenterContainer/gamesContainer")
 tagsMenu = NodePath("tagsMenu")
-tagContainer = NodePath("tagsMenu/tagContainer")
+tagContainer = NodePath("tagsMenu/CenterContainer/tagContainer")
 description = NodePath("MarginContainer")
 descriptionLabel = NodePath("MarginContainer/TextureRect2/MarginContainer/VBoxContainer/description")
 titleLabel = NodePath("MarginContainer/TextureRect2/MarginContainer/VBoxContainer/title")
-cardSpacing = 0.535
+cardSpacing = 0.58
+gameButtonsScale = 1.325
 
 [node name="background" type="TextureRect" parent="."]
 layout_mode = 1
@@ -82,6 +83,54 @@ Press both black buttons to refresh"
 horizontal_alignment = 1
 autowrap_mode = 2
 
+[node name="CenterContainer" type="CenterContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 6
+
+[node name="gamesContainer" type="Control" parent="VBoxContainer/CenterContainer"]
+layout_mode = 2
+
+[node name="tagsMenu" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="tagsMenu"]
+layout_mode = 2
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 5
+
+[node name="DevcadeIcon" type="TextureRect" parent="tagsMenu/MarginContainer"]
+layout_mode = 2
+texture = ExtResource("2_xc2fw")
+expand_mode = 5
+
+[node name="controlHelpText" type="Label" parent="tagsMenu"]
+custom_minimum_size = Vector2(10, 10)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_mmnpk")
+theme_override_font_sizes/font_size = 52
+text = "Press the Red Button to play!
+Press both black buttons to refresh"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="CenterContainer" type="CenterContainer" parent="tagsMenu"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 2
+
+[node name="tagContainer" type="GridContainer" parent="tagsMenu/CenterContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+columns = 2
+
 [node name="MarginContainer" type="MarginContainer" parent="."]
 visible = false
 layout_mode = 1
@@ -128,24 +177,3 @@ layout_mode = 2
 theme_override_fonts/font = ExtResource("4_mmnpk")
 theme_override_font_sizes/font_size = 37
 text = "Description"
-
-[node name="gamesContainer" type="Control" parent="."]
-layout_mode = 1
-anchors_preset = 4
-anchor_top = 0.5
-anchor_bottom = 0.5
-grow_vertical = 2
-
-[node name="tagsMenu" type="MarginContainer" parent="."]
-layout_mode = 2
-offset_top = 539.0
-offset_right = 900.0
-offset_bottom = 559.0
-theme_override_constants/margin_left = 20
-theme_override_constants/margin_top = 10
-theme_override_constants/margin_right = 20
-theme_override_constants/margin_bottom = 10
-
-[node name="tagContainer" type="GridContainer" parent="tagsMenu"]
-layout_mode = 2
-size_flags_vertical = 3
