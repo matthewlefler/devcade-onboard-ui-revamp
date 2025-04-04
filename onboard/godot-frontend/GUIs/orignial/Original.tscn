@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://bs2l3u3gpwk3a"]
+[gd_scene load_steps=10 format=3 uid="uid://bs2l3u3gpwk3a"]
 
 [ext_resource type="Script" uid="uid://bytphx3biwmpk" path="res://GUIs/orignial/OriginalGUI.cs" id="1_eo6uj"]
 [ext_resource type="Texture2D" uid="uid://gsf5hvgxlwu8" path="res://CSHAssets/OnboardBackgroundGradient.png" id="2_4c0jd"]
@@ -7,6 +7,7 @@
 [ext_resource type="Texture2D" uid="uid://d4nlo4q03fi77" path="res://CSHAssets/CSH.png" id="3_x7jqg"]
 [ext_resource type="FontFile" uid="uid://cnha1ohwbh3ts" path="res://CSHAssets/VT323-Regular.ttf" id="4_mmnpk"]
 [ext_resource type="Texture2D" uid="uid://f61vcor4mcvi" path="res://CSHAssets/description.png" id="5_0ghq1"]
+[ext_resource type="Theme" uid="uid://cfha8h63q5pfc" path="res://GUIs/orignial/tagButtonTheme.tres" id="7_loec3"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_loec3"]
 shader = ExtResource("3_1otwf")
@@ -29,6 +30,7 @@ description = NodePath("MarginContainer")
 descriptionLabel = NodePath("MarginContainer/TextureRect2/MarginContainer/VBoxContainer/description")
 titleLabel = NodePath("MarginContainer/TextureRect2/MarginContainer/VBoxContainer/title")
 cardSpacing = 0.58
+tagButtonTheme = ExtResource("7_loec3")
 gameButtonsScale = 1.325
 
 [node name="background" type="TextureRect" parent="."]

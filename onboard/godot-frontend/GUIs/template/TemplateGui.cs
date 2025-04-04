@@ -291,7 +291,8 @@ public partial class TemplateGui : Control, GuiInterface
     /// <param name="game"></param>
     private void launchGame(DevcadeGame game)
     {
-        model.launchGame(game);
+        // discard result, in this instance it is not requried to await the launched game to close
+        _ = model.launchGame(game);
     }
 
     /// <summary>

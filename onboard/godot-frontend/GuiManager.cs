@@ -325,14 +325,14 @@ public partial class GuiManager : Control
     /// lauch the given game
     /// </summary>
     /// <param name="game"> the game to launch </param>
-    public void launchGame(DevcadeGame game) 
+    public async Task launchGame(DevcadeGame game) 
     {
         this.reloadingGameList = true;
         GD.Print("launching game: " + game.name);
 
         showLoadingAnimation();
 
-        Client.launchGame(
+        await Client.launchGame(
             game.id).ContinueWith(res => {
                 if (res.IsCompletedSuccessfully) {
                     // runs after the game completes running

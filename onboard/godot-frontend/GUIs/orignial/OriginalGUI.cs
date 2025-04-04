@@ -38,6 +38,9 @@ public partial class OriginalGUI : Control, GuiInterface
 
     [Export]
     public float cardSpacing = 0.26f;
+
+    [Export]
+    public Theme tagButtonTheme;
     
     // unused for now, 
     // meant to control the time it takes to scroll from one game button to another
@@ -148,10 +151,8 @@ public partial class OriginalGUI : Control, GuiInterface
 
                     textureButton.Name = game.name;
 
-                    Texture2D monochromeBanner = makeMonochrome(game.banner);
-
                     textureButton.TextureDisabled = game.banner;
-                    textureButton.TextureNormal   = monochromeBanner;
+                    textureButton.TextureNormal   = game.banner;
                     textureButton.TextureHover    = game.banner;
                     textureButton.TexturePressed  = game.banner;
                     textureButton.TextureFocused  = game.banner;
@@ -185,6 +186,7 @@ public partial class OriginalGUI : Control, GuiInterface
                     // to the function showDescription called when the button is pressed
                     button.Pressed += () => { 
                         lastButtonPressed = button; 
+                        button.ReleaseFocus();
                         showDescription(game);
                     };
                 }
@@ -211,6 +213,7 @@ public partial class OriginalGUI : Control, GuiInterface
             for (int i = 0; i < tagList.Count; i++)
             {
                 Button button = new Button();
+                button.Theme = tagButtonTheme;
 
                 button.Text = tagList[i].name; 
 
@@ -224,6 +227,9 @@ public partial class OriginalGUI : Control, GuiInterface
         }
     }
 
+    /// <summary>
+    /// sets the neighbor values and the focus actions
+    /// </summary>
     private void setUpButtons()
     {
         var currentGames = gameContainer.GetChildren();
@@ -236,7 +242,6 @@ public partial class OriginalGUI : Control, GuiInterface
             // so a copy of the int i is needed 
             // see: https://stackoverflow.com/questions/451779/how-to-tell-a-lambda-function-to-capture-a-copy-instead-of-a-reference-in-c
             int iCopy = i;
-
             Action focusAction = () => {
                 setFocusedGame(iCopy);
             };
@@ -254,10 +259,11 @@ public partial class OriginalGUI : Control, GuiInterface
             }
             else
             {
+                // if this is the first instance of this button
+                // add it to the dictionary and set the action
                 buttonFocusActions.Add(button, focusAction);
                 button.FocusEntered += focusAction;
             }
-
 
             // then set the focus neighbor node paths
             button.FocusNeighborTop = button.GetPath();
@@ -267,6 +273,8 @@ public partial class OriginalGUI : Control, GuiInterface
             button.FocusPrevious = button.GetPath();
             button.FocusNeighborBottom = button.GetPath();
 
+            // skipping the first button,
+            // override the rest to set the top and bottom neighbors
             if(i != 0)
             {
                 BaseButton aboveButton = currentGames[i - 1] as BaseButton;
@@ -304,7 +312,7 @@ public partial class OriginalGUI : Control, GuiInterface
     private void launchGame(DevcadeGame game)
     {
         state = GuiState.GameLaunched;
-        model.launchGame(game);
+        model.launchGame(game).ContinueWith(_ => state = GuiState.Description);
     }
 
     private void setFocusedGame(int index)
@@ -329,6 +337,10 @@ public partial class OriginalGUI : Control, GuiInterface
         }
     }
 
+    /// <summary>
+    /// show the description for an arbitrary game
+    /// </summary>
+    /// <param name="game"></param>
     private void showDescription(DevcadeGame game)
     {
         state = GuiState.Description;
