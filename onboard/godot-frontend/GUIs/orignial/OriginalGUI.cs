@@ -21,6 +21,9 @@ public partial class OriginalGUI : Control, GuiInterface
     public Control gameContainer;
 
     [Export]
+    public Control tagsMenu;
+
+    [Export]
     public GridContainer tagContainer;
 
     [Export]
@@ -34,16 +37,20 @@ public partial class OriginalGUI : Control, GuiInterface
 
     [Export]
     public float cardSpacing = 0.26f;
+    
+    // unused for now, 
+    // meant to control the time it takes to scroll from one game button to another
+    // when on of the up/down keys is held
+    // [Export]
+    // public float moveTime = 0.5f;
 
     [Export]
-    public float moveTime = 0.5f;
+    public Vector2 gameButtonsSize = new Vector2(470.0f, 273.0f);
 
-    [Export]
-    public Vector2 gameButtonsSize = new Vector2(100, 100);
-
-    GuiManager model = null;
-    List<DevcadeGame> games = new List<DevcadeGame>();
-    List<Tag> tagList = new List<Tag>();
+    private GuiManager model = null;
+    private List<DevcadeGame> games = new List<DevcadeGame>();
+    private List<Tag> tagList = new List<Tag>();
+    bool updateTags = false;
 
     List<BaseButton> gameButtons = new List<BaseButton>();
 
@@ -63,13 +70,16 @@ public partial class OriginalGUI : Control, GuiInterface
     {
         description.Hide();
         description.ZIndex = 1000;
+
+        // tagsMenu.Position = new Vector2(DisplayServer.ScreenGetSize().X, 0.0f);
     }
 
     public override void _Input(InputEvent @event)
     {
+        // back button (blue button)
         if(@event.IsAction("Player1_A2") || @event.IsAction("Player2_A2"))
         {
-            if(description.IsVisibleInTree())
+            if(state == GuiState.Description)
             {
                 description.Hide();
                 lastButtonPressed.GrabFocus();
@@ -77,9 +87,10 @@ public partial class OriginalGUI : Control, GuiInterface
             }
         }
 
+        // enter button (red button)
         if(@event.IsAction("Player1_A1") || @event.IsAction("Player2_A1"))
         {
-            if(description.IsVisibleInTree())
+            if(state == GuiState.Description)
             {
                 lauchCurrentGame();
             }
@@ -87,14 +98,17 @@ public partial class OriginalGUI : Control, GuiInterface
 
         if(@event.IsAction("Player1_StickRight") || @event.IsAction("Player2_StickRight"))
         {
-            
+            if(state == GuiState.ViewGames)
+            {
+                showTagList();
+            }
         }
 
         if(@event.IsAction("Player1_StickLeft") || @event.IsAction("Player2_StickLeft"))
         {
-            if(!description.IsVisibleInTree())
+            if(state == GuiState.Tags)
             {
-
+                hideTagList();
             }
         }
     }
@@ -194,10 +208,29 @@ public partial class OriginalGUI : Control, GuiInterface
                     gameButtons[i - 1].FocusNeighborBottom = button.GetPath();
                 }
 
+                if(i > 5)
+                {
+                    button.Hide();
+                }
+
                 buttonsGames.Add(button, game);
             }
 
             updateGames = false;
+        }
+
+        if(updateTags)
+        {
+            for (int i = 0; i < tagList.Count; i++)
+            {
+                Button button = new Button();
+
+                button.Text = tagList[i].name; 
+
+                tagContainer.AddChild(button);
+            }
+
+            updateTags = false;
         }
     }
 
@@ -230,6 +263,15 @@ public partial class OriginalGUI : Control, GuiInterface
         {
             gameButtons[i].ZIndex = gameButtons.Count - Math.Abs(i - index);
             gameButtons[i].Rotation = (i - index) * cardSpacing;
+
+            if(Math.Abs(i - index) > 4)
+            {
+                gameButtons[i].Hide();
+            }
+            else
+            {
+                gameButtons[i].Show();
+            }
         }
     }
 
@@ -243,11 +285,13 @@ public partial class OriginalGUI : Control, GuiInterface
         description.Show();
     }
 
-    public void showTagList(BaseButton button)
+    public void showTagList()
     {
         state = GuiState.Tags;
-        lastButtonPressed = button;
-        gameContainer.Hide();
+        lastButtonPressed = gameButtons[0];
+        gameContainer.Position -= new Vector2(DisplayServer.ScreenGetSize().X, 0.0f);
+        
+        tagsMenu.Position -= new Vector2(DisplayServer.ScreenGetSize().X, 0.0f);
     }
 
     private void hideTagList()
@@ -256,6 +300,10 @@ public partial class OriginalGUI : Control, GuiInterface
 
         gameContainer.Show();
         lastButtonPressed.GrabFocus();
+
+        gameContainer.Position += new Vector2(DisplayServer.ScreenGetSize().X, 0.0f);
+        
+        tagsMenu.Position += new Vector2(DisplayServer.ScreenGetSize().X, 0.0f);
     }
 
     public void setGameList(List<DevcadeGame> gameTitles, GuiManager model)

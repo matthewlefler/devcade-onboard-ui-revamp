@@ -1,12 +1,20 @@
-[gd_scene load_steps=6 format=3 uid="uid://bs2l3u3gpwk3a"]
+[gd_scene load_steps=9 format=3 uid="uid://bs2l3u3gpwk3a"]
 
 [ext_resource type="Script" uid="uid://bytphx3biwmpk" path="res://GUIs/orignial/OriginalGUI.cs" id="1_eo6uj"]
 [ext_resource type="Texture2D" uid="uid://gsf5hvgxlwu8" path="res://CSHAssets/OnboardBackgroundGradient.png" id="2_4c0jd"]
 [ext_resource type="Texture2D" uid="uid://lqrfprpd7kh3" path="res://CSHAssets/transparent-logo.png" id="2_xc2fw"]
+[ext_resource type="Shader" uid="uid://8uidd8pccdyk" path="res://GUIs/orignial/OriginalBackgrounIconRepeat.gdshader" id="3_1otwf"]
+[ext_resource type="Texture2D" uid="uid://d4nlo4q03fi77" path="res://CSHAssets/CSH.png" id="3_x7jqg"]
 [ext_resource type="FontFile" uid="uid://cnha1ohwbh3ts" path="res://CSHAssets/VT323-Regular.ttf" id="4_mmnpk"]
 [ext_resource type="Texture2D" uid="uid://f61vcor4mcvi" path="res://CSHAssets/description.png" id="5_0ghq1"]
 
-[node name="Original" type="Control" node_paths=PackedStringArray("gameContainer", "description", "descriptionLabel", "titleLabel")]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_loec3"]
+shader = ExtResource("3_1otwf")
+shader_parameter/scale = 7.27
+shader_parameter/direction = Vector2(-0.8, -0.8)
+shader_parameter/alphaScale = 0.72
+
+[node name="Original" type="Control" node_paths=PackedStringArray("gameContainer", "tagsMenu", "tagContainer", "description", "descriptionLabel", "titleLabel")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -15,13 +23,14 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_eo6uj")
 gameContainer = NodePath("gamesContainer")
+tagsMenu = NodePath("tagsMenu")
+tagContainer = NodePath("tagsMenu/tagContainer")
 description = NodePath("MarginContainer")
 descriptionLabel = NodePath("MarginContainer/TextureRect2/MarginContainer/VBoxContainer/description")
 titleLabel = NodePath("MarginContainer/TextureRect2/MarginContainer/VBoxContainer/title")
 cardSpacing = 0.535
-gameButtonsSize = Vector2(700, 700)
 
-[node name="TextureRect" type="TextureRect" parent="."]
+[node name="background" type="TextureRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -31,29 +40,39 @@ grow_vertical = 2
 texture = ExtResource("2_4c0jd")
 expand_mode = 5
 
-[node name="VBoxContainer" type="VBoxContainer" parent="TextureRect"]
+[node name="backgroundCSHIcons" type="TextureRect" parent="background"]
+texture_repeat = 2
+material = SubResource("ShaderMaterial_loec3")
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = 25.0
-offset_bottom = 25.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("3_x7jqg")
+expand_mode = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="TextureRect/VBoxContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer"]
 layout_mode = 2
 theme_override_constants/margin_left = 5
 theme_override_constants/margin_top = 5
 theme_override_constants/margin_right = 5
 theme_override_constants/margin_bottom = 5
 
-[node name="DevcadeIcon" type="TextureRect" parent="TextureRect/VBoxContainer/MarginContainer"]
+[node name="DevcadeIcon" type="TextureRect" parent="VBoxContainer/MarginContainer"]
 layout_mode = 2
 texture = ExtResource("2_xc2fw")
 expand_mode = 5
 
-[node name="controlHelpText" type="Label" parent="TextureRect/VBoxContainer"]
+[node name="controlHelpText" type="Label" parent="VBoxContainer"]
 custom_minimum_size = Vector2(10, 10)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("4_mmnpk")
@@ -62,17 +81,6 @@ text = "Press the Red Button to play!
 Press both black buttons to refresh"
 horizontal_alignment = 1
 autowrap_mode = 2
-
-[node name="MarginContainer2" type="MarginContainer" parent="TextureRect/VBoxContainer"]
-layout_mode = 2
-theme_override_constants/margin_left = 20
-theme_override_constants/margin_top = 10
-theme_override_constants/margin_right = 20
-theme_override_constants/margin_bottom = 10
-
-[node name="tagContainer" type="GridContainer" parent="TextureRect/VBoxContainer/MarginContainer2"]
-layout_mode = 2
-size_flags_vertical = 3
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
 visible = false
@@ -127,3 +135,17 @@ anchors_preset = 4
 anchor_top = 0.5
 anchor_bottom = 0.5
 grow_vertical = 2
+
+[node name="tagsMenu" type="MarginContainer" parent="."]
+layout_mode = 2
+offset_top = 539.0
+offset_right = 900.0
+offset_bottom = 559.0
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 10
+
+[node name="tagContainer" type="GridContainer" parent="tagsMenu"]
+layout_mode = 2
+size_flags_vertical = 3
