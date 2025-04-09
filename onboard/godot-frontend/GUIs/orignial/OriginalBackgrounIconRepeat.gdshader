@@ -18,7 +18,7 @@ void fragment() {
 	float dx = -direction.r * mod(TIME, 1.0 / direction.r);
 	float dy = direction.g * mod(TIME, 1.0 / direction.g);
 
-	COLOR = texture(TEXTURE, fract(UV * vec2(scale, scale * (screen_height / screen_width))) + vec2(dx, dy));
+	COLOR = texture(TEXTURE, fract(SCREEN_UV * vec2(scale, scale * (screen_height / screen_width))) + vec2(dx, dy));
 
 	COLOR.a *= alphaScale;
 }

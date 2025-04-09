@@ -82,7 +82,7 @@ public partial class OriginalGUI : Control, GuiInterface
     {
         description.Hide();
         description.ZIndex = 1000;
-
+        
         tagsMenu.Position = new Vector2(DisplayServer.ScreenGetSize().X, 0.0f);
     }
 
@@ -165,6 +165,9 @@ public partial class OriginalGUI : Control, GuiInterface
                     textButton.SizeFlagsHorizontal = SizeFlags.ExpandFill;
                     textButton.SizeFlagsVertical = SizeFlags.ExpandFill;
 
+                    textButton.Theme = tagButtonTheme;
+
+
                     textButton.Name = game.name;
 
                     textButton.Text = game.name;
@@ -213,6 +216,9 @@ public partial class OriginalGUI : Control, GuiInterface
             for (int i = 0; i < tagList.Count; i++)
             {
                 Button button = new Button();
+                button.SizeFlagsHorizontal = SizeFlags.ExpandFill;
+                button.SizeFlagsVertical = SizeFlags.ExpandFill;
+
                 button.Theme = tagButtonTheme;
 
                 button.Text = tagList[i].name; 
@@ -220,7 +226,15 @@ public partial class OriginalGUI : Control, GuiInterface
                 Tag tag = tagList[i];
                 button.Pressed += () => setCurrentTag(tag);
 
-                tagContainer.AddChild(button);
+                MarginContainer marginContainer = new MarginContainer();
+                marginContainer.SizeFlagsHorizontal = SizeFlags.ExpandFill;
+                marginContainer.SizeFlagsVertical = SizeFlags.ExpandFill;
+
+                marginContainer.Theme = tagButtonTheme;
+
+                marginContainer.AddChild(button);
+
+                tagContainer.AddChild(marginContainer);
             }
 
             updateTags = false;
@@ -323,10 +337,12 @@ public partial class OriginalGUI : Control, GuiInterface
         {
             BaseButton button = currentGames[i] as BaseButton;
 
-            button.ZIndex = currentGames.Count - Math.Abs(i - index);
-            button.Rotation = (i - index) * cardSpacing;
+            int offset = Math.Abs(i - index);
 
-            if(Math.Abs(i - index) > 3.0f / cardSpacing)
+            button.ZIndex = currentGames.Count - offset;
+            button.Rotation = (i - index) * cardSpacing;
+            
+            if(offset > 3.0f / cardSpacing)
             {
                 button.Hide();
             }

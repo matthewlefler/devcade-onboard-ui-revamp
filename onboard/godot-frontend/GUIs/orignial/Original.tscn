@@ -25,7 +25,7 @@ grow_vertical = 2
 script = ExtResource("1_eo6uj")
 gameContainer = NodePath("VBoxContainer/CenterContainer/gamesContainer")
 tagsMenu = NodePath("tagsMenu")
-tagContainer = NodePath("tagsMenu/CenterContainer/tagContainer")
+tagContainer = NodePath("tagsMenu/tagContainer")
 description = NodePath("MarginContainer")
 descriptionLabel = NodePath("MarginContainer/TextureRect2/MarginContainer/VBoxContainer/description")
 titleLabel = NodePath("MarginContainer/TextureRect2/MarginContainer/VBoxContainer/title")
@@ -123,12 +123,7 @@ Press both black buttons to refresh"
 horizontal_alignment = 1
 autowrap_mode = 2
 
-[node name="CenterContainer" type="CenterContainer" parent="tagsMenu"]
-layout_mode = 2
-size_flags_horizontal = 4
-size_flags_vertical = 2
-
-[node name="tagContainer" type="GridContainer" parent="tagsMenu/CenterContainer"]
+[node name="tagContainer" type="GridContainer" parent="tagsMenu"]
 layout_mode = 2
 size_flags_vertical = 3
 columns = 2
