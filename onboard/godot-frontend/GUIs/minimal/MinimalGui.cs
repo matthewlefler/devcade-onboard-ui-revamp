@@ -11,7 +11,7 @@ namespace GodotFrontend;
 /// to show how to create a simple UI script
 /// all logic for creating buttons and adding functions to the buttons is done here
 /// </summary>
-public partial class TemplateGui : Control, GuiInterface
+public partial class MinimalGui : Control, GuiInterface
 {
     GuiManager model;
     public List<DevcadeGame> gameTitles;
@@ -50,7 +50,7 @@ public partial class TemplateGui : Control, GuiInterface
     public Label titleLabel;
 
     /// <summary>
-    /// the button when showing the description that is connected to lauching the selected game
+    /// the button when showing the description that is connected to lauching the game
     /// </summary>
     [Export]
     public BaseButton lauchGameButton;

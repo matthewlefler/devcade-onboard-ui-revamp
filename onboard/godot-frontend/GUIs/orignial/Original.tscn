@@ -23,13 +23,13 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_eo6uj")
-gameContainer = NodePath("VBoxContainer/CenterContainer/gamesContainer")
-tagsMenu = NodePath("tagsMenu")
-tagContainer = NodePath("tagsMenu/tagContainer")
+gameContainer = NodePath("gamesMenu/gamesContainer")
+tagsMenu = NodePath("gamesMenu/tagContainer")
+tagContainer = NodePath("gamesMenu/tagContainer")
 description = NodePath("MarginContainer")
 descriptionLabel = NodePath("MarginContainer/TextureRect2/MarginContainer/VBoxContainer/description")
 titleLabel = NodePath("MarginContainer/TextureRect2/MarginContainer/VBoxContainer/title")
-cardSpacing = 0.58
+cardSpacing = 0.455
 tagButtonTheme = ExtResource("7_loec3")
 gameButtonsScale = 1.325
 
@@ -44,6 +44,7 @@ texture = ExtResource("2_4c0jd")
 expand_mode = 5
 
 [node name="backgroundCSHIcons" type="TextureRect" parent="background"]
+visible = false
 texture_repeat = 2
 material = SubResource("ShaderMaterial_loec3")
 layout_mode = 1
@@ -55,7 +56,7 @@ grow_vertical = 2
 texture = ExtResource("3_x7jqg")
 expand_mode = 1
 
-[node name="VBoxContainer" type="VBoxContainer" parent="."]
+[node name="gamesMenu" type="VBoxContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -63,19 +64,19 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="gamesMenu"]
 layout_mode = 2
 theme_override_constants/margin_left = 5
 theme_override_constants/margin_top = 5
 theme_override_constants/margin_right = 5
 theme_override_constants/margin_bottom = 5
 
-[node name="DevcadeIcon" type="TextureRect" parent="VBoxContainer/MarginContainer"]
+[node name="DevcadeIcon" type="TextureRect" parent="gamesMenu/MarginContainer"]
 layout_mode = 2
 texture = ExtResource("2_xc2fw")
 expand_mode = 5
 
-[node name="controlHelpText" type="Label" parent="VBoxContainer"]
+[node name="controlHelpText" type="Label" parent="gamesMenu"]
 custom_minimum_size = Vector2(10, 10)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("4_mmnpk")
@@ -85,48 +86,14 @@ Press both black buttons to refresh"
 horizontal_alignment = 1
 autowrap_mode = 2
 
-[node name="CenterContainer" type="CenterContainer" parent="VBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 0
-size_flags_vertical = 6
-
-[node name="gamesContainer" type="Control" parent="VBoxContainer/CenterContainer"]
-layout_mode = 2
-
-[node name="tagsMenu" type="VBoxContainer" parent="."]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="MarginContainer" type="MarginContainer" parent="tagsMenu"]
-layout_mode = 2
-theme_override_constants/margin_left = 5
-theme_override_constants/margin_top = 5
-theme_override_constants/margin_right = 5
-theme_override_constants/margin_bottom = 5
-
-[node name="DevcadeIcon" type="TextureRect" parent="tagsMenu/MarginContainer"]
-layout_mode = 2
-texture = ExtResource("2_xc2fw")
-expand_mode = 5
-
-[node name="controlHelpText" type="Label" parent="tagsMenu"]
-custom_minimum_size = Vector2(10, 10)
-layout_mode = 2
-theme_override_fonts/font = ExtResource("4_mmnpk")
-theme_override_font_sizes/font_size = 52
-text = "Press the Red Button to play!
-Press both black buttons to refresh"
-horizontal_alignment = 1
-autowrap_mode = 2
-
-[node name="tagContainer" type="GridContainer" parent="tagsMenu"]
+[node name="tagContainer" type="GridContainer" parent="gamesMenu"]
 layout_mode = 2
 size_flags_vertical = 3
 columns = 2
+
+[node name="gamesContainer" type="Control" parent="gamesMenu"]
+layout_mode = 2
+size_flags_vertical = 3
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
 visible = false
