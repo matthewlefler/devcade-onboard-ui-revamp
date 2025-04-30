@@ -141,7 +141,7 @@ public partial class GuiManager : Control
         // add supervisor button (pt. 2 lol)
         // looks like it'll require a library as 
         // the godot engine properly handles inputs and
-        // does not read inputs when not in foucus
+        // does not read inputs when not in focus
         // aka when a game is running
         // see: https://thegodotbarn.com/contributions/question/178/how-to-make-games-recognize-background-input
 
