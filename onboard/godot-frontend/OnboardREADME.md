@@ -3,6 +3,8 @@ Make a new branch
 If you use Visual Studio or VSCode use tabs as spacing
 because opening the scripts in the Godot script editor will auto format the files to use tabs anyway
 
+If you are creating a new GUI refer to the readme at onboard/godot-frontend/GUIs/CreatingAGuiREADME.md
+
 ## docs
 There are three main scripts for the onboard system
 * Client.cs
@@ -21,6 +23,10 @@ found in onboard/godot-frontend/GuiManager.cs
 
 This script is meant to handle switching between the seperate GUIs and handle communication between the Client.cs script and the GUIs
 It should handle shared logic such as the loading animation
+
+It is a Control node in the scene tree and the root of its scene tree in the current case
+the GUIs are added as a child node to the node the script is attached to, 
+starting with the initial GUI scene as set in the editor for the variable: initialGuiScene
 
 Some of the functions that it provides are: 
 * kill the current running game
