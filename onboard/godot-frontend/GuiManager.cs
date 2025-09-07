@@ -7,9 +7,9 @@ using log4net;
 
 using onboard.devcade;
 using onboard.util;
-using onboard.util.supervisorButton;
 
 using Godot;
+using onboard.util.permenentInput;
 
 namespace GodotFrontend;
 
@@ -85,7 +85,7 @@ public partial class GuiManager : Control
     };
 
     // the game list is set to this if an error conditions is encountered 
-    private static readonly List<DevcadeGame> errorList = new List<DevcadeGame> { defaultGame }; 
+    private static readonly List<DevcadeGame> errorList = new List<DevcadeGame> { defaultGame };
 
     /// <summary>
     /// A godot specific function that is ran once after this node is initialized 
@@ -98,15 +98,15 @@ public partial class GuiManager : Control
         // spawn initial gui scene
         this.guiSceneRootNode = initialGuiScene.Instantiate() as CanvasItem;
 
-        if(guiSceneRootNode == null)
+        if (guiSceneRootNode == null)
         {
             GD.PrintErr("Assert Failed: gui scene root node is not a node that derives from the CanvasItem node");
             throw new ApplicationException("Assert Failed: gui scene root node is not a node that derives from the CanvasItem node");
         }
-        
+
         // make sure it implements the GuiInterface interface
         GuiInterface gui = guiSceneRootNode as GuiInterface;
-        if(gui != null) 
+        if (gui != null)
         {
             this.guiScene = gui;
         }
@@ -114,8 +114,8 @@ public partial class GuiManager : Control
         {
             GD.PrintErr("Assert Failed: gui scene root node script does not implement the GuiInterface interface");
             throw new ApplicationException("Assert Failed: the gui scene's root node script does not implement the GuiInterface interface");
-        } 
-        
+        }
+
         // add the new scene instance as a child of this node
         AddChild(guiSceneRootNode);
 
@@ -125,9 +125,10 @@ public partial class GuiManager : Control
 
     private const double supervisorTimeout = 5.0;
     private double supervisorTimer = supervisorTimeout;
-
+    SupervisorButton supervisorButton = new SupervisorButton();
     public override void _Process(double delta)
     {
+        supervisorButton.supervisorButtonPressed();
         // frontend reset button, reloads all the games from the backend
         if (Input.IsActionPressed("Player1_Menu") && Input.IsActionPressed("Player2_Menu"))
         {
@@ -141,7 +142,7 @@ public partial class GuiManager : Control
         }
 
         // start the countdown if the supervisor buttons are pressed
-        if (SupervisorButton.supervisorButtonPressed())
+        if (false)
         {
             GD.Print("timing out: " + supervisorTimer);
             supervisorTimer -= delta;

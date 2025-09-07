@@ -44,7 +44,6 @@ texture = ExtResource("2_4c0jd")
 expand_mode = 5
 
 [node name="backgroundCSHIcons" type="TextureRect" parent="background"]
-visible = false
 texture_repeat = 2
 material = SubResource("ShaderMaterial_loec3")
 layout_mode = 1
