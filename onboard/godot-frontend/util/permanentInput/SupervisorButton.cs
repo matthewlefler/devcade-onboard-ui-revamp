@@ -1,11 +1,12 @@
+using Godot;
+
 namespace onboard.util.permenentInput
 {
-    public class SupervisorButton 
+    public class SupervisorButton
     {
-        
+
         public SupervisorButton()
         {
-            
         }
 
         /// <summary>
@@ -16,7 +17,7 @@ namespace onboard.util.permenentInput
         {
             bool player1_menuButtonDown = false;
             bool player2_menuButtonDown = false;
-            
+
             return player1_menuButtonDown && player2_menuButtonDown;
         }
     }
