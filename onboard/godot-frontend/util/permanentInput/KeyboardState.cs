@@ -66,7 +66,7 @@ namespace onboard.util.permenentInput
         LBRACKET,
         RBRACKET,
         BACKSLASH,
-        CAPITAL, 	// the Caps Lock key
+        CAPSLOCK, 	// the Caps Lock key
         SEMICOLON,
         APOSTROPHE,
         COMMA, 		// the comma (,) key
@@ -75,7 +75,7 @@ namespace onboard.util.permenentInput
         SPACE, 		// the space bar
         APPS, 		// the Application Menu key (if your keyboard has it, it would be right next to the right CTRL key)
         SYSRQ, 		// the print screen button
-        SCROLL, 	// the Scroll Lock key
+        SCROLLLOCK, 	// the Scroll Lock key
         PAUSE, 		// the Pause/Break button
         INSERT,
         DELETE,
