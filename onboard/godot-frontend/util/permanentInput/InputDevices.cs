@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using Godot;
@@ -15,7 +16,7 @@ namespace onboard.util.permenentInput
     /// an input event <br/>
     /// <see cref="https://www.kernel.org/doc/html/v4.17/input/event-codes.html"/>
     /// </summary>
-    struct input_event
+    struct InputEvent
     {
         public Timeval time; // when the event happened
         public ushort type; // what type of event is it
@@ -28,31 +29,88 @@ namespace onboard.util.permenentInput
         public bool anythingPressed { get; private set; }
 
         public int numberOfGamepads { get; private set; }
+        public Dictionary<string, xBoxGamePad> gamepads;
+
 
         public int numberOfKeyboards { get; private set; }
+        public Dictionary<string, keyboardState> keyboards;
 
+        private DirectoryInfo eventDirectory = new DirectoryInfo("/dev/input");
+
+        private const int sizeOfInputEvent = 24;
 
         public KeyLogger()
         {
             anythingPressed = false;
+
+            gamepads = new Dictionary<string, xBoxGamePad>();
+            keyboards = new Dictionary<string, keyboardState>();
         }
 
-        public static void UpdateKeys()
+        public void UpdateKeys()
         {
             // read from /dev/input/eventX
+            FileInfo[] files = eventDirectory.GetFiles("*.txt");
 
-            Span<byte> fileBytes = File.ReadAllBytes("/dev/input/event0");
-
-            // update number of connected keyboards and gamepads
-
-            // update keyboard and gamepad state
-            // translate from bytes to struct
-            if (fileBytes.Length < 0)
+            anythingPressed = false;
+            
+            foreach (FileInfo file in files)
             {
-                //failure
+                Span<byte> fileBytes = File.ReadAllBytes(file.FullName);
+
+                string fileName = file.Name;
+
+                // update number of connected keyboards and gamepads
+
+                // update keyboard and gamepad state
+                // translate from bytes to struct
+                if (fileBytes.Length < 0)
+                {
+                    //failure
+                    continue;
+                }
+
+                if (fileBytes.Length % sizeOfInputEvent != 0)
+                {
+                    //failure
+                    continue;
+                }
+
+                Span<InputEvent> input_Events = MemoryMarshal.Cast<byte, InputEvent>(fileBytes);
+
+                for (int i = 0; i < input_Events.Length; i++)
+                {
+                    anythingPressed = true;
+                    if (input_Events[i].type == EventTypes.EV_KEY)
+                    {
+                        Key key = getKeyboardKeyFromEventCode(input_Events[i].code);
+                        if (!keyboards.ContainsKey(fileName))
+                        {
+                            keyboards.Add(fileName, new keyboardState());
+                        }
+
+                        switch (input_Events[i].value)
+                        {
+                            case 1:
+                                keyboards[fileName].pressedKeys.Add(key);
+                                break;
+
+                            case 0:
+                                keyboards[fileName].pressedKeys.Remove(key);
+                                break;
+
+                            default:
+                                keyboards[fileName].pressedKeys.Remove(key);
+                                break;
+                        }
+                    }
+
+                }
+
             }
 
-            Span<input_event> input_Events = MemoryMarshal.Cast<byte, input_event>(fileBytes);
+
+
 
         }
 

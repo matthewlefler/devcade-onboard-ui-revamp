@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace onboard.util.permenentInput
 {
-    enum Button
+    public enum Button
     {
         A,
         B,
@@ -19,7 +19,7 @@ namespace onboard.util.permenentInput
         START,
     }
 
-    struct Axis
+    public struct Axis
     {
         public double value;
 
@@ -29,13 +29,13 @@ namespace onboard.util.permenentInput
         }
     }
 
-    struct Joystick
+    public struct Joystick
     {
         public Axis x;
         public Axis y;
     }
 
-    struct xBoxGamePad
+    public struct xBoxGamePad
     {
         public HashSet<Button> buttonsPressed;
 

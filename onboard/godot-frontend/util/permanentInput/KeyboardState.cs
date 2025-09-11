@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace onboard.util.permenentInput
 {
-    enum Key
+    public enum Key
     {
         A,          // alphabet keys
         B,
@@ -116,9 +117,9 @@ namespace onboard.util.permenentInput
         NONE,       // not a US-ENG keyboard key 
     }
 
-    struct keyboardState
+    public struct keyboardState
     {
-        HashSet<Key> pressedKeys;
+        public HashSet<Key> pressedKeys;
 
         public bool isKeyDown(Key key)
         {
@@ -128,6 +129,18 @@ namespace onboard.util.permenentInput
         public bool isKeyUp(Key key)
         {
             return !pressedKeys.Contains(key);
+        }
+
+        public override string ToString()
+        {
+            StringBuilder stringBuilder = new StringBuilder("keyboard -> \n");
+            foreach (Key key in pressedKeys)
+            {
+                stringBuilder.Append("\t");
+                stringBuilder.Append(key.ToString());
+                stringBuilder.Append(" : is pressed \n");
+            }
+            return stringBuilder.ToString();
         }
     }
 }

@@ -5,7 +5,7 @@ public class EventTypes
     * Event types
     */
     public const int EV_SYN = 0x00;
-    public const int EV_KEY = 0x01;
+    public const int EV_KEY = 0x01; 
     public const int EV_REL = 0x02;
     public const int EV_ABS = 0x03;
     public const int EV_MSC = 0x04;
