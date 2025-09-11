@@ -112,6 +112,8 @@ namespace onboard.util.permenentInput
         ADD, 	    // the (+) key on the Number Pad
         DECIMAL, 	// the (.) or period on the Number Pad
         NUMPADENTER,// the Enter key on the Number Pad     
+
+        NONE,       // not a US-ENG keyboard key 
     }
 
     struct keyboardState
