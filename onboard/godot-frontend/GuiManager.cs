@@ -34,6 +34,17 @@ public partial class GuiManager : Control
     [Export]
     public AnimatedSprite2D loadingAnimation;
 
+    /// <summary>
+    /// the node to animate when showing the screen saver animation
+    /// </summary>
+    [Export]
+    public AnimatedSprite2D screenSaverAnimation;
+
+    /// <summary>
+    /// true if the screensaver animation is being shown
+    /// </summary>
+    public bool showingScreenSaverAnimation { get; private set; } = false;
+
     // logger for currently unknown purposes??
     //
     // deos not run, writes an error msg, but does not block output:
@@ -123,8 +134,11 @@ public partial class GuiManager : Control
         reloadGameList();
     }
 
-    const double supervisorButtonTimeout = 5.0;
-    double supervisorButtonTimer = supervisorButtonTimeout;
+    const double supervisorButtonTimeoutSeconds = 5.0;
+    double supervisorButtonTimerSeconds = supervisorButtonTimeoutSeconds;
+
+    const double screenSaverTimeoutSeconds = 120.0; // 2 minutes
+    double screenSaverTimerSeconds = screenSaverTimeoutSeconds;
     public override void _Process(double delta)
     {
         // frontend reset button, reloads all the games from the backend
@@ -138,11 +152,11 @@ public partial class GuiManager : Control
         {
             Client.setProduction(!Client.isProduction).ContinueWith(_ => { setTag(allTag); reloadGameList(); });
         }
-        
+
         if (SupervisorButton.isSupervisorButtonPressed())
         {
-            supervisorButtonTimer -= delta;
-            if (supervisorButtonTimer <= 0.0)
+            supervisorButtonTimerSeconds -= delta;
+            if (supervisorButtonTimerSeconds <= 0.0)
             {
                 // if the timer has timed out
                 // kill the currently running game
@@ -151,7 +165,30 @@ public partial class GuiManager : Control
         }
         else
         {
-            supervisorButtonTimer = supervisorButtonTimeout;
+            supervisorButtonTimerSeconds = supervisorButtonTimeoutSeconds;
+        }
+
+        if (!Input.IsAnythingPressed())
+        {
+            screenSaverTimerSeconds -= delta;
+            if (supervisorButtonTimerSeconds <= 0.0)
+            {
+                // if the timer has timed out
+                // kill the currently running game 
+                // and show the screensaver
+                _ = killGame();
+                showingScreenSaverAnimation = true;
+                showScreenSaver();
+            }
+        }
+        else
+        {
+            if (showingScreenSaverAnimation)
+            {
+                showingScreenSaverAnimation = false;
+                hideScreenSaver();
+            }
+            screenSaverTimerSeconds = screenSaverTimeoutSeconds;
         }
     }
 
@@ -291,6 +328,24 @@ public partial class GuiManager : Control
     {
         loadingScreen.CallDeferred("hide");
         loadingAnimation.CallDeferred("stop");
+    }
+
+    /// <summary>
+    /// shows the base screen saver
+    /// thereby hiding the current GUI
+    /// </summary>
+    public void showScreenSaver()
+    {
+
+    }
+
+    /// <summary>
+    /// hides the base screen saver 
+    /// thereby showing the current GUI
+    /// </summary>
+    public void hideScreenSaver()
+    {
+
     }
 
     /// <summary>
