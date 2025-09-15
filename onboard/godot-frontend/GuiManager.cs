@@ -9,6 +9,7 @@ using onboard.devcade;
 using onboard.util;
 
 using Godot;
+using onboard.util.supervisor_button;
 
 namespace GodotFrontend;
 
@@ -122,43 +123,36 @@ public partial class GuiManager : Control
         reloadGameList();
     }
 
+    const double supervisorButtonTimeout = 5.0;
+    double supervisorButtonTimer = supervisorButtonTimeout;
     public override void _Process(double delta)
     {
         // frontend reset button, reloads all the games from the backend
-        if(Input.IsActionPressed("Player1_Menu") && Input.IsActionPressed("Player2_Menu"))
+        if (Input.IsActionPressed("Player1_Menu") && Input.IsActionPressed("Player2_Menu"))
         {
             reloadGameList();
         }
 
         // switch between dev and normal mode
-        if(Input.IsActionPressed("Player1_B4") && Input.IsActionPressed("Player2_B4"))
+        if (Input.IsActionPressed("Player1_B4") && Input.IsActionPressed("Player2_B4"))
         {
             Client.setProduction(!Client.isProduction).ContinueWith(_ => { setTag(allTag); reloadGameList(); });
         }
-
-        // TODO:
-        // add supervisor button (pt. 2 lol)
-        // looks like it'll require a library as 
-        // the godot engine properly handles inputs and
-        // does not read inputs when not in focus
-        // aka when a game is running
-        // see: https://thegodotbarn.com/contributions/question/178/how-to-make-games-recognize-background-input
-
-        // if(Input.IsActionPressed("Player1_Menu") && Input.IsActionPressed("Player2_Menu"))
-        // {
-        //     GD.Print("timing out: " + timer)
-        //     timer -= delta;
-        //     if(timer <= 0.0) 
-        //     {
-        //         // if the timer has timed out
-        //         // kill the currently running game
-        //         killCurrentlyRunningGame();
-        //     }
-        // }
-        // else
-        // {
-        //     timer = timeout;
-        // }
+        
+        if (SupervisorButton.isSupervisorButtonPressed())
+        {
+            supervisorButtonTimer -= delta;
+            if (supervisorButtonTimer <= 0.0)
+            {
+                // if the timer has timed out
+                // kill the currently running game
+                _ = killGame();
+            }
+        }
+        else
+        {
+            supervisorButtonTimer = supervisorButtonTimeout;
+        }
     }
 
     /// <summary>

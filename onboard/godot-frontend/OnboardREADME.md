@@ -38,3 +38,11 @@ found in onboard/godot-frontend/devcade/GuiInterface.cs
 
 this is an interface that defines the needed functions for a GUI to interface with the GuiManager
 mainly tasks related to the game list and tags
+
+# SupervisorButton.cs
+found in onboard/godot-frontend/util/SupervisorButton.cs
+
+this is a simple class to encapsulate the detecting of the "supervisor button" that will 
+kill the currently running game if held for some amount of time defined in GuiManager.cs
+!IMPORTANT! due to how gamepad and keyboard events are propogated, only gamepad events are able
+to be recieved when the onboard is not the focused window
