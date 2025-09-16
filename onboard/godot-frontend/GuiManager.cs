@@ -105,6 +105,8 @@ public partial class GuiManager : Control
     {
         // hide the loading screen by default
         hideLoadingAnimation();
+        // hide the screen saver by default
+        hideScreenSaver();
 
         // spawn initial gui scene
         this.guiSceneRootNode = initialGuiScene.Instantiate() as CanvasItem;
@@ -137,7 +139,7 @@ public partial class GuiManager : Control
     const double supervisorButtonTimeoutSeconds = 5.0;
     double supervisorButtonTimerSeconds = supervisorButtonTimeoutSeconds;
 
-    const double screenSaverTimeoutSeconds = 120.0; // 2 minutes
+    const double screenSaverTimeoutSeconds = 10.0; // 2 minutes
     double screenSaverTimerSeconds = screenSaverTimeoutSeconds;
     public override void _Process(double delta)
     {
@@ -153,6 +155,9 @@ public partial class GuiManager : Control
             Client.setProduction(!Client.isProduction).ContinueWith(_ => { setTag(allTag); reloadGameList(); });
         }
 
+        //
+        // supervisor button (aka force kill)
+        //
         if (SupervisorButton.isSupervisorButtonPressed())
         {
             supervisorButtonTimerSeconds -= delta;
@@ -168,16 +173,20 @@ public partial class GuiManager : Control
             supervisorButtonTimerSeconds = supervisorButtonTimeoutSeconds;
         }
 
+        //
+        // screen saver
+        //
         if (!Input.IsAnythingPressed())
         {
             screenSaverTimerSeconds -= delta;
-            if (supervisorButtonTimerSeconds <= 0.0)
+            if (screenSaverTimerSeconds <= 0.0 && showingScreenSaverAnimation == false)
             {
                 // if the timer has timed out
                 // kill the currently running game 
                 // and show the screensaver
                 _ = killGame();
                 showingScreenSaverAnimation = true;
+                GD.Print("showing screen saver");
                 showScreenSaver();
             }
         }
@@ -186,6 +195,7 @@ public partial class GuiManager : Control
             if (showingScreenSaverAnimation)
             {
                 showingScreenSaverAnimation = false;
+                GD.Print("hiding screen saver");
                 hideScreenSaver();
             }
             screenSaverTimerSeconds = screenSaverTimeoutSeconds;
@@ -336,7 +346,8 @@ public partial class GuiManager : Control
     /// </summary>
     public void showScreenSaver()
     {
-
+        screenSaverAnimation.CallDeferred("show");
+        screenSaverAnimation.CallDeferred("play");
     }
 
     /// <summary>
@@ -345,7 +356,8 @@ public partial class GuiManager : Control
     /// </summary>
     public void hideScreenSaver()
     {
-
+        screenSaverAnimation.CallDeferred("hide");
+        screenSaverAnimation.CallDeferred("stop");
     }
 
     /// <summary>
