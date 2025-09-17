@@ -110,6 +110,12 @@ public partial class GuiManager : Control
     /// </summary>
     public override void _Ready()
     {
+        supervisorButtonTimeoutSeconds = Convert.ToDouble(Env.get("SUPERVISOR_BUTTON_TIMEOUT_SEC").unwrap_or("5")); // default 5 seconds
+        supervisorButtonTimerSeconds = supervisorButtonTimeoutSeconds;
+
+        screenSaverTimeoutSeconds = Convert.ToDouble(Env.get("SCREENSAVER_TIMEOUT_SEC").unwrap_or("120")); // default 2 minutes
+        screenSaverTimerSeconds = screenSaverTimeoutSeconds;
+
         // hide the loading screen by default
         hideLoadingAnimation();
         // hide the screen saver by default
@@ -143,11 +149,11 @@ public partial class GuiManager : Control
         reloadGameList();
     }
 
-    const double supervisorButtonTimeoutSeconds = 5.0;
-    double supervisorButtonTimerSeconds = supervisorButtonTimeoutSeconds;
+    double supervisorButtonTimeoutSeconds;
+    double supervisorButtonTimerSeconds;
 
-    const double screenSaverTimeoutSeconds = 10.0; // 2 minutes
-    double screenSaverTimerSeconds = screenSaverTimeoutSeconds;
+    double screenSaverTimeoutSeconds;
+    double screenSaverTimerSeconds;
     public override void _Process(double delta)
     {
         // frontend reset button, reloads all the games from the backend
