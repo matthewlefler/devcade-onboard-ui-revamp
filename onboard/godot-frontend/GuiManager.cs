@@ -34,6 +34,24 @@ public partial class GuiManager : Control
     [Export]
     public AnimatedSprite2D loadingAnimation;
 
+    /// <summary>
+    /// the root node of the screen saver
+    /// the control node to hide when not showing the screen saver
+    /// </summary>
+    [Export]
+    public Control screenSaver;
+
+    /// <summary>
+    /// the node to animate when showing the screen saver animation
+    /// </summary>
+    [Export]
+    public AnimatedSprite2D screenSaverAnimation;
+
+    /// <summary>
+    /// true if the screensaver animation is being shown
+    /// </summary>
+    public bool showingScreenSaverAnimation { get; private set; } = false;
+
     // logger for currently unknown purposes??
     //
     // deos not run, writes an error msg, but does not block output:
@@ -92,8 +110,16 @@ public partial class GuiManager : Control
     /// </summary>
     public override void _Ready()
     {
+        supervisorButtonTimeoutSeconds = Convert.ToDouble(Env.get("SUPERVISOR_BUTTON_TIMEOUT_SEC").unwrap_or("5")); // default 5 seconds
+        supervisorButtonTimerSeconds = supervisorButtonTimeoutSeconds;
+
+        screenSaverTimeoutSeconds = Convert.ToDouble(Env.get("SCREENSAVER_TIMEOUT_SEC").unwrap_or("120")); // default 2 minutes
+        screenSaverTimerSeconds = screenSaverTimeoutSeconds;
+
         // hide the loading screen by default
         hideLoadingAnimation();
+        // hide the screen saver by default
+        hideScreenSaver();
 
         // spawn initial gui scene
         this.guiSceneRootNode = initialGuiScene.Instantiate() as CanvasItem;
@@ -123,8 +149,11 @@ public partial class GuiManager : Control
         reloadGameList();
     }
 
-    const double supervisorButtonTimeout = 5.0;
-    double supervisorButtonTimer = supervisorButtonTimeout;
+    double supervisorButtonTimeoutSeconds;
+    double supervisorButtonTimerSeconds;
+
+    double screenSaverTimeoutSeconds;
+    double screenSaverTimerSeconds;
     public override void _Process(double delta)
     {
         // frontend reset button, reloads all the games from the backend
@@ -138,11 +167,14 @@ public partial class GuiManager : Control
         {
             Client.setProduction(!Client.isProduction).ContinueWith(_ => { setTag(allTag); reloadGameList(); });
         }
-        
+
+        //
+        // supervisor button (aka force kill)
+        //
         if (SupervisorButton.isSupervisorButtonPressed())
         {
-            supervisorButtonTimer -= delta;
-            if (supervisorButtonTimer <= 0.0)
+            supervisorButtonTimerSeconds -= delta;
+            if (supervisorButtonTimerSeconds <= 0.0)
             {
                 // if the timer has timed out
                 // kill the currently running game
@@ -151,7 +183,35 @@ public partial class GuiManager : Control
         }
         else
         {
-            supervisorButtonTimer = supervisorButtonTimeout;
+            supervisorButtonTimerSeconds = supervisorButtonTimeoutSeconds;
+        }
+
+        //
+        // screen saver
+        //
+        if (!Input.IsAnythingPressed())
+        {
+            screenSaverTimerSeconds -= delta;
+            if (screenSaverTimerSeconds <= 0.0 && showingScreenSaverAnimation == false)
+            {
+                // if the timer has timed out
+                // kill the currently running game 
+                // and show the screensaver
+                _ = killGame();
+                showingScreenSaverAnimation = true;
+                GD.Print("showing screen saver");
+                showScreenSaver();
+            }
+        }
+        else
+        {
+            if (showingScreenSaverAnimation)
+            {
+                showingScreenSaverAnimation = false;
+                GD.Print("hiding screen saver");
+                hideScreenSaver();
+            }
+            screenSaverTimerSeconds = screenSaverTimeoutSeconds;
         }
     }
 
@@ -291,6 +351,26 @@ public partial class GuiManager : Control
     {
         loadingScreen.CallDeferred("hide");
         loadingAnimation.CallDeferred("stop");
+    }
+
+    /// <summary>
+    /// shows the base screen saver
+    /// thereby hiding the current GUI
+    /// </summary>
+    public void showScreenSaver()
+    {
+        screenSaver.CallDeferred("show");
+        screenSaverAnimation.CallDeferred("play");
+    }
+
+    /// <summary>
+    /// hides the base screen saver 
+    /// thereby showing the current GUI
+    /// </summary>
+    public void hideScreenSaver()
+    {
+        screenSaver.CallDeferred("hide");
+        screenSaverAnimation.CallDeferred("stop");
     }
 
     /// <summary>
