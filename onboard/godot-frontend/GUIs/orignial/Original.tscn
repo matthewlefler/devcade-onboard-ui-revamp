@@ -7,7 +7,7 @@
 [ext_resource type="Texture2D" uid="uid://d4nlo4q03fi77" path="res://CSHAssets/CSH.png" id="3_x7jqg"]
 [ext_resource type="FontFile" uid="uid://cnha1ohwbh3ts" path="res://CSHAssets/VT323-Regular.ttf" id="4_mmnpk"]
 [ext_resource type="Texture2D" uid="uid://f61vcor4mcvi" path="res://CSHAssets/description.png" id="5_0ghq1"]
-[ext_resource type="Theme" uid="uid://cfha8h63q5pfc" path="res://GUIs/orignial/tagButtonTheme.tres" id="7_loec3"]
+[ext_resource type="Script" uid="uid://bjnrrsq5svi0h" path="res://GUIs/orignial/TagContainer.cs" id="8_loec3"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_loec3"]
 shader = ExtResource("3_1otwf")
@@ -30,7 +30,6 @@ description = NodePath("MarginContainer")
 descriptionLabel = NodePath("MarginContainer/TextureRect2/MarginContainer/VBoxContainer/description")
 titleLabel = NodePath("MarginContainer/TextureRect2/MarginContainer/VBoxContainer/title")
 cardSpacing = 0.455
-tagButtonTheme = ExtResource("7_loec3")
 gameButtonsScale = 1.325
 
 [node name="background" type="TextureRect" parent="."]
@@ -158,6 +157,7 @@ offset_right = 900.0
 offset_bottom = 528.0
 size_flags_vertical = 3
 columns = 2
+script = ExtResource("8_loec3")
 
 [node name="Camera2D" type="Camera2D" parent="."]
 anchor_mode = 0
