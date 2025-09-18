@@ -7,7 +7,7 @@ public partial class OriginalGUI : Control, GuiInterface
 {
     /// <summary>
     /// the current state of the GUI
-    /// this is used to determine what actions to take based on what is on the screen
+    /// this is used to determine what actions to take based on what is / should be on the screen
     /// </summary>
     private GuiState state = GuiState.ViewGames;
 
@@ -20,6 +20,14 @@ public partial class OriginalGUI : Control, GuiInterface
         Theme, // the theme picker is shown
         GameLaunched // a game is being run
     }
+
+    /// <summary>
+    /// The camera,
+    /// which is moved around to show the 
+    /// tags, games, theme picker, and similar
+    /// </summary>
+    [Export]
+    public Camera2D camera;
 
     /// <summary>
     /// the node that has the game buttons as children
@@ -199,9 +207,7 @@ public partial class OriginalGUI : Control, GuiInterface
         state = GuiState.Tags;
         gameContainer.resetLastPressedButton();
 
-        // gameContainer.Position = new Vector2(-DisplayServer.ScreenGetSize().X, 0.0f);
-
-        // tagsMenu.targetPosition = new Vector2(0.0f, 0.0f);
+        camera.Position = new Vector2(DisplayServer.ScreenGetSize().X, 0.0f);
     }
 
     /// <summary>
@@ -213,9 +219,7 @@ public partial class OriginalGUI : Control, GuiInterface
 
         gameContainer.grabFocus();
 
-        // gameContainer.Position = new Vector2(0.0f, 0.0f);
-
-        // tagsMenu.targetPosition = new Vector2(DisplayServer.ScreenGetSize().X, 0.0f);
+        camera.Position = new Vector2(0.0f, 0.0f);
     }
 
     public void setGameList(List<DevcadeGame> gameTitles, GuiManager model)

@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://bs2l3u3gpwk3a"]
+[gd_scene load_steps=11 format=3 uid="uid://bs2l3u3gpwk3a"]
 
 [ext_resource type="Script" uid="uid://bytphx3biwmpk" path="res://GUIs/orignial/OriginalGUI.cs" id="1_eo6uj"]
 [ext_resource type="Texture2D" uid="uid://gsf5hvgxlwu8" path="res://CSHAssets/OnboardBackgroundGradient.png" id="2_4c0jd"]
@@ -7,6 +7,7 @@
 [ext_resource type="Texture2D" uid="uid://d4nlo4q03fi77" path="res://CSHAssets/CSH.png" id="3_x7jqg"]
 [ext_resource type="FontFile" uid="uid://cnha1ohwbh3ts" path="res://CSHAssets/VT323-Regular.ttf" id="4_mmnpk"]
 [ext_resource type="Texture2D" uid="uid://f61vcor4mcvi" path="res://CSHAssets/description.png" id="5_0ghq1"]
+[ext_resource type="Script" uid="uid://d15s735p2xr6b" path="res://GUIs/orignial/GamesContainer.cs" id="7_s6n7q"]
 [ext_resource type="Script" uid="uid://bjnrrsq5svi0h" path="res://GUIs/orignial/TagContainer.cs" id="8_loec3"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_loec3"]
@@ -26,11 +27,9 @@ script = ExtResource("1_eo6uj")
 gameContainer = NodePath("gamesMenu/gamesContainer")
 tagsMenu = NodePath("tagsBackground/tagContainer")
 tagContainer = NodePath("tagsBackground/tagContainer")
-description = NodePath("MarginContainer")
-descriptionLabel = NodePath("MarginContainer/TextureRect2/MarginContainer/VBoxContainer/description")
-titleLabel = NodePath("MarginContainer/TextureRect2/MarginContainer/VBoxContainer/title")
-cardSpacing = 0.455
-gameButtonsScale = 1.325
+description = NodePath("DescriptionContainer")
+descriptionLabel = NodePath("DescriptionContainer/TextureRect2/MarginContainer/VBoxContainer/description")
+titleLabel = NodePath("DescriptionContainer/TextureRect2/MarginContainer/VBoxContainer/title")
 
 [node name="background" type="TextureRect" parent="."]
 layout_mode = 1
@@ -88,8 +87,9 @@ autowrap_mode = 2
 [node name="gamesContainer" type="Control" parent="gamesMenu"]
 layout_mode = 2
 size_flags_vertical = 3
+script = ExtResource("7_s6n7q")
 
-[node name="MarginContainer" type="MarginContainer" parent="."]
+[node name="DescriptionContainer" type="MarginContainer" parent="."]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -102,12 +102,12 @@ theme_override_constants/margin_top = 90
 theme_override_constants/margin_right = 65
 theme_override_constants/margin_bottom = 85
 
-[node name="TextureRect2" type="TextureRect" parent="MarginContainer"]
+[node name="TextureRect2" type="TextureRect" parent="DescriptionContainer"]
 layout_mode = 2
 texture = ExtResource("5_0ghq1")
 expand_mode = 1
 
-[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/TextureRect2"]
+[node name="MarginContainer" type="MarginContainer" parent="DescriptionContainer/TextureRect2"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -119,18 +119,18 @@ theme_override_constants/margin_top = 25
 theme_override_constants/margin_right = 45
 theme_override_constants/margin_bottom = 25
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/TextureRect2/MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="DescriptionContainer/TextureRect2/MarginContainer"]
 layout_mode = 2
 theme_override_constants/separation = 50
 
-[node name="title" type="Label" parent="MarginContainer/TextureRect2/MarginContainer/VBoxContainer"]
+[node name="title" type="Label" parent="DescriptionContainer/TextureRect2/MarginContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("4_mmnpk")
 theme_override_font_sizes/font_size = 121
 text = "Title"
 horizontal_alignment = 1
 
-[node name="description" type="Label" parent="MarginContainer/TextureRect2/MarginContainer/VBoxContainer"]
+[node name="description" type="Label" parent="DescriptionContainer/TextureRect2/MarginContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("4_mmnpk")
 theme_override_font_sizes/font_size = 37
