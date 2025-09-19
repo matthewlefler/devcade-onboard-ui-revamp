@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://bs2l3u3gpwk3a"]
+[gd_scene load_steps=14 format=3 uid="uid://bs2l3u3gpwk3a"]
 
 [ext_resource type="Script" uid="uid://bytphx3biwmpk" path="res://GUIs/orignial/OriginalGUI.cs" id="1_eo6uj"]
 [ext_resource type="Texture2D" uid="uid://gsf5hvgxlwu8" path="res://CSHAssets/OnboardBackgroundGradient.png" id="2_4c0jd"]
@@ -8,15 +8,18 @@
 [ext_resource type="FontFile" uid="uid://cnha1ohwbh3ts" path="res://CSHAssets/VT323-Regular.ttf" id="4_mmnpk"]
 [ext_resource type="Texture2D" uid="uid://f61vcor4mcvi" path="res://CSHAssets/description.png" id="5_0ghq1"]
 [ext_resource type="Script" uid="uid://d15s735p2xr6b" path="res://GUIs/orignial/GamesContainer.cs" id="7_s6n7q"]
+[ext_resource type="Script" uid="uid://cj0skhgydnii2" path="res://GUIs/orignial/Background.cs" id="8_4asay"]
 [ext_resource type="Script" uid="uid://bjnrrsq5svi0h" path="res://GUIs/orignial/TagContainer.cs" id="8_loec3"]
+[ext_resource type="Script" uid="uid://bnbcabv83bi6o" path="res://GUIs/orignial/SlerpCamera2d.cs" id="10_feq1j"]
+[ext_resource type="Theme" uid="uid://cfha8h63q5pfc" path="res://GUIs/orignial/tagButtonTheme.tres" id="12_vs4r3"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_loec3"]
 shader = ExtResource("3_1otwf")
 shader_parameter/scale = 7.27
-shader_parameter/direction = Vector2(-0.8, -0.8)
+shader_parameter/direction = Vector2(-0.4, -0.4)
 shader_parameter/alphaScale = 0.72
 
-[node name="Original" type="Control" node_paths=PackedStringArray("gameContainer", "tagsMenu", "tagContainer", "description", "descriptionLabel", "titleLabel")]
+[node name="Original" type="Control" node_paths=PackedStringArray("camera", "gameContainer", "tagsMenu", "tagContainer", "description", "descriptionLabel", "titleLabel")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -24,35 +27,13 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_eo6uj")
+camera = NodePath("Camera2D")
 gameContainer = NodePath("gamesMenu/gamesContainer")
-tagsMenu = NodePath("tagsBackground/tagContainer")
-tagContainer = NodePath("tagsBackground/tagContainer")
+tagsMenu = NodePath("ScrollContainer/tagContainer")
+tagContainer = NodePath("ScrollContainer/tagContainer")
 description = NodePath("DescriptionContainer")
 descriptionLabel = NodePath("DescriptionContainer/TextureRect2/MarginContainer/VBoxContainer/description")
 titleLabel = NodePath("DescriptionContainer/TextureRect2/MarginContainer/VBoxContainer/title")
-
-[node name="background" type="TextureRect" parent="."]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-texture = ExtResource("2_4c0jd")
-expand_mode = 5
-
-[node name="backgroundCSHIcons" type="TextureRect" parent="background"]
-visible = false
-texture_repeat = 2
-material = SubResource("ShaderMaterial_loec3")
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-texture = ExtResource("3_x7jqg")
-expand_mode = 1
 
 [node name="gamesMenu" type="VBoxContainer" parent="."]
 layout_mode = 1
@@ -136,28 +117,49 @@ theme_override_fonts/font = ExtResource("4_mmnpk")
 theme_override_font_sizes/font_size = 37
 text = "Description"
 
-[node name="tagsBackground" type="TextureRect" parent="."]
+[node name="Camera2D" type="Camera2D" parent="."]
+anchor_mode = 0
+script = ExtResource("10_feq1j")
+easeAmount = 2.0
+animationSpeed = 5.0
+
+[node name="background" type="TextureRect" parent="Camera2D" node_paths=PackedStringArray("camera")]
+z_index = -4096
+z_as_relative = false
+custom_minimum_size = Vector2(900, 0)
+offset_bottom = 50.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+texture = ExtResource("2_4c0jd")
+expand_mode = 5
+script = ExtResource("8_4asay")
+camera = NodePath("..")
+
+[node name="backgroundCSHIcons" type="TextureRect" parent="Camera2D/background"]
+texture_repeat = 2
+material = SubResource("ShaderMaterial_loec3")
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 901.0
-offset_top = -25.0
-offset_right = 901.0
-offset_bottom = 25.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = ExtResource("2_4c0jd")
-expand_mode = 5
-flip_h = true
+texture = ExtResource("3_x7jqg")
+expand_mode = 1
 
-[node name="tagContainer" type="GridContainer" parent="tagsBackground"]
-layout_mode = 2
+[node name="ScrollContainer" type="ScrollContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 900.0
 offset_right = 900.0
-offset_bottom = 528.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="tagContainer" type="GridContainer" parent="ScrollContainer"]
+layout_mode = 2
 size_flags_vertical = 3
 columns = 2
 script = ExtResource("8_loec3")
-
-[node name="Camera2D" type="Camera2D" parent="."]
-anchor_mode = 0
+tagButtonTheme = ExtResource("12_vs4r3")

@@ -27,7 +27,7 @@ public partial class OriginalGUI : Control, GuiInterface
     /// tags, games, theme picker, and similar
     /// </summary>
     [Export]
-    public Camera2D camera;
+    public SlerpCamera2d camera;
 
     /// <summary>
     /// the node that has the game buttons as children
@@ -39,7 +39,7 @@ public partial class OriginalGUI : Control, GuiInterface
     /// the control node that is moved to show/hide the tag list
     /// </summary>
     [Export]
-    public SlerpControl tagsMenu;
+    public TagContainer tagsMenu;
 
     /// <summary>
     /// the node that has the tag buttons as children
@@ -97,9 +97,6 @@ public partial class OriginalGUI : Control, GuiInterface
         description.Hide();
         // and hopefully make it appear on top of everything else
         description.ZIndex = 1000;
-
-        // offset the tag menu by the screen width at the start
-        tagsMenu.Position = new Vector2(DisplayServer.ScreenGetSize().X, 0.0f);
     }
 
     public override void _Input(InputEvent @event)
@@ -182,6 +179,7 @@ public partial class OriginalGUI : Control, GuiInterface
     private void launchGame(DevcadeGame game)
     {
         state = GuiState.GameLaunched;
+        // this launches the selected game, and continues when the game closes
         model.launchGame(game).ContinueWith(_ => state = GuiState.Description);
     }
 
@@ -206,8 +204,7 @@ public partial class OriginalGUI : Control, GuiInterface
     {
         state = GuiState.Tags;
         gameContainer.resetLastPressedButton();
-
-        camera.Position = new Vector2(DisplayServer.ScreenGetSize().X, 0.0f);
+        camera.moveRight();
     }
 
     /// <summary>
@@ -219,7 +216,7 @@ public partial class OriginalGUI : Control, GuiInterface
 
         gameContainer.grabFocus();
 
-        camera.Position = new Vector2(0.0f, 0.0f);
+        camera.moveLeft();
     }
 
     public void setGameList(List<DevcadeGame> gameTitles, GuiManager model)
