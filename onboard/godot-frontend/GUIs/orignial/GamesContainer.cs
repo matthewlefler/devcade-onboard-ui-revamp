@@ -50,6 +50,11 @@ public partial class GamesContainer : Control
     /// </summary>
     private Dictionary<BaseButton, Action> buttonFocusActions = new Dictionary<BaseButton, Action>();
 
+    public override void _Ready()
+    {
+        this.Position = new Vector2(0.0f, GetViewportRect().Size.Y / 2.0f);
+    }
+
     public override void _Process(double delta)
     {
         // update each GameButton so that the animations play out

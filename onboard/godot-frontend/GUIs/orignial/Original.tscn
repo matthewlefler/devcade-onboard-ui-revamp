@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://bs2l3u3gpwk3a"]
+[gd_scene load_steps=15 format=3 uid="uid://bs2l3u3gpwk3a"]
 
 [ext_resource type="Script" uid="uid://bytphx3biwmpk" path="res://GUIs/orignial/OriginalGUI.cs" id="1_eo6uj"]
 [ext_resource type="Texture2D" uid="uid://gsf5hvgxlwu8" path="res://CSHAssets/OnboardBackgroundGradient.png" id="2_4c0jd"]
@@ -12,6 +12,7 @@
 [ext_resource type="Script" uid="uid://bjnrrsq5svi0h" path="res://GUIs/orignial/TagContainer.cs" id="8_loec3"]
 [ext_resource type="Script" uid="uid://bnbcabv83bi6o" path="res://GUIs/orignial/SlerpCamera2d.cs" id="10_feq1j"]
 [ext_resource type="Theme" uid="uid://cfha8h63q5pfc" path="res://GUIs/orignial/tagButtonTheme.tres" id="12_vs4r3"]
+[ext_resource type="Script" uid="uid://do70tefvxy3xy" path="res://GUIs/orignial/ControlHelpTextTags.cs" id="13_6sm6r"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_loec3"]
 shader = ExtResource("3_1otwf")
@@ -28,47 +29,12 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_eo6uj")
 camera = NodePath("Camera2D")
-gameContainer = NodePath("gamesMenu/gamesContainer")
+gameContainer = NodePath("gamesContainer")
 tagsMenu = NodePath("ScrollContainer/tagContainer")
 tagContainer = NodePath("ScrollContainer/tagContainer")
 description = NodePath("DescriptionContainer")
 descriptionLabel = NodePath("DescriptionContainer/TextureRect2/MarginContainer/VBoxContainer/description")
 titleLabel = NodePath("DescriptionContainer/TextureRect2/MarginContainer/VBoxContainer/title")
-
-[node name="gamesMenu" type="VBoxContainer" parent="."]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="MarginContainer" type="MarginContainer" parent="gamesMenu"]
-layout_mode = 2
-theme_override_constants/margin_left = 5
-theme_override_constants/margin_top = 5
-theme_override_constants/margin_right = 5
-theme_override_constants/margin_bottom = 5
-
-[node name="DevcadeIcon" type="TextureRect" parent="gamesMenu/MarginContainer"]
-layout_mode = 2
-texture = ExtResource("2_xc2fw")
-expand_mode = 5
-
-[node name="controlHelpText" type="Label" parent="gamesMenu"]
-custom_minimum_size = Vector2(10, 10)
-layout_mode = 2
-theme_override_fonts/font = ExtResource("4_mmnpk")
-theme_override_font_sizes/font_size = 52
-text = "Press the Red Button to play!
-Press both black buttons to refresh"
-horizontal_alignment = 1
-autowrap_mode = 2
-
-[node name="gamesContainer" type="Control" parent="gamesMenu"]
-layout_mode = 2
-size_flags_vertical = 3
-script = ExtResource("7_s6n7q")
 
 [node name="DescriptionContainer" type="MarginContainer" parent="."]
 visible = false
@@ -147,19 +113,90 @@ grow_vertical = 2
 texture = ExtResource("3_x7jqg")
 expand_mode = 1
 
-[node name="ScrollContainer" type="ScrollContainer" parent="."]
+[node name="gamesMenu" type="VBoxContainer" parent="Camera2D/background"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 900.0
-offset_right = 900.0
 grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="Camera2D/background/gamesMenu"]
+layout_mode = 2
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 5
+
+[node name="DevcadeIcon" type="TextureRect" parent="Camera2D/background/gamesMenu/MarginContainer"]
+layout_mode = 2
+texture = ExtResource("2_xc2fw")
+expand_mode = 5
+
+[node name="ScrollContainer" type="ScrollContainer" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 1.0
+anchor_right = 2.0
+anchor_bottom = 1.0
+offset_top = 569.0
+offset_bottom = 4.0
+grow_horizontal = 0
 grow_vertical = 2
 
 [node name="tagContainer" type="GridContainer" parent="ScrollContainer"]
 layout_mode = 2
+size_flags_horizontal = 3
 size_flags_vertical = 3
 columns = 2
 script = ExtResource("8_loec3")
 tagButtonTheme = ExtResource("12_vs4r3")
+
+[node name="gamesContainer" type="Control" parent="."]
+layout_mode = 2
+anchors_preset = 0
+offset_top = 539.0
+offset_right = 900.0
+offset_bottom = 1650.0
+size_flags_vertical = 3
+script = ExtResource("7_s6n7q")
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.26375
+anchor_right = 1.0
+anchor_bottom = 0.26375
+offset_bottom = 109.0
+grow_horizontal = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="controlHelpTextGames" type="Label" parent="CenterContainer"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_mmnpk")
+theme_override_font_sizes/font_size = 52
+text = "Press the Red Button to play! 
+Press both black buttons to refresh"
+horizontal_alignment = 1
+
+[node name="CenterContainer2" type="CenterContainer" parent="."]
+layout_mode = 2
+anchor_left = 1.00222
+anchor_right = 1.00222
+offset_left = 211.0
+offset_top = 450.0
+offset_right = 689.0
+offset_bottom = 503.0
+grow_horizontal = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="controlHelpTextTags" type="Label" parent="CenterContainer2" node_paths=PackedStringArray("tagContainer")]
+custom_minimum_size = Vector2(10, 10)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("4_mmnpk")
+theme_override_font_sizes/font_size = 52
+text = "Select A Tag to Search:"
+horizontal_alignment = 1
+script = ExtResource("13_6sm6r")
+tagContainer = NodePath("../../ScrollContainer/tagContainer")
