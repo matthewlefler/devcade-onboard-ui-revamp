@@ -28,7 +28,10 @@ public partial class GamesContainer : Control
     /// the spacing between the game buttons in radians
     /// </summary>
     [Export]
-    public float cardSpacing = 0.26f;
+    public float cardSpacing = 0.4f;
+
+    [Export]
+    public float cardScaleAmount = 0.8f;
 
     /// <summary>
     /// list of game buttons
@@ -238,6 +241,9 @@ public partial class GamesContainer : Control
 
             gameButton.childButton.ZIndex = currentGames.Count - offset;
             gameButton.targetRotation = (i - index) * cardSpacing;
+
+            float scaleFactor = -cardScaleAmount * offset / 10.0f;
+            gameButton.childButton.Scale = new Vector2(gameButtonsScale + scaleFactor, gameButtonsScale + scaleFactor);
 
             ++i;
         }
