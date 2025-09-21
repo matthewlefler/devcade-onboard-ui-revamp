@@ -80,35 +80,24 @@ public partial class SlerpCamera2d : Camera2D
         this.Position = CubicBezier(startPosition, startPosition + (offset / easeAmount), endPosition - (offset / easeAmount), endPosition, time);
     }
 
-    public void moveRight()
+    public void setRelativeTargetIndex(int rel_index)
     {
-        previousTargetIndex = targetIndex;
-
-        targetIndex++;
-
-        if (targetIndex > positions.Length - 1)
+        if (rel_index > positionsRight)
         {
-            targetIndex = positions.Length - 1;
+            rel_index = positionsRight;
         }
+        if (rel_index < -positionsLeft)
+        {
+            rel_index = -positionsLeft;
+        }
+
+        previousTargetIndex = targetIndex;
+        targetIndex = rel_index + positionsLeft;
 
         time = 0;
     }
 
-    public void moveLeft()
-    {
-        previousTargetIndex = targetIndex;
-
-        targetIndex--;
-
-        if (targetIndex < 0)
-        {
-            targetIndex = 0;
-        }
-
-        time = 0;
-    }
-
-    public void setTargetIndex(int index)
+    public void setAbosluteTargetIndex(int index)
     {
         if (index > positions.Length - 1)
         {

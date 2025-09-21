@@ -91,18 +91,22 @@ public partial class OriginalGUI : Control, GuiInterface
     /// </summary>
     private bool updateGames = false;
 
+    private int leftRightStickMovement = 0;
+
     public override void _Ready()
     {
-        // hide the description if it is not already
+        // hide the description if it is not already hidden
         description.Hide();
         // and hopefully make it appear on top of everything else
         description.ZIndex = 1000;
+
+        state = GuiState.ViewGames;
     }
 
     public override void _Input(InputEvent @event)
     {
         // back button (blue button)
-        if (@event.IsAction("Player1_A2") || @event.IsAction("Player2_A2"))
+        if (@event.IsActionPressed("Player1_A2") || @event.IsActionPressed("Player2_A2"))
         {
             if (state == GuiState.Description)
             {
@@ -113,29 +117,41 @@ public partial class OriginalGUI : Control, GuiInterface
         }
 
         // enter button (red button)
-        if (@event.IsAction("Player1_A1") || @event.IsAction("Player2_A1"))
+        if (@event.IsActionPressed("Player1_A1") || @event.IsActionPressed("Player2_A1"))
         {
             if (state == GuiState.Description)
             {
                 lauchCurrentGame();
             }
         }
-
+        
         // stick right
-        if (@event.IsAction("Player1_StickRight") || @event.IsAction("Player2_StickRight"))
+        if (@event.IsActionPressed("Player1_StickRight") || @event.IsActionPressed("Player2_StickRight"))
         {
-            if (state == GuiState.ViewGames)
+            leftRightStickMovement++;
+            if (leftRightStickMovement > tagContainer.Columns)
+            {
+                leftRightStickMovement = tagContainer.Columns;
+            }
+
+            if (leftRightStickMovement == 1)
             {
                 showTagList();
             }
         }
 
         // stick left
-        if (@event.IsAction("Player1_StickLeft") || @event.IsAction("Player2_StickLeft"))
+        if (@event.IsActionPressed("Player1_StickLeft") || @event.IsActionPressed("Player2_StickLeft"))
         {
-            if (state == GuiState.Tags)
+            leftRightStickMovement--;
+            if (leftRightStickMovement < 0)
             {
-                hideTagList();
+                leftRightStickMovement = 0;
+            }
+
+            if (leftRightStickMovement == 0)
+            {
+                showGameList();
             }
         }
     }
@@ -204,19 +220,15 @@ public partial class OriginalGUI : Control, GuiInterface
     {
         state = GuiState.Tags;
         gameContainer.resetLastPressedButton();
-        camera.moveRight();
+        tagContainer.grabFocus();
+        camera.setRelativeTargetIndex(1);
     }
 
-    /// <summary>
-    /// hides the tag list
-    /// </summary>
-    private void hideTagList()
+    private void showGameList()
     {
         state = GuiState.ViewGames;
-
         gameContainer.grabFocus();
-
-        camera.moveLeft();
+        camera.setRelativeTargetIndex(0);
     }
 
     public void setGameList(List<DevcadeGame> gameTitles, GuiManager model)
@@ -234,6 +246,7 @@ public partial class OriginalGUI : Control, GuiInterface
     public void setCurrentTag(Tag tag)
     {
         model.setTag(tag);
+        showGameList();
     }
 
     public void setTagList(List<Tag> tags)

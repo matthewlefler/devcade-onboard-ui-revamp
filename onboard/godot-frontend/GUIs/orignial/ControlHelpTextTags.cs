@@ -19,9 +19,9 @@ public partial class ControlHelpTextTags : Label
     public override void _Process(double delta)
     {
         // change text based on currenly seleted tag
-        if (tagContainer.currentTag != null)
+        if (tagContainer.currentHoveredTag != null)
         {
-            this.Text = initText + "\n" + tagContainer.currentTag.description;
+            this.Text = initText + "\n" + tagContainer.currentHoveredTag.description;
         }
         else
         {

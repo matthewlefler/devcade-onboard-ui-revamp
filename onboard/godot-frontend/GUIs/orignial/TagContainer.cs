@@ -13,21 +13,25 @@ public partial class TagContainer : GridContainer
     [Export]
     public Theme tagButtonTheme;
 
-    public Tag currentTag;
+    public Tag currentHoveredTag;
+
+    private Button[] tagButtons;
 
     public void updateTags(List<Tag> tagList, Action<Tag> on_tag_pressed)
     {
-        foreach(Node child in this.GetChildren())
+        foreach (Node child in this.GetChildren())
         {
             this.RemoveChild(child);
         }
-        
+
         if (tagList.Count <= 0)
         {
             return;
         }
 
-        currentTag = tagList[0];
+        tagButtons = new Button[tagList.Count];
+
+        currentHoveredTag = tagList[0];
 
         for (int i = 0; i < tagList.Count; i++)
         {
@@ -41,7 +45,9 @@ public partial class TagContainer : GridContainer
 
             Tag tag = tagList[i];
             button.Pressed += () => on_tag_pressed(tag);
-            button.FocusEntered += () => currentTag = tag;
+            button.FocusEntered += () => currentHoveredTag = tag;
+
+            tagButtons[i] = button;
 
             MarginContainer marginContainer = new MarginContainer();
             marginContainer.SizeFlagsHorizontal = SizeFlags.ExpandFill;
@@ -53,5 +59,10 @@ public partial class TagContainer : GridContainer
 
             this.AddChild(marginContainer);
         }
+    }
+
+    public void grabFocus()
+    {
+        this.tagButtons[0].GrabFocus();
     }
 }
