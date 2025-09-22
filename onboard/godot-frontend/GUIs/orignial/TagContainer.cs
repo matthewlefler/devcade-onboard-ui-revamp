@@ -63,6 +63,6 @@ public partial class TagContainer : GridContainer
 
     public void grabFocus()
     {
-        this.tagButtons[0].GrabFocus();
+        this.tagButtons[0].CallDeferred("grab_focus");
     }
 }

@@ -160,6 +160,7 @@ offset_right = 900.0
 offset_bottom = 1650.0
 size_flags_vertical = 3
 script = ExtResource("7_s6n7q")
+percentYPositionValue = 60.0
 
 [node name="CenterContainer" type="CenterContainer" parent="."]
 layout_mode = 1

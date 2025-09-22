@@ -30,8 +30,15 @@ public partial class GamesContainer : Control
     [Export]
     public float cardSpacing = 0.4f;
 
+    /// <summary>
+    /// the percent of effect that the offset index has on the size of the game cards
+    /// aka this changes the amount that the closer a card gets to the center, the larger it gets
+    /// </summary>
     [Export]
-    public float cardScaleAmount = 0.8f;
+    public float cardScaleAmount = 0.3f;
+
+    [Export]
+    public float percentYPositionValue = 66.0f;
 
     /// <summary>
     /// list of game buttons
@@ -55,7 +62,7 @@ public partial class GamesContainer : Control
 
     public override void _Ready()
     {
-        this.Position = new Vector2(0.0f, GetViewportRect().Size.Y / 2.0f);
+        this.Position = new Vector2(0.0f, GetViewportRect().Size.Y * percentYPositionValue / 100.0f);
     }
 
     public override void _Process(double delta)
