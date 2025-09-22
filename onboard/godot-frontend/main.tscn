@@ -1,7 +1,7 @@
 [gd_scene load_steps=129 format=3 uid="uid://br86segmlm7yg"]
 
 [ext_resource type="Script" uid="uid://cpnqnrrdr0pbv" path="res://GuiManager.cs" id="1_ig7tw"]
-[ext_resource type="PackedScene" uid="uid://bs2l3u3gpwk3a" path="res://GUIs/orignial/Original.tscn" id="2_1bvp3"]
+[ext_resource type="PackedScene" uid="uid://bs2l3u3gpwk3a" path="res://GUIs/orignial/Original.tscn" id="2_lquwl"]
 [ext_resource type="Texture2D" uid="uid://cm8hlcb1in1rd" path="res://CSHAssets/transparent-logo-white.png" id="3_1bvp3"]
 [ext_resource type="SpriteFrames" uid="uid://cwsn76nuho5hi" path="res://CSHAssets/loadingAnimation.tres" id="3_h2yge"]
 [ext_resource type="Texture2D" uid="uid://bvfvpq8dgdo8l" path="res://CSHAssets/sprite_sheet(2).png" id="5_lquwl"]
@@ -870,7 +870,7 @@ offset_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_ig7tw")
-initialGuiScene = ExtResource("2_1bvp3")
+initialGuiScene = ExtResource("2_lquwl")
 loadingScreen = NodePath("loadingScreen")
 loadingAnimation = NodePath("loadingScreen/VBoxContainer/CenterContainer/loadingAnimation")
 screenSaver = NodePath("Panel")
@@ -944,4 +944,4 @@ size_flags_vertical = 4
 z_index = 4095
 sprite_frames = SubResource("SpriteFrames_1iygd")
 animation = &"new_animation"
-speed_scale = 2.0
+speed_scale = 5.0
