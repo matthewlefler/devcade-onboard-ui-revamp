@@ -8,6 +8,8 @@ def main():
     
     home_path = "/home/devcade"
     out_path = "/home/devcade/publish"
+
+    frontend_path = "./godot-frontend"
     
     
     if os.path.exists(f"{home_path}/publish.bak") and os.path.exists(out_path):
@@ -15,12 +17,17 @@ def main():
     
     if os.path.exists(out_path):
         shutil.move(out_path, f"{home_path}/publish.bak")
+
+    # make sure the out path exists as the previous
+    # if statement removes it
+    if not os.path.exists(out_path):
+        os.makedirs(out_path, exist_ok=True)
     
     # make frontend executable
     # onboard script expects an executable named frontend
     # preset name must be one defined in 'export_presets.cfg'
     # @see https://docs.godotengine.org/en/latest/tutorials/editor/command_line_tutorial.html
-    subprocess.run(f"godot --export-release Linux {out_path}/frontend", shell=True)
+    subprocess.run(f"godot --path {frontend_path} --export-release Linux {out_path}/frontend", shell=True)
     
     # build and move backend
     # onboard script expects an executable named backend
