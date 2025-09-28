@@ -27,7 +27,7 @@ def main():
     # onboard script expects an executable named frontend
     # preset name must be one defined in 'export_presets.cfg'
     # @see https://docs.godotengine.org/en/latest/tutorials/editor/command_line_tutorial.html
-    subprocess.run(f"godot --path {frontend_path} --export-release Linux {out_path}/frontend", shell=True)
+    subprocess.run(f"godot --headless --path {frontend_path} --export-release Linux {out_path}/frontend", shell=True)
     
     # build and move backend
     # onboard script expects an executable named backend
