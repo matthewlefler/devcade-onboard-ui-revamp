@@ -4,7 +4,7 @@ using System;
 using onboard.devcade;
 using System.Collections.Generic;
 
-namespace GodotFrontend;
+namespace onboard.devcade.GUI.minimal;
 
 /// <summary>
 /// this is somewhat simple GUI that implements all the basic functions 

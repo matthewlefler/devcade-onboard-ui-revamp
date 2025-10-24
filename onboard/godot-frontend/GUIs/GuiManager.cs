@@ -5,13 +5,12 @@ using System.Threading.Tasks;
 
 using log4net;
 
-using onboard.devcade;
 using onboard.util;
 
 using Godot;
 using onboard.util.supervisor_button;
 
-namespace GodotFrontend;
+namespace onboard.devcade.GUI;
 
 public partial class GuiManager : Control
 {
@@ -52,12 +51,27 @@ public partial class GuiManager : Control
     /// </summary>
     public bool showingScreenSaverAnimation { get; private set; } = false;
 
-    // logger for currently unknown purposes??
-    //
     // deos not run, writes an error msg, but does not block output:
-    // log4net:ERROR Exception while reading ConfigurationSettings. Check your .config file is well formed XML. log4net:ERROR Exception while reading ConfigurationSettings. Check your .config file is well formed XML.
+    // err msg ->
     //
-    private static ILog logger = LogManager.GetLogger("onboard.ui.Devcade");
+    // log4net:ERROR Exception while reading ConfigurationSettings. Check your .config file is well formed XML.
+    // System.Configuration.ConfigurationErrorsException: Configuration system failed to initialize
+    //  ---> System.PlatformNotSupportedException: Operation is not supported on this platform.
+    //    at System.Configuration.ClientConfigPaths..ctor(String exePath, Boolean includeUserConfig)
+    //    at System.Configuration.ClientConfigPaths.GetPaths(String exePath, Boolean includeUserConfig)
+    //    at System.Configuration.ClientConfigurationHost.get_ConfigPaths()
+    //    at System.Configuration.ClientConfigurationHost.GetStreamName(String configPath)
+    //    at System.Configuration.ClientConfigurationHost.get_IsAppConfigHttp()
+    //    at System.Configuration.Internal.DelegatingConfigHost.get_IsAppConfigHttp()
+    //    at System.Configuration.ClientConfigurationSystem..ctor()
+    //    at System.Configuration.ConfigurationManager.EnsureConfigurationSystem()
+    //    --- End of inner exception stack trace ---
+    //    at System.Configuration.ConfigurationManager.PrepareConfigSystem()
+    //    at System.Configuration.ConfigurationManager.GetSection(String sectionName)
+    //    at System.Configuration.ConfigurationManager.get_AppSettings()
+    //    at log4net.Util.SystemInfo.GetAppSetting(String key)
+    //
+    private static ILog logger;
 
     /// <summary>
     /// A list of all the games
@@ -219,7 +233,10 @@ public partial class GuiManager : Control
     /// the constructor of a class will run before the _Ready() function is called
     /// </summary>
     public GuiManager()
-    {
+    {      
+        // get the logger
+        logger = LogManager.GetLogger("onboard.devcade.GUI");
+
         // load the .env file (contains the enviorment variables)
         Env.load("../.env");
 
