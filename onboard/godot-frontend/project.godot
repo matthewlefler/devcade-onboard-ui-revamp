@@ -23,7 +23,7 @@ LogConfigAutoLoad="*res://LogConfigAutoLoad.cs"
 [display]
 
 window/size/viewport_width=900
-window/size/viewport_height=1600
+window/size/viewport_height=2100
 window/stretch/mode="canvas_items"
 window/viewport_width=900
 window/viewport_height=1600

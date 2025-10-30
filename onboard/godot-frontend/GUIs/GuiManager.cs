@@ -233,9 +233,9 @@ public partial class GuiManager : Control
     /// the constructor of a class will run before the _Ready() function is called
     /// </summary>
     public GuiManager()
-    {      
+    {
         // get the logger
-        logger = LogManager.GetLogger("onboard.devcade.GUI");
+        logger = LogManager.GetLogger("onboard.GUI");
 
         // load the .env file (contains the enviorment variables)
         Env.load("../.env");
