@@ -234,9 +234,7 @@ public partial class GuiManager : Control
     {
         // get the logger
         logger = LogManager.GetLogger("onboard.GUI");
-
-        // load the .env file (contains the enviorment variables)
-        Env.load("../.env");
+        logger.Info($"Date: {Time.GetDateStringFromSystem()} \n");
 
         // start client (backend networked communicator)
         Client.init();
