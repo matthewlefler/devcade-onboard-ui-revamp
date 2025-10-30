@@ -140,7 +140,7 @@ public partial class GuiManager : Control
 
         if(guiSceneRootNode == null)
         {
-            GD.PrintErr("Assert Failed: gui scene root node is not a node that derives from the CanvasItem node");
+            logger.Fatal("Assert Failed: gui scene root node is not a node that derives from the CanvasItem node");
             throw new ApplicationException("Assert Failed: gui scene root node is not a node that derives from the CanvasItem node");
         }
         
@@ -152,7 +152,7 @@ public partial class GuiManager : Control
         }
         else
         {
-            GD.PrintErr("Assert Failed: gui scene root node script does not implement the GuiInterface interface");
+            logger.Fatal("Assert Failed: gui scene root node script does not implement the GuiInterface interface");
             throw new ApplicationException("Assert Failed: the gui scene's root node script does not implement the GuiInterface interface");
         } 
         
@@ -213,7 +213,6 @@ public partial class GuiManager : Control
                 // and show the screensaver
                 _ = killGame();
                 showingScreenSaverAnimation = true;
-                GD.Print("showing screen saver");
                 showScreenSaver();
             }
         }
@@ -222,7 +221,6 @@ public partial class GuiManager : Control
             if (showingScreenSaverAnimation)
             {
                 showingScreenSaverAnimation = false;
-                GD.Print("hiding screen saver");
                 hideScreenSaver();
             }
             screenSaverTimerSeconds = screenSaverTimeoutSeconds;
@@ -259,7 +257,6 @@ public partial class GuiManager : Control
             .ContinueWith(t => {
                 if (!t.IsCompletedSuccessfully) {
                     logger.Error($"Failed to fetch game list: {t.Exception}");
-                    GD.Print($"Failed to fetch game list: {t.Exception}"); 
                     gameTitles = errorList;
                     return;
                 }
@@ -267,13 +264,11 @@ public partial class GuiManager : Control
                 var res = t.Result.into_result<List<DevcadeGame>>();
                 if (!res.is_ok()) {
                     logger.Error($"Failed to fetch game list: {res.err().unwrap()}");
-                    GD.Print($"Failed to fetch game list: {res.err().unwrap()}"); 
                     gameTitles = errorList;
                     return;
                 }
 
                 logger.Info("Got game list, setting titles");
-                GD.Print("Got game list, setting titles");
 
                 gameTitles = res.unwrap();
 
@@ -285,7 +280,6 @@ public partial class GuiManager : Control
             })
             .ContinueWith(_ => {
                 logger.Info("Setting cards");
-                GD.Print("setting cards");
 
                 loadBanners();
 
@@ -321,7 +315,6 @@ public partial class GuiManager : Control
                 }
                 catch (Exception e) {
                     logger.Warn($"Unable to set card: {e.Message}");
-                    GD.Print($"Unable to set card: {e.Message}");
                 }
             }
 
@@ -376,6 +369,8 @@ public partial class GuiManager : Control
     /// </summary>
     public void showScreenSaver()
     {
+        logger.Info("Showing Screen Saver");
+
         screenSaver.CallDeferred("show");
         screenSaverAnimation.CallDeferred("play");
     }
@@ -386,6 +381,8 @@ public partial class GuiManager : Control
     /// </summary>
     public void hideScreenSaver()
     {
+        logger.Info("Hiding Screen Saver");
+
         screenSaver.CallDeferred("hide");
         screenSaverAnimation.CallDeferred("stop");
     }
@@ -418,7 +415,7 @@ public partial class GuiManager : Control
     public async Task launchGame(DevcadeGame game) 
     {
         this.reloadingGameList = true;
-        GD.Print("launching game: " + game.name);
+        logger.Info("launching game: " + game.name);
 
         showLoadingAnimation();
 
@@ -430,7 +427,6 @@ public partial class GuiManager : Control
                 }
                 else {
                     logger.Error("Failed to launch game: " + res.Exception);
-                    GD.Print("Failed to launch game: " + res.Exception);
                     this.reloadingGameList = false;
                 }
         });

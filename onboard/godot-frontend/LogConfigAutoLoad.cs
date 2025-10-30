@@ -11,6 +11,8 @@ public partial class LogConfigAutoLoad : Node
     /// </summary>
     public LogConfigAutoLoad()
     {
+        // log file name
+        log4net.GlobalContext.Properties["LogFileName"] = "latest.log";
         // set where to log
         log4net.GlobalContext.Properties["LogFilePath"] = "/home/skye/.devcade/logs/frontend";
         log4net.Config.XmlConfigurator.Configure(new FileInfo("app.config"));
