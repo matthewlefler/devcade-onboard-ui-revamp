@@ -1,7 +1,7 @@
 using onboard.devcade;
 using System.Collections.Generic;
 
-namespace GodotFrontend;
+namespace onboard.devcade.GUI;
 
 interface GuiInterface
 {

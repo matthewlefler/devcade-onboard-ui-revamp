@@ -98,16 +98,8 @@ public static class LogConfig {
             )
         ),
         new NS(
-            "onboard.ui",
-            Level.INHERIT,
-            new NS(
-                "onboard.ui.Devcade",
-                Level.INHERIT
-            ),
-            new NS(
-                "onboard.ui.Menu",
-                Level.INHERIT
-            )
+            "onboard.GUI",
+            Level.INHERIT
         ),
         new NS(
             "onboard.util",

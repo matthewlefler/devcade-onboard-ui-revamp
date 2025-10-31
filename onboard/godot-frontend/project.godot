@@ -16,10 +16,14 @@ config/features=PackedStringArray("4.4", "C#", "GL Compatibility")
 run/low_processor_mode=true
 config/icon="res://icon.svg"
 
+[autoload]
+
+LogConfigAutoLoad="*res://LogConfigAutoLoad.cs"
+
 [display]
 
 window/size/viewport_width=900
-window/size/viewport_height=1600
+window/size/viewport_height=2100
 window/stretch/mode="canvas_items"
 window/viewport_width=900
 window/viewport_height=1600
