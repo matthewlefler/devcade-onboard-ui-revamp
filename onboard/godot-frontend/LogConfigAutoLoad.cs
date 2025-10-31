@@ -15,7 +15,7 @@ public partial class LogConfigAutoLoad : Node
         Env.load("../.env");
 
         // log file name
-        log4net.GlobalContext.Properties["LogFileName"] = "lastest.log";
+        log4net.GlobalContext.Properties["LogFileName"] = "latest.log";
         // set where to log
         log4net.GlobalContext.Properties["LogFilePath"] = Env.get("DEVCADE_PATH").unwrap_or("~/.devcade") + "/logs/frontend";
         // load the configuration file
