@@ -51,26 +51,9 @@ public partial class GuiManager : Control
     /// </summary>
     public bool showingScreenSaverAnimation { get; private set; } = false;
 
-    // deos not run, writes an error msg, but does not block output:
-    // err msg ->
-    //
-    // log4net:ERROR Exception while reading ConfigurationSettings. Check your .config file is well formed XML.
-    // System.Configuration.ConfigurationErrorsException: Configuration system failed to initialize
-    //  ---> System.PlatformNotSupportedException: Operation is not supported on this platform.
-    //    at System.Configuration.ClientConfigPaths..ctor(String exePath, Boolean includeUserConfig)
-    //    at System.Configuration.ClientConfigPaths.GetPaths(String exePath, Boolean includeUserConfig)
-    //    at System.Configuration.ClientConfigurationHost.get_ConfigPaths()
-    //    at System.Configuration.ClientConfigurationHost.GetStreamName(String configPath)
-    //    at System.Configuration.ClientConfigurationHost.get_IsAppConfigHttp()
-    //    at System.Configuration.Internal.DelegatingConfigHost.get_IsAppConfigHttp()
-    //    at System.Configuration.ClientConfigurationSystem..ctor()
-    //    at System.Configuration.ConfigurationManager.EnsureConfigurationSystem()
-    //    --- End of inner exception stack trace ---
-    //    at System.Configuration.ConfigurationManager.PrepareConfigSystem()
-    //    at System.Configuration.ConfigurationManager.GetSection(String sectionName)
-    //    at System.Configuration.ConfigurationManager.get_AppSettings()
-    //    at log4net.Util.SystemInfo.GetAppSetting(String key)
-    //
+    /// <summary>
+    /// logger related to this class
+    /// </summary>
     private static ILog logger;
 
     /// <summary>
