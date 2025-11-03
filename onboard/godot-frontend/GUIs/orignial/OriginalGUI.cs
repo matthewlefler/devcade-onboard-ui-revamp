@@ -217,6 +217,8 @@ public partial class OriginalGUI : Control, GuiInterface
     /// </summary>
     public void showTagList()
     {
+        leftRightStickMovement = 1;
+
         state = GuiState.Tags;
         gameContainer.resetLastPressedButton();
         tagContainer.grabFocus();
@@ -225,6 +227,8 @@ public partial class OriginalGUI : Control, GuiInterface
 
     private void showGameList()
     {
+        leftRightStickMovement = 0;
+
         state = GuiState.ViewGames;
         gameContainer.grabFocus();
         camera.setRelativeTargetIndex(0);
