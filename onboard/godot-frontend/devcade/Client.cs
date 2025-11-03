@@ -76,7 +76,6 @@ public static class Client {
             v => v,
             () => {
                 logger.Warn("DEVCADE_PATH not set, using default");
-                GD.Print("DEVCADE_PATH not set, using default");
                 return "/tmp/devcade";
             });
         logger.Info("DEVCADE_PATH: " + workingDir);
@@ -94,7 +93,6 @@ public static class Client {
     [DoesNotReturn]
     private static void start() {
         logger.Info("Starting Devcade Client");
-        GD.Print("Starting Devcade Client");
         
         // Open the read/write pipe to the backend
         
@@ -104,7 +102,6 @@ public static class Client {
                 break;
             }
             logger.Warn($"Failed to open backend socket, retrying in 500ms: {socketResult.unwrap_err()}");
-            GD.Print("Failed to open backend socket, retrying in 500ms: " + socketResult.unwrap_err());
             Thread.Sleep(500);
         }
 
