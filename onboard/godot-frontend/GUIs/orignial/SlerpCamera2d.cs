@@ -29,7 +29,7 @@ public partial class SlerpCamera2d : Camera2D
     public float animationSpeed = 2.0f;
     private Vector2[] positions;
 
-    private int targetIndex;
+    public int targetIndex { get; private set; }
     private int previousTargetIndex;
 
     private float time = 0;
@@ -44,26 +44,33 @@ public partial class SlerpCamera2d : Camera2D
     private void calculatePositions(float viewportWidth)
     {
         positions = new Vector2[positionsLeft + positionsRight + 1];
-        
+
         for (int i = positionsLeft; i >= 0; i--)
         {
-            positions[i] = new Vector2(viewportWidth * -i, this.Position.Y); 
+            positions[i] = new Vector2(viewportWidth * -i, this.Position.Y);
         }
 
         positions[positionsLeft] = this.Position;
 
         for (int i = 1; i <= positionsRight; i++)
         {
-            positions[positionsLeft + i] = new Vector2(viewportWidth * i, this.Position.Y); 
+            positions[positionsLeft + i] = new Vector2(viewportWidth * i, this.Position.Y);
         }
 
         targetIndex = positionsLeft;
         previousTargetIndex = positionsLeft;
     }
 
+    int testindx = 0;
     public override void _Process(double delta)
     {
         base._Process(delta);
+
+        if(targetIndex != testindx)
+        {
+            GD.Print(targetIndex);
+            testindx = targetIndex;
+        }
 
         time += (float)delta * animationSpeed;
 
