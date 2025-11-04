@@ -61,6 +61,12 @@ public partial class GuiManager : Control
     /// </summary>
     public List<DevcadeGame> gameTitles;
 
+    /// <summary>
+    /// if the cabneit is in demo mode
+    /// i.e. show only the curated game list
+    /// </summary>
+    public bool isDemoMode = false;
+
     //////////
     // TAGS //
     //////////
@@ -69,11 +75,12 @@ public partial class GuiManager : Control
     /// a list of all the tags
     /// </summary>
     public List<Tag> tagList = new List<Tag>() { allTag };
-    
+
     /// <summary>
     /// A dictionary of tags to lists of games that have that tag
     /// </summary>
     private Dictionary<string, List<DevcadeGame>> tagLists = new Dictionary<string, List<DevcadeGame>>();
+    public readonly static Tag curatedTag = new Tag("Curated", "Curated by the Devcade Team");
     public readonly static Tag allTag = new Tag("All Games", "View all available games");
     public Tag currentTag = allTag;
 
@@ -107,11 +114,13 @@ public partial class GuiManager : Control
     /// </summary>
     public override void _Ready()
     {
-        supervisorButtonTimeoutSeconds = Convert.ToDouble(Env.get("SUPERVISOR_BUTTON_TIMEOUT_SEC").unwrap_or("5")); // default 5 seconds
+        supervisorButtonTimeoutSeconds = Env.get("SUPERVISOR_BUTTON_TIMEOUT_SEC").map_or(5.0, double.Parse); // default 5 seconds
         supervisorButtonTimerSeconds = supervisorButtonTimeoutSeconds;
 
-        screenSaverTimeoutSeconds = Convert.ToDouble(Env.get("SCREENSAVER_TIMEOUT_SEC").unwrap_or("120")); // default 2 minutes
+        screenSaverTimeoutSeconds = Env.get("SCREENSAVER_TIMEOUT_SEC").map_or(120.0, double.Parse); // default 2 minutes
         screenSaverTimerSeconds = screenSaverTimeoutSeconds;
+        
+        isDemoMode = Env.get("DEMO_MODE").map_or(false, bool.Parse);
 
         // hide the loading screen by default
         hideLoadingAnimation();
@@ -255,9 +264,28 @@ public partial class GuiManager : Control
 
                 // each game does not have the "all tag"
                 // adding it removes the requirement for an extra condition in each gui's code
-                gameTitles.ForEach(game => {
+                gameTitles.ForEach(game =>
+                {
                     game.tags.Add(allTag);
                 });
+                
+                // remove all games that do not have the curated tag if
+                // demo mode is enabled
+                if(isDemoMode)
+                {
+                    for (int i = 0; i < gameTitles.Count; i++)
+                    {
+                        DevcadeGame game = gameTitles[i];
+                        // if it does not have the curatedTag 
+                        if(!game.tags.Contains(curatedTag))
+                        {
+                            // remove it
+                            gameTitles.Remove(game);
+                            i--; // fix the index, so we don't skip any games
+                        }
+                    }
+                }
+                
             })
             .ContinueWith(_ => {
                 logger.Info("Setting cards");

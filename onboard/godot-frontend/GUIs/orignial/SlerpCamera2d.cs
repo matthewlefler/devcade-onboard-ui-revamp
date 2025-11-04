@@ -61,16 +61,9 @@ public partial class SlerpCamera2d : Camera2D
         previousTargetIndex = positionsLeft;
     }
 
-    int testindx = 0;
     public override void _Process(double delta)
     {
         base._Process(delta);
-
-        if(targetIndex != testindx)
-        {
-            GD.Print(targetIndex);
-            testindx = targetIndex;
-        }
 
         time += (float)delta * animationSpeed;
 
