@@ -5,6 +5,12 @@ def main():
     import os
     import shutil
     import subprocess
+
+    import sys
+
+    if len(sys.argv) != 2:
+        print(f"usage: {sys.argv[0]} <path-to-godot-executable>")
+    godot_path = sys.argv[1]
     
     home_path = "/home/devcade"
     out_path = "/home/devcade/publish"
@@ -27,7 +33,7 @@ def main():
     # onboard script expects an executable named frontend
     # preset name must be one defined in 'export_presets.cfg'
     # @see https://docs.godotengine.org/en/latest/tutorials/editor/command_line_tutorial.html
-    subprocess.run(f"godot --headless --path {frontend_path} --export-release Linux {out_path}/frontend", shell=True)
+    subprocess.run(f"{godot_path} --headless --path {frontend_path} --export-release Linux {out_path}/frontend", shell=True)
     
     # build and move backend
     # onboard script expects an executable named backend

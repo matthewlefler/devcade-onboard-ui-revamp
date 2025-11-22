@@ -17,7 +17,7 @@ public partial class LogConfigAutoLoad : Node
         Env.load("../.env");
 
         // log file name
-        log4net.GlobalContext.Properties["LogFileName"] = "latest.log";
+        log4net.GlobalContext.Properties["LogFileName"] = ".log";
         // set where to log
         log4net.GlobalContext.Properties["LogFilePath"] = Env.get("DEVCADE_PATH").unwrap_or("~/.devcade") + "/logs/frontend";
         // load the configuration file
@@ -57,9 +57,12 @@ public partial class LogConfigAutoLoad : Node
 
         LogConfig.init(level);
 
+        ILog logger = LogManager.GetLogger("onboard");
+        logger.Info(Time.GetDateStringFromSystem());
+        
         if (levelOption.is_none())
         {
-            LogManager.GetLogger("onboard").Error("FRONTEND_LOG is not set to a valid value");
+            logger.Error("FRONTEND_LOG is not set to a valid value");
         }
     }
 }
