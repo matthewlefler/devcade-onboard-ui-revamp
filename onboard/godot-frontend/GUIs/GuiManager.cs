@@ -155,6 +155,15 @@ public partial class GuiManager : Control
         reloadGameList();
     }
 
+    public override void _Input(InputEvent @event)
+    {
+        if(@event is InputEventAction) {
+            InputEventAction tmp = (InputEventAction) @event;
+            GD.Print(@event.Device, tmp.Action);
+            base._Input(@event);
+        }
+    }
+
     double supervisorButtonTimeoutSeconds;
     double supervisorButtonTimerSeconds;
 
