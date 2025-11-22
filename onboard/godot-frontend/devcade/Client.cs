@@ -72,13 +72,18 @@ public static class Client {
     /// </summary>
     static Client() {
         logger.Info("Initializing Devcade Client");
+        GD.Print("Initializing Devcade Client");
+
         workingDir = Env.get("DEVCADE_PATH").match(
             v => v,
             () => {
                 logger.Warn("DEVCADE_PATH not set, using default");
+                GD.PrintErr("DEVCADE_PATH not set, using default");
+
                 return "/tmp/devcade";
             });
         logger.Info("DEVCADE_PATH: " + workingDir);
+        GD.Print("DEVCADE_PATH: " + workingDir);
 
         clientThread = new Thread(start) {
             IsBackground = true
