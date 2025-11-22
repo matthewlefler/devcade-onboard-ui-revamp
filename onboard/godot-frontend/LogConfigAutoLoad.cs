@@ -56,10 +56,8 @@ public partial class LogConfigAutoLoad : Node
         }
 
         LogConfig.init(level);
-
-        ILog logger = LogManager.GetLogger("onboard");
-        logger.Info(Time.GetDateStringFromSystem());
         
+        ILog logger = LogManager.GetLogger("onboard");
         if (levelOption.is_none())
         {
             logger.Error("FRONTEND_LOG is not set to a valid value");
