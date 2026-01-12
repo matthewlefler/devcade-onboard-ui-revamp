@@ -85,17 +85,22 @@ public partial class GuiManager : Control
     public Tag currentTag = allTag;
 
     /// <summary>
-    /// true if the game list is being reloaded from the backend
+    /// True if the game list is being reloaded from the backend
     /// </summary>
     public bool reloadingGameList { get; private set; } = false;
 
     /// <summary>
-    /// the current GUI scene being shown
+    /// True if one of the games is being run, false otherwise
+    /// </summary>
+    public bool gameLauched { get; private set; } = false;
+
+    /// <summary>
+    /// The current GUI scene being shown
     /// </summary>
     GuiInterface guiScene;
 
     /// <summary>
-    /// the root node of the GUI scene
+    /// The root node of the GUI scene
     /// </summary>
     CanvasItem guiSceneRootNode;
 
@@ -156,8 +161,16 @@ public partial class GuiManager : Control
     }
 
     public override void _Input(InputEvent @event)
-    {
-        if(@event is InputEventAction) {
+    {   
+        // stop the gui from handling input when the onboard is not focused 
+        if(gameLauched == true)
+        {
+            GetViewport().SetInputAsHandled();
+            AcceptEvent();
+        }
+
+        if(@event is InputEventAction) 
+        {
             InputEventAction tmp = (InputEventAction) @event;
             GD.Print(@event.Device, tmp.Action);
             base._Input(@event);
@@ -226,6 +239,8 @@ public partial class GuiManager : Control
             }
             screenSaverTimerSeconds = screenSaverTimeoutSeconds;
         }
+        
+        
     }
 
     /// <summary>
@@ -430,14 +445,14 @@ public partial class GuiManager : Control
     /// lauch the given game
     /// </summary>
     /// <param name="game"> the game to launch </param>
-    public async Task launchGame(DevcadeGame game) 
+    public void launchGame(DevcadeGame game) 
     {
-        this.reloadingGameList = true;
+        this.gameLauched = true;
         logger.Info("launching game: " + game.name);
 
         showLoadingAnimation();
 
-        await Client.launchGame(
+        Task lauchGame = Client.launchGame(
             game.id).ContinueWith(res => {
                 if (res.IsCompletedSuccessfully) {
                     // runs after the game completes running
@@ -445,8 +460,8 @@ public partial class GuiManager : Control
                 }
                 else {
                     logger.Error("Failed to launch game: " + res.Exception);
-                    this.reloadingGameList = false;
                 }
+                this.gameLauched = false;
         });
     }
 
