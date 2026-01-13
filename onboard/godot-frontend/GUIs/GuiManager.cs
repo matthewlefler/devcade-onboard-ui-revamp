@@ -119,6 +119,9 @@ public partial class GuiManager : Control
     /// </summary>
     public override void _Ready()
     {
+        // pause when scene tree paused
+        ProcessMode = Node.ProcessModeEnum.Pausable;
+
         supervisorButtonTimeoutSeconds = Env.get("SUPERVISOR_BUTTON_TIMEOUT_SEC").map_or(5.0, double.Parse); // default 5 seconds
         supervisorButtonTimerSeconds = supervisorButtonTimeoutSeconds;
 
@@ -162,13 +165,6 @@ public partial class GuiManager : Control
 
     public override void _Input(InputEvent @event)
     {   
-        // stop the gui from handling input when the onboard is not focused 
-        if(gameLauched == true)
-        {
-            GetViewport().SetInputAsHandled();
-            AcceptEvent();
-        }
-
         if(@event is InputEventAction) 
         {
             InputEventAction tmp = (InputEventAction) @event;
@@ -447,6 +443,11 @@ public partial class GuiManager : Control
     /// <param name="game"> the game to launch </param>
     public void launchGame(DevcadeGame game) 
     {
+
+        // pause when a game is launched so the onboard does not receive input when not focused 
+        SceneTree tree = GetTree();
+        tree.pause = true;
+        
         this.gameLauched = true;
         logger.Info("launching game: " + game.name);
 
@@ -461,6 +462,7 @@ public partial class GuiManager : Control
                 else {
                     logger.Error("Failed to launch game: " + res.Exception);
                 }
+                tree.pause = false; // unpause
                 this.gameLauched = false;
         });
     }
