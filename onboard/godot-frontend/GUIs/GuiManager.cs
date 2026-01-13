@@ -441,19 +441,19 @@ public partial class GuiManager : Control
     /// lauch the given game
     /// </summary>
     /// <param name="game"> the game to launch </param>
-    public void launchGame(DevcadeGame game) 
+    public async Task launchGame(DevcadeGame game) 
     {
 
         // pause when a game is launched so the onboard does not receive input when not focused 
         SceneTree tree = GetTree();
-        tree.pause = true;
+        tree.Paused = true;
         
         this.gameLauched = true;
         logger.Info("launching game: " + game.name);
 
         showLoadingAnimation();
 
-        Task lauchGame = Client.launchGame(
+        await Client.launchGame(
             game.id).ContinueWith(res => {
                 if (res.IsCompletedSuccessfully) {
                     // runs after the game completes running
@@ -462,7 +462,7 @@ public partial class GuiManager : Control
                 else {
                     logger.Error("Failed to launch game: " + res.Exception);
                 }
-                tree.pause = false; // unpause
+                tree.Paused = false; // unpause
                 this.gameLauched = false;
         });
     }
