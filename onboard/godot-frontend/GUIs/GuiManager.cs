@@ -162,12 +162,12 @@ public partial class GuiManager : Control
 
     public override void _Input(InputEvent @event)
     {   
-        if(@event is InputEventAction) 
-        {
-            InputEventAction tmp = (InputEventAction) @event;
-            GD.Print(@event.Device, tmp.Action);
-            base._Input(@event);
-        }
+        // if(@event is InputEventAction) 
+        // {
+        //     InputEventAction tmp = (InputEventAction) @event;
+        //     GD.Print(@event.Device, tmp.Action);
+        //     base._Input(@event);
+        // }
     }
 
     double supervisorButtonTimeoutSeconds;
@@ -218,7 +218,10 @@ public partial class GuiManager : Control
                 // if the timer has timed out
                 // kill the currently running game 
                 // and show the screensaver
-                _ = killGame();
+                if(gameLauched)
+                {
+                    _ = killGame();
+                }
                 showingScreenSaverAnimation = true;
                 showScreenSaver();
             }
@@ -440,6 +443,7 @@ public partial class GuiManager : Control
     /// <param name="game"> the game to launch </param>
     public async Task launchGame(DevcadeGame game) 
     {
+        long previousProcessMode = (long) this.ProcessMode;
         // pause when a game is launched so the onboard does not receive input when not focused 
         // SceneTree tree = GetTree();
         // tree.Paused = true;
@@ -460,8 +464,7 @@ public partial class GuiManager : Control
                     logger.Error("Failed to launch game: " + res.Exception);
                 }
                 // ProcessMode = ProcessModeEnum.Always; 
-                long ProcessModeAlways = (long) ProcessModeEnum.Always;
-                this.SetDeferred("this.ProcessMode", ProcessModeAlways);
+                this.SetDeferred("process_mode", previousProcessMode);
 
                 this.gameLauched = false;
         });

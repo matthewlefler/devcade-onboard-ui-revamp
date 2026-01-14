@@ -72,18 +72,15 @@ public static class Client {
     /// </summary>
     static Client() {
         logger.Info("Initializing Devcade Client");
-        GD.Print("Initializing Devcade Client");
 
         workingDir = Env.get("DEVCADE_PATH").match(
             v => v,
             () => {
                 logger.Warn("DEVCADE_PATH not set, using default");
-                GD.PrintErr("DEVCADE_PATH not set, using default");
 
                 return "/tmp/devcade";
             });
         logger.Info("DEVCADE_PATH: " + workingDir);
-        GD.Print("DEVCADE_PATH: " + workingDir);
 
         clientThread = new Thread(start) {
             IsBackground = true
@@ -98,7 +95,6 @@ public static class Client {
     [DoesNotReturn]
     private static void start() {
         logger.Info("Starting Devcade Client");
-        GD.Print("Starting Devcade Client");
         
         // Open the read/write pipe to the backend
         
@@ -108,13 +104,11 @@ public static class Client {
                 break;
             }
             logger.Warn($"Failed to open backend socket, retrying in 500ms: {socketResult.unwrap_err()}");
-            GD.PrintErr($"Failed to open backend socket, retrying in 500ms: {socketResult.unwrap_err()}");
 
             Thread.Sleep(500);
         }
 
         logger.Info($"Opened read pipe: {workingDir}/onboard.sock");
-        GD.Print($"Opened read pipe: {workingDir}/onboard.sock");
 
         repeatPing(5000, 5000);
 
@@ -122,7 +116,6 @@ public static class Client {
         while (true) {
             if (brokenPipe) {
                 logger.Debug("Attempting to fix broken pipe");
-                GD.PrintErr("Attempting to fix broken pipe");
 
                 fixPipes();
                 Thread.Sleep(500);
@@ -137,14 +130,12 @@ public static class Client {
             }
             
             logger.Trace("Received message: " + message);
-            GD.Print("Received message: " + message);
             
             // Parse the message
             Response res = Response.deserialize(message);
 
             if (!tasks.ContainsKey(res.request_id)) {
                 logger.Warn("Received response for unknown request id: " + res.request_id);
-                GD.PrintErr("Received response for unknown request id: " + res.request_id);
 
                 continue;
             }
