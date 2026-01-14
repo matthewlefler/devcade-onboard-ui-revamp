@@ -119,9 +119,6 @@ public partial class GuiManager : Control
     /// </summary>
     public override void _Ready()
     {
-        // pause when scene tree paused
-        ProcessMode = Node.ProcessModeEnum.Pausable;
-
         supervisorButtonTimeoutSeconds = Env.get("SUPERVISOR_BUTTON_TIMEOUT_SEC").map_or(5.0, double.Parse); // default 5 seconds
         supervisorButtonTimerSeconds = supervisorButtonTimeoutSeconds;
 
@@ -443,10 +440,10 @@ public partial class GuiManager : Control
     /// <param name="game"> the game to launch </param>
     public async Task launchGame(DevcadeGame game) 
     {
-
         // pause when a game is launched so the onboard does not receive input when not focused 
-        SceneTree tree = GetTree();
-        tree.Paused = true;
+        // SceneTree tree = GetTree();
+        // tree.Paused = true;
+        ProcessMode = ProcessModeEnum.Disabled;
         
         this.gameLauched = true;
         logger.Info("launching game: " + game.name);
@@ -462,7 +459,10 @@ public partial class GuiManager : Control
                 else {
                     logger.Error("Failed to launch game: " + res.Exception);
                 }
-                tree.Paused = false; // unpause
+                // ProcessMode = ProcessModeEnum.Always; 
+                long ProcessModeAlways = (long) ProcessModeEnum.Always;
+                this.SetDeferred("this.ProcessMode", ProcessModeAlways);
+
                 this.gameLauched = false;
         });
     }
