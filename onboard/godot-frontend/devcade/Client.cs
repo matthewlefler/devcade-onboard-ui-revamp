@@ -76,10 +76,13 @@ public static class Client {
         workingDir = Env.get("DEVCADE_PATH").match(
             v => v,
             () => {
+                GD.PrintErr("DEVCADE_PATH not set, using default");
                 logger.Warn("DEVCADE_PATH not set, using default");
 
                 return "/tmp/devcade";
             });
+
+        GD.Print("DEVCADE_PATH: " + workingDir);
         logger.Info("DEVCADE_PATH: " + workingDir);
 
         clientThread = new Thread(start) {
