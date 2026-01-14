@@ -177,7 +177,6 @@ public partial class GuiManager : Control
     double screenSaverTimerSeconds;
     public override void _Process(double delta)
     {
-        GD.Print("updated");
         // frontend reset button, reloads all the games from the backend
         if (Input.IsActionPressed("Player1_Menu") && Input.IsActionPressed("Player2_Menu"))
         {
