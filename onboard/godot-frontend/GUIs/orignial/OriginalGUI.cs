@@ -124,33 +124,36 @@ public partial class OriginalGUI : Control, GuiInterface
             }
         }
         
-        // stick right
-        if (@event.IsActionPressed("Player1_StickRight") || @event.IsActionPressed("Player2_StickRight"))
+        if (state != GuiState.Description)
         {
-            leftRightStickMovement++;
-            if (leftRightStickMovement > tagContainer.Columns)
+            // stick right
+            if (@event.IsActionPressed("Player1_StickRight") || @event.IsActionPressed("Player2_StickRight"))
             {
-                leftRightStickMovement = tagContainer.Columns;
+                leftRightStickMovement++;
+                if (leftRightStickMovement > tagContainer.Columns)
+                {
+                    leftRightStickMovement = tagContainer.Columns;
+                }
+
+                if (leftRightStickMovement == 1)
+                {
+                    showTagList();
+                }
             }
 
-            if (leftRightStickMovement == 1)
+            // stick left
+            if (@event.IsActionPressed("Player1_StickLeft") || @event.IsActionPressed("Player2_StickLeft"))
             {
-                showTagList();
-            }
-        }
+                leftRightStickMovement--;
+                if (leftRightStickMovement < 0)
+                {
+                    leftRightStickMovement = 0;
+                }
 
-        // stick left
-        if (@event.IsActionPressed("Player1_StickLeft") || @event.IsActionPressed("Player2_StickLeft"))
-        {
-            leftRightStickMovement--;
-            if (leftRightStickMovement < 0)
-            {
-                leftRightStickMovement = 0;
-            }
-
-            if (leftRightStickMovement == 0)
-            {
-                showGameList();
+                if (leftRightStickMovement == 0)
+                {
+                    showGameList();
+                }
             }
         }
     }
