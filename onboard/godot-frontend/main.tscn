@@ -861,6 +861,7 @@ animations = [{
 }]
 
 [node name="main_node" type="Control" node_paths=PackedStringArray("loadingScreen", "loadingAnimation", "screenSaver", "screenSaverAnimation")]
+process_mode = 1
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
