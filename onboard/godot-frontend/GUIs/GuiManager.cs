@@ -119,6 +119,10 @@ public partial class GuiManager : Control
     /// </summary>
     public override void _Ready()
     {
+        // get the logger
+        logger = LogManager.GetLogger("onboard.GUI");
+        logger.Info($"Date: {Time.GetDateStringFromSystem()} \n");
+
         supervisorButtonTimeoutSeconds = Env.get("SUPERVISOR_BUTTON_TIMEOUT_SEC").map_or(5.0, double.Parse); // default 5 seconds
         supervisorButtonTimerSeconds = supervisorButtonTimeoutSeconds;
 
@@ -244,12 +248,7 @@ public partial class GuiManager : Control
     /// </summary>
     public GuiManager()
     {
-        // get the logger
-        logger = LogManager.GetLogger("onboard.GUI");
-        logger.Info($"Date: {Time.GetDateStringFromSystem()} \n");
 
-        // start client (backend networked communicator)
-        Client.init();
     }
 
     private Task reloadGameList()

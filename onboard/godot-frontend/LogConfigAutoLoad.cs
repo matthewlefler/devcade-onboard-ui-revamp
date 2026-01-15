@@ -18,6 +18,9 @@ public partial class LogConfigAutoLoad : Node
         // load the .env file (contains the enviorment variables)
         Env.load("../.env");
 
+        // start client (backend networked communicator)
+        onboard.devcade.Client.init();
+
         // log file name
         log4net.GlobalContext.Properties["LogFileName"] = ".log";
         // set where to log
