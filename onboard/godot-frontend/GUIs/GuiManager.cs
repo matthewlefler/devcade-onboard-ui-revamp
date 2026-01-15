@@ -204,6 +204,7 @@ public partial class GuiManager : Control
                 // if the timer has timed out
                 // kill the currently running game
                 _ = killGame();
+                GD.Print("log: Killing current running game");
             }
         }
         else
