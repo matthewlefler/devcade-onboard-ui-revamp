@@ -166,10 +166,15 @@ public partial class GuiManager : Control
 
     public override void _Input(InputEvent @event)
     {   
-        // if(@event is InputEventJoypadButton joy)
-        // {
-        //     GD.Print(joy.Device, joy.ButtonIndex);
-        // }
+        if(@event is InputEventJoypadButton joy)
+        {
+            GD.Print(joy.Device, joy.ButtonIndex);
+        }
+
+        if(@event is InputEventJoypadMotion axis)
+        {
+            GD.Print(axis.Device, axis.Axis);
+        }
     }
 
     double supervisorButtonTimeoutSeconds;
