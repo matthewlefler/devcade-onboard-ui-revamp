@@ -166,11 +166,16 @@ public partial class GuiManager : Control
 
     public override void _Input(InputEvent @event)
     {   
-        // if(@event is InputEventAction) 
+        // string action_name = "";
+        // if(@event.IsActionType()) 
         // {
-        //     InputEventAction tmp = (InputEventAction) @event;
-        //     GD.Print(@event.Device, tmp.Action);
-        //     base._Input(@event);
+        //     string extra = " nope";
+        //     if(@event.IsAction(action_name)) 
+        //     {
+        //         extra = action_name; 
+        //     }
+
+        //     GD.Print(@event.Device, extra);
         // }
     }
 
@@ -199,12 +204,18 @@ public partial class GuiManager : Control
         if (SupervisorButton.isSupervisorButtonPressed())
         {
             supervisorButtonTimerSeconds -= delta;
+            if(supervisorButtonTimerSeconds - delta < Math.Floor(supervisorButtonTimeoutSeconds))
+            {
+                GD.Print($"launched game will be killed in {supervisorButtonTimerSeconds} seconds");
+            }
+
             if (supervisorButtonTimerSeconds <= 0.0)
             {
                 // if the timer has timed out
                 // kill the currently running game
                 _ = killGame();
                 GD.Print("log: Killing current running game");
+                supervisorButtonTimerSeconds = supervisorButtonTimeoutSeconds;
             }
         }
         else
@@ -438,11 +449,12 @@ public partial class GuiManager : Control
     }
 
     /// <summary>
-    /// lauch the given game
+    /// launch the given game
     /// </summary>
     /// <param name="game"> the game to launch </param>
     public async Task launchGame(DevcadeGame game) 
     {
+        // this has to be a long because the SetDeferred func takes a variant that does not accept an enum
         long previousProcessMode = (long) guiSceneRootNode.ProcessMode;
         // pause when a game is launched so the onboard does not receive input when not focused 
         // ProcessMode = ProcessModeEnum.Disabled;
