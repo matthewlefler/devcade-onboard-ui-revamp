@@ -166,16 +166,9 @@ public partial class GuiManager : Control
 
     public override void _Input(InputEvent @event)
     {   
-        // string action_name = "";
-        // if(@event.IsActionType()) 
+        // if(@event is InputEventJoypadButton joy)
         // {
-        //     string extra = " nope";
-        //     if(@event.IsAction(action_name)) 
-        //     {
-        //         extra = action_name; 
-        //     }
-
-        //     GD.Print(@event.Device, extra);
+        //     GD.Print(joy.Device, joy.ButtonIndex);
         // }
     }
 
