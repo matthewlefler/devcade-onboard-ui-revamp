@@ -180,20 +180,40 @@ public partial class GuiManager : Control
     double supervisorButtonTimeoutSeconds;
     double supervisorButtonTimerSeconds;
 
+    static readonly double reloadButtonCooldown = 1.0; 
+    double reloadButtonCooldownTimer = reloadButtonCooldown; 
+    static readonly double switchDevButtonCooldown = 1.0; 
+    double switchDevButtonCooldownTimer = switchDevButtonCooldown; 
+
     double screenSaverTimeoutSeconds;
     double screenSaverTimerSeconds;
+
     public override void _Process(double delta)
     {
+        reloadButtonCooldownTimer -= delta;
+        if(reloadButtonCooldownTimer < 0)
+        {
+            reloadButtonCooldownTimer = 0;
+        }
+
         // frontend reset button, reloads all the games from the backend
-        if (Input.IsActionPressed("Player1_Menu") && Input.IsActionPressed("Player2_Menu"))
+        if (Input.IsActionPressed("Player1_Menu") && Input.IsActionPressed("Player2_Menu") && reloadButtonCooldownTimer <= 0)
         {
             reloadGameList();
+            reloadButtonCooldownTimer = reloadButtonCooldown;
+        }
+
+        switchDevButtonCooldownTimer -= delta;
+        if(switchDevButtonCooldownTimer < 0)
+        {
+            switchDevButtonCooldownTimer = 0;
         }
 
         // switch between dev and normal mode
-        if (Input.IsActionPressed("Player1_B4") && Input.IsActionPressed("Player2_B4"))
+        if (Input.IsActionPressed("Player1_B4") && Input.IsActionPressed("Player2_B4") && switchDevButtonCooldownTimer <= 0)
         {
             Client.setProduction(!Client.isProduction).ContinueWith(_ => { setTag(allTag); reloadGameList(); });
+            switchDevButtonCooldownTimer = switchDevButtonCooldown;
         }
 
         //
@@ -202,10 +222,6 @@ public partial class GuiManager : Control
         if (SupervisorButton.isSupervisorButtonPressed())
         {
             supervisorButtonTimerSeconds -= delta;
-            if(supervisorButtonTimerSeconds - delta < Math.Floor(supervisorButtonTimeoutSeconds))
-            {
-                GD.Print($"launched game will be killed in {supervisorButtonTimerSeconds} seconds");
-            }
 
             if (supervisorButtonTimerSeconds <= 0.0)
             {
@@ -213,6 +229,8 @@ public partial class GuiManager : Control
                 // kill the currently running game
                 _ = killGame();
                 GD.Print("log: Killing current running game");
+                logger.Info("Killing current running game");
+                
                 supervisorButtonTimerSeconds = supervisorButtonTimeoutSeconds;
             }
         }
@@ -439,7 +457,6 @@ public partial class GuiManager : Control
     /// <summary>
     /// initilizes a gui object with the taglist and game list
     /// </summary>
-    /// <exception cref="ApplicationException"> throws if the current GUI does not implement the GuiInterface </exception>
     private void initGUI()
     {
         guiScene.setGameList(tagLists[currentTag.name], this);
