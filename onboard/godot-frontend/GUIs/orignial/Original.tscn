@@ -76,12 +76,14 @@ theme_override_fonts/font = ExtResource("4_mmnpk")
 theme_override_font_sizes/font_size = 121
 text = "Title"
 horizontal_alignment = 1
+autowrap_mode = 2
 
 [node name="description" type="Label" parent="DescriptionContainer/TextureRect2/MarginContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("4_mmnpk")
 theme_override_font_sizes/font_size = 37
 text = "Description"
+autowrap_mode = 2
 
 [node name="Camera2D" type="Camera2D" parent="."]
 anchor_mode = 0

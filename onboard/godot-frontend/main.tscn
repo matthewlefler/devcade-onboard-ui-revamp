@@ -861,6 +861,7 @@ animations = [{
 }]
 
 [node name="main_node" type="Control" node_paths=PackedStringArray("loadingScreen", "loadingAnimation", "screenSaver", "screenSaverAnimation")]
+process_mode = 1
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -873,8 +874,8 @@ script = ExtResource("1_ig7tw")
 initialGuiScene = ExtResource("2_lquwl")
 loadingScreen = NodePath("loadingScreen")
 loadingAnimation = NodePath("loadingScreen/VBoxContainer/CenterContainer/loadingAnimation")
-screenSaver = NodePath("Panel")
-screenSaverAnimation = NodePath("Panel/AspectRatioContainer/CenterContainer/screenSaverAnimation")
+screenSaver = NodePath("screensaver")
+screenSaverAnimation = NodePath("screensaver/AspectRatioContainer/CenterContainer/screenSaverAnimation")
 
 [node name="loadingScreen" type="Panel" parent="."]
 top_level = true
@@ -915,7 +916,7 @@ size_flags_vertical = 6
 [node name="loadingAnimation" type="AnimatedSprite2D" parent="loadingScreen/VBoxContainer/CenterContainer"]
 sprite_frames = ExtResource("3_h2yge")
 
-[node name="Panel" type="Panel" parent="."]
+[node name="screensaver" type="Panel" parent="."]
 top_level = true
 z_index = 4095
 layout_mode = 1
@@ -926,7 +927,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_lquwl")
 
-[node name="AspectRatioContainer" type="AspectRatioContainer" parent="Panel"]
+[node name="AspectRatioContainer" type="AspectRatioContainer" parent="screensaver"]
 top_level = true
 layout_mode = 1
 anchors_preset = 15
@@ -935,12 +936,12 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="CenterContainer" type="CenterContainer" parent="Panel/AspectRatioContainer"]
+[node name="CenterContainer" type="CenterContainer" parent="screensaver/AspectRatioContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 
-[node name="screenSaverAnimation" type="AnimatedSprite2D" parent="Panel/AspectRatioContainer/CenterContainer"]
+[node name="screenSaverAnimation" type="AnimatedSprite2D" parent="screensaver/AspectRatioContainer/CenterContainer"]
 z_index = 4095
 sprite_frames = SubResource("SpriteFrames_1iygd")
 animation = &"new_animation"

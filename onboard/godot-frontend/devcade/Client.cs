@@ -72,12 +72,17 @@ public static class Client {
     /// </summary>
     static Client() {
         logger.Info("Initializing Devcade Client");
+
         workingDir = Env.get("DEVCADE_PATH").match(
             v => v,
             () => {
+                GD.PrintErr("DEVCADE_PATH not set, using default");
                 logger.Warn("DEVCADE_PATH not set, using default");
+
                 return "/tmp/devcade";
             });
+
+        GD.Print("DEVCADE_PATH: " + workingDir);
         logger.Info("DEVCADE_PATH: " + workingDir);
 
         clientThread = new Thread(start) {
@@ -102,6 +107,7 @@ public static class Client {
                 break;
             }
             logger.Warn($"Failed to open backend socket, retrying in 500ms: {socketResult.unwrap_err()}");
+
             Thread.Sleep(500);
         }
 
@@ -113,6 +119,7 @@ public static class Client {
         while (true) {
             if (brokenPipe) {
                 logger.Debug("Attempting to fix broken pipe");
+
                 fixPipes();
                 Thread.Sleep(500);
             }
@@ -132,6 +139,7 @@ public static class Client {
 
             if (!tasks.ContainsKey(res.request_id)) {
                 logger.Warn("Received response for unknown request id: " + res.request_id);
+
                 continue;
             }
             

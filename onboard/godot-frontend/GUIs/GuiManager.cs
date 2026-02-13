@@ -85,17 +85,22 @@ public partial class GuiManager : Control
     public Tag currentTag = allTag;
 
     /// <summary>
-    /// true if the game list is being reloaded from the backend
+    /// True if the game list is being reloaded from the backend
     /// </summary>
     public bool reloadingGameList { get; private set; } = false;
 
     /// <summary>
-    /// the current GUI scene being shown
+    /// True if one of the games is being run, false otherwise
+    /// </summary>
+    public bool gameLauched { get; private set; } = false;
+
+    /// <summary>
+    /// The current GUI scene being shown
     /// </summary>
     GuiInterface guiScene;
 
     /// <summary>
-    /// the root node of the GUI scene
+    /// The root node of the GUI scene
     /// </summary>
     CanvasItem guiSceneRootNode;
 
@@ -114,6 +119,10 @@ public partial class GuiManager : Control
     /// </summary>
     public override void _Ready()
     {
+        // get the logger
+        logger = LogManager.GetLogger("onboard.GUI");
+        logger.Info($"Date: {Time.GetDateStringFromSystem()} \n");
+
         supervisorButtonTimeoutSeconds = Env.get("SUPERVISOR_BUTTON_TIMEOUT_SEC").map_or(5.0, double.Parse); // default 5 seconds
         supervisorButtonTimerSeconds = supervisorButtonTimeoutSeconds;
 
@@ -155,23 +164,56 @@ public partial class GuiManager : Control
         reloadGameList();
     }
 
+    public override void _Input(InputEvent @event)
+    {   
+        if(@event is InputEventJoypadButton joy)
+        {
+            GD.Print(joy.Device, joy.ButtonIndex);
+        }
+
+        if(@event is InputEventJoypadMotion axis)
+        {
+            GD.Print(axis.Device, axis.Axis);
+        }
+    }
+
     double supervisorButtonTimeoutSeconds;
     double supervisorButtonTimerSeconds;
 
+    static readonly double reloadButtonCooldown = 1.0; 
+    double reloadButtonCooldownTimer = reloadButtonCooldown; 
+    static readonly double switchDevButtonCooldown = 1.0; 
+    double switchDevButtonCooldownTimer = switchDevButtonCooldown; 
+
     double screenSaverTimeoutSeconds;
     double screenSaverTimerSeconds;
+
     public override void _Process(double delta)
     {
+        reloadButtonCooldownTimer -= delta;
+        if(reloadButtonCooldownTimer < 0)
+        {
+            reloadButtonCooldownTimer = 0;
+        }
+
         // frontend reset button, reloads all the games from the backend
-        if (Input.IsActionPressed("Player1_Menu") && Input.IsActionPressed("Player2_Menu"))
+        if (Input.IsActionPressed("Player1_Menu") && Input.IsActionPressed("Player2_Menu") && reloadButtonCooldownTimer <= 0)
         {
             reloadGameList();
+            reloadButtonCooldownTimer = reloadButtonCooldown;
+        }
+
+        switchDevButtonCooldownTimer -= delta;
+        if(switchDevButtonCooldownTimer < 0)
+        {
+            switchDevButtonCooldownTimer = 0;
         }
 
         // switch between dev and normal mode
-        if (Input.IsActionPressed("Player1_B4") && Input.IsActionPressed("Player2_B4"))
+        if (Input.IsActionPressed("Player1_B4") && Input.IsActionPressed("Player2_B4") && switchDevButtonCooldownTimer <= 0)
         {
             Client.setProduction(!Client.isProduction).ContinueWith(_ => { setTag(allTag); reloadGameList(); });
+            switchDevButtonCooldownTimer = switchDevButtonCooldown;
         }
 
         //
@@ -180,11 +222,16 @@ public partial class GuiManager : Control
         if (SupervisorButton.isSupervisorButtonPressed())
         {
             supervisorButtonTimerSeconds -= delta;
+
             if (supervisorButtonTimerSeconds <= 0.0)
             {
                 // if the timer has timed out
                 // kill the currently running game
                 _ = killGame();
+                GD.Print("log: Killing current running game");
+                logger.Info("Killing current running game");
+                
+                supervisorButtonTimerSeconds = supervisorButtonTimeoutSeconds;
             }
         }
         else
@@ -203,7 +250,10 @@ public partial class GuiManager : Control
                 // if the timer has timed out
                 // kill the currently running game 
                 // and show the screensaver
-                _ = killGame();
+                if(gameLauched)
+                {
+                    _ = killGame();
+                }
                 showingScreenSaverAnimation = true;
                 showScreenSaver();
             }
@@ -217,6 +267,8 @@ public partial class GuiManager : Control
             }
             screenSaverTimerSeconds = screenSaverTimeoutSeconds;
         }
+        
+        
     }
 
     /// <summary>
@@ -224,12 +276,7 @@ public partial class GuiManager : Control
     /// </summary>
     public GuiManager()
     {
-        // get the logger
-        logger = LogManager.GetLogger("onboard.GUI");
-        logger.Info($"Date: {Time.GetDateStringFromSystem()} \n");
 
-        // start client (backend networked communicator)
-        Client.init();
     }
 
     private Task reloadGameList()
@@ -410,7 +457,6 @@ public partial class GuiManager : Control
     /// <summary>
     /// initilizes a gui object with the taglist and game list
     /// </summary>
-    /// <exception cref="ApplicationException"> throws if the current GUI does not implement the GuiInterface </exception>
     private void initGUI()
     {
         guiScene.setGameList(tagLists[currentTag.name], this);
@@ -418,12 +464,18 @@ public partial class GuiManager : Control
     }
 
     /// <summary>
-    /// lauch the given game
+    /// launch the given game
     /// </summary>
     /// <param name="game"> the game to launch </param>
     public async Task launchGame(DevcadeGame game) 
     {
-        this.reloadingGameList = true;
+        // this has to be a long because the SetDeferred func takes a variant that does not accept an enum
+        long previousProcessMode = (long) guiSceneRootNode.ProcessMode;
+        // pause when a game is launched so the onboard does not receive input when not focused 
+        // ProcessMode = ProcessModeEnum.Disabled;
+        guiSceneRootNode.ProcessMode = ProcessModeEnum.Disabled;
+        
+        this.gameLauched = true;
         logger.Info("launching game: " + game.name);
 
         showLoadingAnimation();
@@ -436,8 +488,11 @@ public partial class GuiManager : Control
                 }
                 else {
                     logger.Error("Failed to launch game: " + res.Exception);
-                    this.reloadingGameList = false;
                 }
+                // ProcessMode = ProcessModeEnum.Always; 
+                guiSceneRootNode.SetDeferred("process_mode", previousProcessMode);
+
+                this.gameLauched = false;
         });
     }
 

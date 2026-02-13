@@ -92,32 +92,36 @@ public partial class GamesContainer : Control
             if (game.banner != null)
             {
 
-                TextureButton textureButton = new TextureButton();
-                textureButton.IgnoreTextureSize = true;
-                textureButton.StretchMode = TextureButton.StretchModeEnum.KeepAspectCentered;
+                TextureButton textureButton = new TextureButton
+                {
+                    IgnoreTextureSize = true,
+                    StretchMode = TextureButton.StretchModeEnum.KeepAspectCentered,
 
-                textureButton.Name = game.name;
+                    Name = game.name,
 
-                textureButton.TextureDisabled = game.banner;
-                textureButton.TextureNormal = game.banner;
-                textureButton.TextureHover = game.banner;
-                textureButton.TexturePressed = game.banner;
-                textureButton.TextureFocused = game.banner;
+                    TextureDisabled = game.banner,
+                    TextureNormal = game.banner,
+                    TextureHover = game.banner,
+                    TexturePressed = game.banner,
+                    TextureFocused = game.banner
+                };
 
                 button = textureButton;
             }
             else
             {
-                Button textButton = new Button();
-                textButton.SizeFlagsHorizontal = SizeFlags.ExpandFill;
-                textButton.SizeFlagsVertical = SizeFlags.ExpandFill;
+                Button textButton = new Button
+                {
+                    SizeFlagsHorizontal = SizeFlags.ExpandFill,
+                    SizeFlagsVertical = SizeFlags.ExpandFill,
 
-                // textButton.Theme = tagButtonTheme;
+                    // textButton.Theme = tagButtonTheme;
 
 
-                textButton.Name = game.name;
+                    Name = game.name,
 
-                textButton.Text = game.name;
+                    Text = game.name
+                };
 
                 button = textButton;
             }

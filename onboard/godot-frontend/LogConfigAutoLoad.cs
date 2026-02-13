@@ -7,17 +7,22 @@ namespace onboard;
 
 public partial class LogConfigAutoLoad : Node
 {
+    public LogConfigAutoLoad() {} // must be empty?
+
     /// <summary>
     /// load the config file as early as possible
     /// with set properties
     /// </summary>
-    public LogConfigAutoLoad()
+    public override void _EnterTree()
     {
         // load the .env file (contains the enviorment variables)
         Env.load("../.env");
 
+        // start client (backend networked communicator)
+        onboard.devcade.Client.init();
+
         // log file name
-        log4net.GlobalContext.Properties["LogFileName"] = "latest.log";
+        log4net.GlobalContext.Properties["LogFileName"] = ".log";
         // set where to log
         log4net.GlobalContext.Properties["LogFilePath"] = Env.get("DEVCADE_PATH").unwrap_or("~/.devcade") + "/logs/frontend";
         // load the configuration file
@@ -56,10 +61,11 @@ public partial class LogConfigAutoLoad : Node
         }
 
         LogConfig.init(level);
-
+        
+        ILog logger = LogManager.GetLogger("onboard");
         if (levelOption.is_none())
         {
-            LogManager.GetLogger("onboard").Error("FRONTEND_LOG is not set to a valid value");
+            logger.Error("FRONTEND_LOG is not set to a valid value");
         }
     }
 }
