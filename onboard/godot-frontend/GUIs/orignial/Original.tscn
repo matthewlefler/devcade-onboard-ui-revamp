@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://bs2l3u3gpwk3a"]
+[gd_scene load_steps=17 format=3 uid="uid://bs2l3u3gpwk3a"]
 
 [ext_resource type="Script" uid="uid://bytphx3biwmpk" path="res://GUIs/orignial/OriginalGUI.cs" id="1_eo6uj"]
 [ext_resource type="Texture2D" uid="uid://gsf5hvgxlwu8" path="res://CSHAssets/OnboardBackgroundGradient.png" id="2_4c0jd"]
@@ -10,7 +10,9 @@
 [ext_resource type="Script" uid="uid://d15s735p2xr6b" path="res://GUIs/orignial/GamesContainer.cs" id="7_s6n7q"]
 [ext_resource type="Script" uid="uid://cj0skhgydnii2" path="res://GUIs/orignial/Background.cs" id="8_4asay"]
 [ext_resource type="Script" uid="uid://bjnrrsq5svi0h" path="res://GUIs/orignial/TagContainer.cs" id="8_loec3"]
+[ext_resource type="Script" uid="uid://62sckdwbwl8r" path="res://GUIs/orignial/DevcadeIcon.cs" id="10_84p7e"]
 [ext_resource type="Script" uid="uid://bnbcabv83bi6o" path="res://GUIs/orignial/SlerpCamera2d.cs" id="10_feq1j"]
+[ext_resource type="Texture2D" uid="uid://bj333tajmq7mt" path="res://CSHAssets/transparent-dev-logo.png" id="11_7qoy5"]
 [ext_resource type="Theme" uid="uid://cfha8h63q5pfc" path="res://GUIs/orignial/tagButtonTheme.tres" id="12_vs4r3"]
 [ext_resource type="Script" uid="uid://do70tefvxy3xy" path="res://GUIs/orignial/ControlHelpTextTags.cs" id="13_6sm6r"]
 
@@ -134,6 +136,9 @@ theme_override_constants/margin_bottom = 5
 layout_mode = 2
 texture = ExtResource("2_xc2fw")
 expand_mode = 5
+script = ExtResource("10_84p7e")
+prodTexture = ExtResource("2_xc2fw")
+devTexture = ExtResource("11_7qoy5")
 
 [node name="ScrollContainer" type="ScrollContainer" parent="."]
 layout_mode = 1
