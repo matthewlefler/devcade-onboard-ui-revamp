@@ -5,8 +5,9 @@
 [ext_resource type="Texture2D" uid="uid://gsf5hvgxlwu8" path="res://CSHAssets/OnboardBackgroundGradient.png" id="2_s0yr3"]
 [ext_resource type="Script" uid="uid://ei3nslcsxscs" path="res://guiManager/FlashingRichTextLabel.cs" id="3_anfla"]
 [ext_resource type="Shader" uid="uid://b1box1f256y3s" path="res://guiManager/screensaverCSHIcons.gdshader" id="3_s0yr3"]
+[ext_resource type="Script" uid="uid://3dod6y75r7mb" path="res://guiManager/screensaver_games_animations/ScreenSaverGameAnimation.cs" id="4_q4yft"]
 [ext_resource type="Texture2D" uid="uid://d4nlo4q03fi77" path="res://CSHAssets/CSH.png" id="5_d5f7k"]
-[ext_resource type="PackedScene" uid="uid://dir1di2qk6g4o" path="res://guiManager/screensaver_games_animations/temp_game_animation.tscn" id="7_s0yr3"]
+[ext_resource type="PackedScene" uid="uid://camd641ivrd43" path="res://guiManager/screensaver_games_animations/worldOfWallHoppers/WorldOfWallHoppersScreenSaver.tscn" id="7_s0yr3"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_oh2v1"]
 shader = ExtResource("3_s0yr3")
@@ -17,10 +18,9 @@ shader_parameter/alphaScale = 0.72
 
 [sub_resource type="Theme" id="Theme_q4yft"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_s0yr3"]
-bg_color = Color(0.0925597, 0.315221, 0.35023, 1)
-
 [node name="Control" type="Control" node_paths=PackedStringArray("gamesAnimationsContainer", "backgroundIcons")]
+z_index = 4096
+y_sort_enabled = true
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -30,10 +30,33 @@ grow_vertical = 2
 script = ExtResource("1_fcd5e")
 scrollSpeed = 0.7
 gamesAnimationsContainer = NodePath("gameAnimationsContainer")
-backgroundIcons = NodePath("background/backgroundCSHIcons")
+backgroundIcons = NodePath("gameAnimationsContainer/background/background/backgroundCSHIcons")
 
-[node name="background" type="TextureRect" parent="."]
-z_index = 4000
+[node name="gameAnimationsContainer" type="Control" parent="."]
+z_as_relative = false
+y_sort_enabled = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="background" type="Control" parent="gameAnimationsContainer"]
+z_as_relative = false
+y_sort_enabled = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("4_q4yft")
+
+[node name="background" type="TextureRect" parent="gameAnimationsContainer/background"]
+z_index = 1000
+z_as_relative = false
+y_sort_enabled = true
 custom_minimum_size = Vector2(900, 0)
 layout_mode = 1
 anchors_preset = 15
@@ -46,7 +69,10 @@ size_flags_vertical = 3
 texture = ExtResource("2_s0yr3")
 expand_mode = 5
 
-[node name="backgroundCSHIcons" type="TextureRect" parent="background"]
+[node name="backgroundCSHIcons" type="TextureRect" parent="gameAnimationsContainer/background/background"]
+z_index = 1500
+z_as_relative = false
+y_sort_enabled = true
 texture_repeat = 2
 material = SubResource("ShaderMaterial_oh2v1")
 layout_mode = 1
@@ -58,23 +84,58 @@ grow_vertical = 2
 texture = ExtResource("5_d5f7k")
 expand_mode = 1
 
-[node name="AspectRatioContainer" type="AspectRatioContainer" parent="background/backgroundCSHIcons"]
-top_level = true
+[node name="WorldOfWallHoppersScreenSaver" parent="gameAnimationsContainer" instance=ExtResource("7_s0yr3")]
+z_index = 4000
+z_as_relative = false
+y_sort_enabled = true
+layout_mode = 1
+
+[node name="background2" type="Control" parent="gameAnimationsContainer"]
+z_as_relative = false
+y_sort_enabled = true
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("4_q4yft")
 
-[node name="CenterContainer" type="CenterContainer" parent="background/backgroundCSHIcons/AspectRatioContainer"]
-layout_mode = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
+[node name="background" type="TextureRect" parent="gameAnimationsContainer/background2"]
+z_index = 1000
+z_as_relative = false
+y_sort_enabled = true
+custom_minimum_size = Vector2(900, 0)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+texture = ExtResource("2_s0yr3")
+expand_mode = 5
 
-[node name="continueText" type="RichTextLabel" parent="background/backgroundCSHIcons"]
+[node name="backgroundCSHIcons" type="TextureRect" parent="gameAnimationsContainer/background2/background"]
+z_index = 1500
+z_as_relative = false
+y_sort_enabled = true
+texture_repeat = 2
+material = SubResource("ShaderMaterial_oh2v1")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("5_d5f7k")
+expand_mode = 1
+
+[node name="continueText" type="RichTextLabel" parent="."]
 z_index = 4096
 z_as_relative = false
+y_sort_enabled = true
 layout_mode = 1
 anchors_preset = 12
 anchor_top = 1.0
@@ -100,24 +161,3 @@ horizontal_alignment = 1
 vertical_alignment = 1
 script = ExtResource("3_anfla")
 end_color = Color(1, 1, 1, 0)
-
-[node name="gameAnimationsContainer" type="Control" parent="."]
-z_index = 4061
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="TempGameAnimation" parent="gameAnimationsContainer" instance=ExtResource("7_s0yr3")]
-layout_mode = 1
-
-[node name="TempGameAnimation2" parent="gameAnimationsContainer" instance=ExtResource("7_s0yr3")]
-layout_mode = 1
-
-[node name="Panel" parent="gameAnimationsContainer/TempGameAnimation2" index="0"]
-theme_override_styles/panel = SubResource("StyleBoxFlat_s0yr3")
-
-[editable path="gameAnimationsContainer/TempGameAnimation"]
-[editable path="gameAnimationsContainer/TempGameAnimation2"]

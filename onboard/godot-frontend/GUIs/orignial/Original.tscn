@@ -23,6 +23,7 @@ shader_parameter/direction = Vector2(-0.4, -0.4)
 shader_parameter/alphaScale = 0.72
 
 [node name="Original" type="Control" node_paths=PackedStringArray("camera", "gameContainer", "tagsMenu", "tagContainer", "description", "descriptionLabel", "titleLabel")]
+y_sort_enabled = true
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -40,6 +41,7 @@ titleLabel = NodePath("DescriptionContainer/TextureRect2/MarginContainer/VBoxCon
 
 [node name="DescriptionContainer" type="MarginContainer" parent="."]
 visible = false
+y_sort_enabled = true
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -52,11 +54,13 @@ theme_override_constants/margin_right = 65
 theme_override_constants/margin_bottom = 85
 
 [node name="TextureRect2" type="TextureRect" parent="DescriptionContainer"]
+y_sort_enabled = true
 layout_mode = 2
 texture = ExtResource("5_0ghq1")
 expand_mode = 1
 
 [node name="MarginContainer" type="MarginContainer" parent="DescriptionContainer/TextureRect2"]
+y_sort_enabled = true
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -69,10 +73,12 @@ theme_override_constants/margin_right = 45
 theme_override_constants/margin_bottom = 25
 
 [node name="VBoxContainer" type="VBoxContainer" parent="DescriptionContainer/TextureRect2/MarginContainer"]
+y_sort_enabled = true
 layout_mode = 2
 theme_override_constants/separation = 50
 
 [node name="title" type="Label" parent="DescriptionContainer/TextureRect2/MarginContainer/VBoxContainer"]
+y_sort_enabled = true
 layout_mode = 2
 theme_override_fonts/font = ExtResource("4_mmnpk")
 theme_override_font_sizes/font_size = 121
@@ -81,6 +87,7 @@ horizontal_alignment = 1
 autowrap_mode = 2
 
 [node name="description" type="Label" parent="DescriptionContainer/TextureRect2/MarginContainer/VBoxContainer"]
+y_sort_enabled = true
 layout_mode = 2
 theme_override_fonts/font = ExtResource("4_mmnpk")
 theme_override_font_sizes/font_size = 37
@@ -88,6 +95,7 @@ text = "Description"
 autowrap_mode = 2
 
 [node name="Camera2D" type="Camera2D" parent="."]
+y_sort_enabled = true
 anchor_mode = 0
 script = ExtResource("10_feq1j")
 easeAmount = 2.0
@@ -95,7 +103,7 @@ animationSpeed = 5.0
 
 [node name="background" type="TextureRect" parent="Camera2D" node_paths=PackedStringArray("camera")]
 z_index = -4096
-z_as_relative = false
+y_sort_enabled = true
 custom_minimum_size = Vector2(900, 0)
 offset_bottom = 50.0
 size_flags_horizontal = 3
@@ -106,6 +114,7 @@ script = ExtResource("8_4asay")
 camera = NodePath("..")
 
 [node name="backgroundCSHIcons" type="TextureRect" parent="Camera2D/background"]
+y_sort_enabled = true
 texture_repeat = 2
 material = SubResource("ShaderMaterial_loec3")
 layout_mode = 1
@@ -118,6 +127,7 @@ texture = ExtResource("3_x7jqg")
 expand_mode = 1
 
 [node name="gamesMenu" type="VBoxContainer" parent="Camera2D/background"]
+y_sort_enabled = true
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -126,6 +136,7 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="MarginContainer" type="MarginContainer" parent="Camera2D/background/gamesMenu"]
+y_sort_enabled = true
 layout_mode = 2
 theme_override_constants/margin_left = 5
 theme_override_constants/margin_top = 5
@@ -133,6 +144,7 @@ theme_override_constants/margin_right = 5
 theme_override_constants/margin_bottom = 5
 
 [node name="DevcadeIcon" type="TextureRect" parent="Camera2D/background/gamesMenu/MarginContainer"]
+y_sort_enabled = true
 layout_mode = 2
 texture = ExtResource("2_xc2fw")
 expand_mode = 5
@@ -141,6 +153,7 @@ prodTexture = ExtResource("2_xc2fw")
 devTexture = ExtResource("11_7qoy5")
 
 [node name="ScrollContainer" type="ScrollContainer" parent="."]
+y_sort_enabled = true
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 1.0
@@ -152,6 +165,7 @@ grow_horizontal = 0
 grow_vertical = 2
 
 [node name="tagContainer" type="GridContainer" parent="ScrollContainer"]
+y_sort_enabled = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -160,6 +174,7 @@ script = ExtResource("8_loec3")
 tagButtonTheme = ExtResource("12_vs4r3")
 
 [node name="gamesContainer" type="Control" parent="."]
+y_sort_enabled = true
 layout_mode = 2
 anchors_preset = 0
 offset_top = 539.0
@@ -171,16 +186,18 @@ gameButtonsScale = 1.28
 percentYPositionValue = 60.0
 
 [node name="CenterContainer" type="CenterContainer" parent="."]
+y_sort_enabled = true
 layout_mode = 1
 anchors_preset = -1
-anchor_top = 0.26375
+anchor_top = 0.213333
 anchor_right = 1.0
-anchor_bottom = 0.26375
+anchor_bottom = 0.213333
 offset_bottom = 109.0
 grow_horizontal = 2
 metadata/_edit_use_anchors_ = true
 
 [node name="controlHelpTextGames" type="Label" parent="CenterContainer"]
+y_sort_enabled = true
 layout_mode = 2
 theme_override_fonts/font = ExtResource("4_mmnpk")
 theme_override_font_sizes/font_size = 52
@@ -189,6 +206,7 @@ Press both black buttons to refresh"
 horizontal_alignment = 1
 
 [node name="CenterContainer2" type="CenterContainer" parent="."]
+y_sort_enabled = true
 layout_mode = 2
 anchor_left = 1.00222
 anchor_right = 1.00222
@@ -200,6 +218,7 @@ grow_horizontal = 2
 metadata/_edit_use_anchors_ = true
 
 [node name="controlHelpTextTags" type="Label" parent="CenterContainer2" node_paths=PackedStringArray("tagContainer")]
+y_sort_enabled = true
 custom_minimum_size = Vector2(10, 10)
 layout_mode = 2
 theme_override_colors/font_color = Color(0, 0, 0, 1)

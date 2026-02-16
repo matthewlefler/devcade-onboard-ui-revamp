@@ -54,13 +54,13 @@ public partial class Screensaver : Control
             }
         }
 
-        endPosition = new Vector2(-1 * screenWidth * (gameAnimationNodes.Count + 1), 0);
+        endPosition = new Vector2(-1 * screenWidth * (gameAnimationNodes.Count - 1), 0);
 
         for (int i = 0; i < gameAnimationNodes.Count; i++)
         {
             ScreenSaverGameAnimation anim = gameAnimationNodes[i];
 
-            anim.Position = new Vector2(screenWidth * (i + 1), 0);
+            anim.Position = new Vector2(screenWidth * i, 0);
         }
     }
 
@@ -73,6 +73,11 @@ public partial class Screensaver : Control
         }
 
         shader_offset += scrollSpeed / 230.0f;
+        if(shader_offset > 1)
+        {
+            shader_offset -= 1;
+        }
+
         setShaderXOffest(shader_offset);
 
         gamesAnimationsContainer.Position += new Vector2(-scrollSpeed, 0);
