@@ -32,3 +32,4 @@ stream = ExtResource("2_7r8jx")
 autoplay = true
 expand = true
 loop = true
+buffering_msec = 1000

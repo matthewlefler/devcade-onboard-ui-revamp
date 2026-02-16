@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://dlupqaxwr7sdp"]
+[gd_scene load_steps=17 format=3 uid="uid://dlupqaxwr7sdp"]
 
 [ext_resource type="Script" uid="uid://bd2ibq7qygtdu" path="res://guiManager/Screensaver.cs" id="1_fcd5e"]
 [ext_resource type="FontFile" uid="uid://cnha1ohwbh3ts" path="res://CSHAssets/VT323-Regular.ttf" id="2_fcd5e"]
@@ -8,6 +8,11 @@
 [ext_resource type="Script" uid="uid://3dod6y75r7mb" path="res://guiManager/screensaver_games_animations/ScreenSaverGameAnimation.cs" id="4_q4yft"]
 [ext_resource type="Texture2D" uid="uid://d4nlo4q03fi77" path="res://CSHAssets/CSH.png" id="5_d5f7k"]
 [ext_resource type="PackedScene" uid="uid://camd641ivrd43" path="res://guiManager/screensaver_games_animations/worldOfWallHoppers/WorldOfWallHoppersScreenSaver.tscn" id="7_s0yr3"]
+[ext_resource type="PackedScene" uid="uid://rf2ubr76htca" path="res://guiManager/screensaver_games_animations/BombOmbSquad/BombOmbSquadScreenSaver.tscn" id="7_usgw7"]
+[ext_resource type="Shader" uid="uid://bh58gmppws1x4" path="res://guiManager/outline.gdshader" id="10_dt653"]
+[ext_resource type="Texture2D" uid="uid://lqrfprpd7kh3" path="res://CSHAssets/transparent-logo.png" id="10_n0j55"]
+[ext_resource type="Script" uid="uid://62sckdwbwl8r" path="res://GUIs/orignial/DevcadeIcon.cs" id="11_dt653"]
+[ext_resource type="Texture2D" uid="uid://bj333tajmq7mt" path="res://CSHAssets/transparent-dev-logo.png" id="12_spuds"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_oh2v1"]
 shader = ExtResource("3_s0yr3")
@@ -17,6 +22,12 @@ shader_parameter/x_offset = 1.0
 shader_parameter/alphaScale = 0.72
 
 [sub_resource type="Theme" id="Theme_q4yft"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_spuds"]
+shader = ExtResource("10_dt653")
+shader_parameter/outline_width = 6
+shader_parameter/start_outline_color = Color(0.466667, 0, 1, 1)
+shader_parameter/end_outline_color = Color(1, 0.968627, 0, 1)
 
 [node name="Control" type="Control" node_paths=PackedStringArray("gamesAnimationsContainer", "backgroundIcons")]
 z_index = 4096
@@ -85,6 +96,12 @@ texture = ExtResource("5_d5f7k")
 expand_mode = 1
 
 [node name="WorldOfWallHoppersScreenSaver" parent="gameAnimationsContainer" instance=ExtResource("7_s0yr3")]
+z_index = 4000
+z_as_relative = false
+y_sort_enabled = true
+layout_mode = 1
+
+[node name="BombOmbSquadScreenSaver" parent="gameAnimationsContainer" instance=ExtResource("7_usgw7")]
 z_index = 4000
 z_as_relative = false
 y_sort_enabled = true
@@ -161,3 +178,29 @@ horizontal_alignment = 1
 vertical_alignment = 1
 script = ExtResource("3_anfla")
 end_color = Color(1, 1, 1, 0)
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = -5.0
+offset_top = -5.0
+offset_right = -5.0
+offset_bottom = 417.037
+grow_horizontal = 2
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 5
+
+[node name="DevcadeIcon" type="TextureRect" parent="MarginContainer"]
+z_index = 4096
+z_as_relative = false
+y_sort_enabled = true
+material = SubResource("ShaderMaterial_spuds")
+layout_mode = 2
+texture = ExtResource("10_n0j55")
+expand_mode = 5
+script = ExtResource("11_dt653")
+prodTexture = ExtResource("10_n0j55")
+devTexture = ExtResource("12_spuds")
