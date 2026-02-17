@@ -159,8 +159,7 @@ anchors_preset = -1
 anchor_left = 1.0
 anchor_right = 2.0
 anchor_bottom = 1.0
-offset_top = 569.0
-offset_bottom = 4.0
+offset_top = 600.0
 grow_horizontal = 0
 grow_vertical = 2
 
@@ -198,12 +197,14 @@ metadata/_edit_use_anchors_ = true
 
 [node name="controlHelpTextGames" type="Label" parent="CenterContainer"]
 y_sort_enabled = true
+custom_minimum_size = Vector2(900, 0)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("4_mmnpk")
 theme_override_font_sizes/font_size = 52
 text = "Press the Red Button to play! 
 Press both black buttons to refresh"
 horizontal_alignment = 1
+autowrap_mode = 2
 
 [node name="CenterContainer2" type="CenterContainer" parent="."]
 y_sort_enabled = true
@@ -219,12 +220,13 @@ metadata/_edit_use_anchors_ = true
 
 [node name="controlHelpTextTags" type="Label" parent="CenterContainer2" node_paths=PackedStringArray("tagContainer")]
 y_sort_enabled = true
-custom_minimum_size = Vector2(10, 10)
+custom_minimum_size = Vector2(900, 10.875)
 layout_mode = 2
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_fonts/font = ExtResource("4_mmnpk")
 theme_override_font_sizes/font_size = 52
 text = "Select A Tag to Search:"
 horizontal_alignment = 1
+autowrap_mode = 2
 script = ExtResource("13_6sm6r")
 tagContainer = NodePath("../../ScrollContainer/tagContainer")
