@@ -68,6 +68,7 @@ size_flags_vertical = 6
 
 [node name="loadingAnimation" type="AnimatedSprite2D" parent="loadingScreen/VBoxContainer/CenterContainer"]
 y_sort_enabled = true
+scale = Vector2(3.11989, 3.11989)
 sprite_frames = ExtResource("3_h2yge")
 
 [node name="screensaver" parent="." instance=ExtResource("5_lquwl")]
