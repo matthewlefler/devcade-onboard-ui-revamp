@@ -72,7 +72,7 @@ public partial class Screensaver : Control
             return;
         }
 
-        shader_offset += scrollSpeed / 230.0f;
+        shader_offset += scrollSpeed / 500.0f;
         if(shader_offset > 1)
         {
             shader_offset -= 1;
