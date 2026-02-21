@@ -35,13 +35,15 @@ public partial class TagContainer : GridContainer
 
         for (int i = 0; i < tagList.Count; i++)
         {
-            Button button = new Button();
-            button.SizeFlagsHorizontal = SizeFlags.ExpandFill;
-            button.SizeFlagsVertical = SizeFlags.ExpandFill;
+            Button button = new Button
+            {
+                SizeFlagsHorizontal = SizeFlags.ExpandFill,
+                SizeFlagsVertical = SizeFlags.ExpandFill,
 
-            button.Theme = tagButtonTheme;
+                Theme = tagButtonTheme,
 
-            button.Text = tagList[i].name;
+                Text = tagList[i].name
+            };
 
             Tag tag = tagList[i];
             button.Pressed += () => on_tag_pressed(tag);
@@ -49,11 +51,13 @@ public partial class TagContainer : GridContainer
 
             tagButtons[i] = button;
 
-            MarginContainer marginContainer = new MarginContainer();
-            marginContainer.SizeFlagsHorizontal = SizeFlags.ExpandFill;
-            marginContainer.SizeFlagsVertical = SizeFlags.ExpandFill;
+            MarginContainer marginContainer = new MarginContainer
+            {
+                SizeFlagsHorizontal = SizeFlags.ExpandFill,
+                SizeFlagsVertical = SizeFlags.ExpandFill,
 
-            marginContainer.Theme = tagButtonTheme;
+                Theme = tagButtonTheme
+            };
 
             marginContainer.AddChild(button);
 

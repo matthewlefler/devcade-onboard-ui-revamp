@@ -38,13 +38,7 @@ public partial class GuiManager : Control
     /// the control node to hide when not showing the screen saver
     /// </summary>
     [Export]
-    public Control screenSaver;
-
-    /// <summary>
-    /// the node to animate when showing the screen saver animation
-    /// </summary>
-    [Export]
-    public AnimatedSprite2D screenSaverAnimation;
+    public Screensaver screenSaver;
 
     /// <summary>
     /// true if the screensaver animation is being shown
@@ -428,7 +422,7 @@ public partial class GuiManager : Control
         logger.Info("Showing Screen Saver");
 
         screenSaver.CallDeferred("show");
-        screenSaverAnimation.CallDeferred("play");
+        screenSaver.CallDeferred("play");
     }
 
     /// <summary>
@@ -440,7 +434,7 @@ public partial class GuiManager : Control
         logger.Info("Hiding Screen Saver");
 
         screenSaver.CallDeferred("hide");
-        screenSaverAnimation.CallDeferred("stop");
+        screenSaver.CallDeferred("stop");
     }
 
     /// <summary>

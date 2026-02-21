@@ -23,6 +23,7 @@ shader_parameter/direction = Vector2(-0.4, -0.4)
 shader_parameter/alphaScale = 0.72
 
 [node name="Original" type="Control" node_paths=PackedStringArray("camera", "gameContainer", "tagsMenu", "tagContainer", "description", "descriptionLabel", "titleLabel")]
+y_sort_enabled = true
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -40,6 +41,7 @@ titleLabel = NodePath("DescriptionContainer/TextureRect2/MarginContainer/VBoxCon
 
 [node name="DescriptionContainer" type="MarginContainer" parent="."]
 visible = false
+z_as_relative = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -52,11 +54,16 @@ theme_override_constants/margin_right = 65
 theme_override_constants/margin_bottom = 85
 
 [node name="TextureRect2" type="TextureRect" parent="DescriptionContainer"]
+z_index = 200
+z_as_relative = false
+y_sort_enabled = true
 layout_mode = 2
 texture = ExtResource("5_0ghq1")
 expand_mode = 1
 
 [node name="MarginContainer" type="MarginContainer" parent="DescriptionContainer/TextureRect2"]
+z_index = 200
+y_sort_enabled = true
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -69,25 +76,33 @@ theme_override_constants/margin_right = 45
 theme_override_constants/margin_bottom = 25
 
 [node name="VBoxContainer" type="VBoxContainer" parent="DescriptionContainer/TextureRect2/MarginContainer"]
+z_index = 200
+y_sort_enabled = true
 layout_mode = 2
 theme_override_constants/separation = 50
 
 [node name="title" type="Label" parent="DescriptionContainer/TextureRect2/MarginContainer/VBoxContainer"]
+z_index = 200
+y_sort_enabled = true
 layout_mode = 2
 theme_override_fonts/font = ExtResource("4_mmnpk")
-theme_override_font_sizes/font_size = 121
+theme_override_font_sizes/font_size = 220
 text = "Title"
 horizontal_alignment = 1
-autowrap_mode = 2
+autowrap_mode = 3
 
 [node name="description" type="Label" parent="DescriptionContainer/TextureRect2/MarginContainer/VBoxContainer"]
+z_index = 200
+z_as_relative = false
+y_sort_enabled = true
 layout_mode = 2
 theme_override_fonts/font = ExtResource("4_mmnpk")
-theme_override_font_sizes/font_size = 37
+theme_override_font_sizes/font_size = 120
 text = "Description"
 autowrap_mode = 2
 
 [node name="Camera2D" type="Camera2D" parent="."]
+y_sort_enabled = true
 anchor_mode = 0
 script = ExtResource("10_feq1j")
 easeAmount = 2.0
@@ -95,17 +110,19 @@ animationSpeed = 5.0
 
 [node name="background" type="TextureRect" parent="Camera2D" node_paths=PackedStringArray("camera")]
 z_index = -4096
-z_as_relative = false
+y_sort_enabled = true
 custom_minimum_size = Vector2(900, 0)
-offset_bottom = 50.0
+offset_right = 2169.0
+offset_bottom = 3842.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 texture = ExtResource("2_4c0jd")
-expand_mode = 5
+expand_mode = 1
 script = ExtResource("8_4asay")
 camera = NodePath("..")
 
 [node name="backgroundCSHIcons" type="TextureRect" parent="Camera2D/background"]
+y_sort_enabled = true
 texture_repeat = 2
 material = SubResource("ShaderMaterial_loec3")
 layout_mode = 1
@@ -118,6 +135,7 @@ texture = ExtResource("3_x7jqg")
 expand_mode = 1
 
 [node name="gamesMenu" type="VBoxContainer" parent="Camera2D/background"]
+y_sort_enabled = true
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -126,6 +144,7 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="MarginContainer" type="MarginContainer" parent="Camera2D/background/gamesMenu"]
+y_sort_enabled = true
 layout_mode = 2
 theme_override_constants/margin_left = 5
 theme_override_constants/margin_top = 5
@@ -133,6 +152,7 @@ theme_override_constants/margin_right = 5
 theme_override_constants/margin_bottom = 5
 
 [node name="DevcadeIcon" type="TextureRect" parent="Camera2D/background/gamesMenu/MarginContainer"]
+y_sort_enabled = true
 layout_mode = 2
 texture = ExtResource("2_xc2fw")
 expand_mode = 5
@@ -141,17 +161,19 @@ prodTexture = ExtResource("2_xc2fw")
 devTexture = ExtResource("11_7qoy5")
 
 [node name="ScrollContainer" type="ScrollContainer" parent="."]
+y_sort_enabled = true
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 1.0
 anchor_right = 2.0
 anchor_bottom = 1.0
-offset_top = 569.0
-offset_bottom = 4.0
+offset_top = 1548.0
+offset_bottom = 8.0
 grow_horizontal = 0
 grow_vertical = 2
 
 [node name="tagContainer" type="GridContainer" parent="ScrollContainer"]
+y_sort_enabled = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -160,52 +182,63 @@ script = ExtResource("8_loec3")
 tagButtonTheme = ExtResource("12_vs4r3")
 
 [node name="gamesContainer" type="Control" parent="."]
+y_sort_enabled = true
 layout_mode = 2
 anchors_preset = 0
-offset_top = 539.0
+offset_top = 2268.0
 offset_right = 900.0
-offset_bottom = 1650.0
+offset_bottom = 3379.0
+scale = Vector2(2, 2)
 size_flags_vertical = 3
 script = ExtResource("7_s6n7q")
 gameButtonsScale = 1.28
 percentYPositionValue = 60.0
 
 [node name="CenterContainer" type="CenterContainer" parent="."]
+y_sort_enabled = true
 layout_mode = 1
 anchors_preset = -1
-anchor_top = 0.26375
+anchor_top = 0.25
 anchor_right = 1.0
-anchor_bottom = 0.26375
+anchor_bottom = 0.350521
 offset_bottom = 109.0
 grow_horizontal = 2
 metadata/_edit_use_anchors_ = true
 
 [node name="controlHelpTextGames" type="Label" parent="CenterContainer"]
+z_index = 100
+z_as_relative = false
+y_sort_enabled = true
+custom_minimum_size = Vector2(2100, 0)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("4_mmnpk")
-theme_override_font_sizes/font_size = 52
+theme_override_font_sizes/font_size = 142
 text = "Press the Red Button to play! 
 Press both black buttons to refresh"
 horizontal_alignment = 1
+autowrap_mode = 2
 
 [node name="CenterContainer2" type="CenterContainer" parent="."]
+y_sort_enabled = true
 layout_mode = 2
-anchor_left = 1.00222
-anchor_right = 1.00222
+anchor_left = 0.904535
+anchor_top = 0.175781
+anchor_right = 1.09991
+anchor_bottom = 0.175781
 offset_left = 211.0
 offset_top = 450.0
 offset_right = 689.0
 offset_bottom = 503.0
-grow_horizontal = 2
-metadata/_edit_use_anchors_ = true
 
 [node name="controlHelpTextTags" type="Label" parent="CenterContainer2" node_paths=PackedStringArray("tagContainer")]
-custom_minimum_size = Vector2(10, 10)
+y_sort_enabled = true
+custom_minimum_size = Vector2(2100, 10.875)
 layout_mode = 2
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_fonts/font = ExtResource("4_mmnpk")
-theme_override_font_sizes/font_size = 52
+theme_override_font_sizes/font_size = 142
 text = "Select A Tag to Search:"
 horizontal_alignment = 1
+autowrap_mode = 2
 script = ExtResource("13_6sm6r")
 tagContainer = NodePath("../../ScrollContainer/tagContainer")

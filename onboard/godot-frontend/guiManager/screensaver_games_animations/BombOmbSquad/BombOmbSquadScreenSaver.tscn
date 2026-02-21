@@ -1,0 +1,38 @@
+[gd_scene load_steps=4 format=3 uid="uid://rf2ubr76htca"]
+
+[ext_resource type="Script" uid="uid://cgy5ytnue1rpw" path="res://guiManager/screensaver_games_animations/BombOmbSquad/BombOmbSquadScreenSaver.cs" id="1_2r8ub"]
+[ext_resource type="VideoStream" uid="uid://cufvdkpq44xob" path="res://guiManager/screensaver_games_animations/BombOmbSquad/BombOmbSquad.ogv" id="2_2r8ub"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2r8ub"]
+bg_color = Color(0, 0, 0, 1)
+
+[node name="BombOmbSquadScreenSaver" type="Control" node_paths=PackedStringArray("videoStreamPlayer")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_2r8ub")
+videoStreamPlayer = NodePath("Panel/VideoStreamPlayer")
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_2r8ub")
+
+[node name="VideoStreamPlayer" type="VideoStreamPlayer" parent="Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+stream = ExtResource("2_2r8ub")
+autoplay = true
+expand = true
+loop = true

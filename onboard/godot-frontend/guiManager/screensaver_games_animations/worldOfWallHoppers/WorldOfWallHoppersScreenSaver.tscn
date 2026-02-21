@@ -1,0 +1,43 @@
+[gd_scene load_steps=4 format=3 uid="uid://camd641ivrd43"]
+
+[ext_resource type="Script" uid="uid://ceik4vls3rk1r" path="res://guiManager/screensaver_games_animations/worldOfWallHoppers/WorldOfWallHoppersScreenSaver.cs" id="1_pvo00"]
+[ext_resource type="VideoStream" uid="uid://c1vfs20bv7nkn" path="res://guiManager/screensaver_games_animations/worldOfWallHoppers/worldOfWallhoppers.ogv" id="2_7r8jx"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pvo00"]
+bg_color = Color(0, 0, 0, 1)
+
+[node name="WorldOfWallHoppersScreenSaver" type="Control" node_paths=PackedStringArray("videoStreamPlayer")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_pvo00")
+videoStreamPlayer = NodePath("Panel/AspectRatioContainer/VideoStreamPlayer")
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_pvo00")
+
+[node name="AspectRatioContainer" type="AspectRatioContainer" parent="Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+ratio = 0.4286
+
+[node name="VideoStreamPlayer" type="VideoStreamPlayer" parent="Panel/AspectRatioContainer"]
+layout_mode = 2
+stream = ExtResource("2_7r8jx")
+autoplay = true
+expand = true
+loop = true
+buffering_msec = 1000
