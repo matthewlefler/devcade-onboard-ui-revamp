@@ -8,9 +8,9 @@ public partial class NotificationService : Node
     private Process notificationService;
     public override void _Ready()
     {      
-        bool started = "~/.devcade/notification_service -t".Bash();
+        notificationService = "~/.devcade/notification_service -t".Bash();
 
-        if(!started)
+        if(notificationService != null)
         {
             GD.PushError("Failed to start Notification Service");
         }
@@ -40,7 +40,7 @@ public partial class NotificationService : Node
 
 public static class ShellHelper
 {
-    public static bool Bash(this string cmd)
+    public static Process Bash(this string cmd)
     {
         var source = new TaskCompletionSource<int>();
         var escapedArgs = cmd.Replace("\"", "\\\"");
@@ -61,21 +61,30 @@ public static class ShellHelper
         
         process.Exited += (sender, args) =>
         {
-            GD.PushWarning(process.StandardError.ReadToEnd());
-            GD.PushError(process.StandardOutput.ReadToEnd());
+            string stdErr = process.StandardError.ReadToEnd();
+            if(stdErr.Length > 0)
+            {
+                GD.PushError(stdErr);
+            }
+            string stdOut = process.StandardOutput.ReadToEnd();
+            if(stdOut.Length > 0)
+            {
+                GD.Print(stdOut);
+            }
 
             process.Dispose();
         };
 
         try
         {
-            return process.Start();
+            process.Start();
         }
         catch (Exception e)
         {
             GD.PushError(e, "Command {} failed", cmd);
+            return null;
         }
 
-        return false;
+        return process;
     }
 }
