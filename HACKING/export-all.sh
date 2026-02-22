@@ -7,7 +7,7 @@ if [[ $1 == --help ]] || [[ $1 == -h ]] || [[ $# -ne 3 ]]; then
 fi
 
 # backend
-# cargo smth 
+# cargo build the backend cause yeah
 
 # godot frontend
 $1 --path $2/onboard/godot-frontend --headless --export-release "Linux" $3/godot-onboard

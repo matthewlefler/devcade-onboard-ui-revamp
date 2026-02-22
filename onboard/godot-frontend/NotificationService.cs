@@ -6,7 +6,7 @@ public partial class NotificationService : Node
     private Process notificationService;
     public override void _Ready()
     {      
-        string command = "~/.devcade/notification-service";
+        string command = "~/.devcade/notification-service -t";
         var escapedArgs = command.Replace("\"", "\\\""); // Escape double quotes within the command (" become \")
         
         var startInfo = new ProcessStartInfo
