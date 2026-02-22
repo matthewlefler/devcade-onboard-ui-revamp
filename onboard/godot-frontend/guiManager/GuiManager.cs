@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
-using log4net;
-
 using onboard.util;
 
 using Godot;
@@ -44,11 +42,6 @@ public partial class GuiManager : Control
     /// true if the screensaver animation is being shown
     /// </summary>
     public bool showingScreenSaverAnimation { get; private set; } = false;
-
-    /// <summary>
-    /// logger related to this class
-    /// </summary>
-    private static ILog logger;
 
     /// <summary>
     /// A list of all the games
@@ -113,10 +106,6 @@ public partial class GuiManager : Control
     /// </summary>
     public override void _Ready()
     {
-        // get the logger
-        logger = LogManager.GetLogger("onboard.GUI");
-        logger.Info($"Date: {Time.GetDateStringFromSystem()} \n");
-
         supervisorButtonTimeoutSeconds = Env.get("SUPERVISOR_BUTTON_TIMEOUT_SEC").map_or(5.0, double.Parse); // default 5 seconds
         supervisorButtonTimerSeconds = supervisorButtonTimeoutSeconds;
 
@@ -135,7 +124,7 @@ public partial class GuiManager : Control
 
         if(guiSceneRootNode == null)
         {
-            logger.Fatal("Assert Failed: gui scene root node is not a node that derives from the CanvasItem node");
+            GD.PushError("Assert Failed: gui scene root node is not a node that derives from the CanvasItem node");
             throw new ApplicationException("Assert Failed: gui scene root node is not a node that derives from the CanvasItem node");
         }
         
@@ -147,7 +136,7 @@ public partial class GuiManager : Control
         }
         else
         {
-            logger.Fatal("Assert Failed: gui scene root node script does not implement the GuiInterface interface");
+            GD.PushError("Assert Failed: gui scene root node script does not implement the GuiInterface interface");
             throw new ApplicationException("Assert Failed: the gui scene's root node script does not implement the GuiInterface interface");
         } 
         
@@ -223,7 +212,6 @@ public partial class GuiManager : Control
                 // kill the currently running game
                 _ = killGame();
                 GD.Print("log: Killing current running game");
-                logger.Info("Killing current running game");
                 
                 supervisorButtonTimerSeconds = supervisorButtonTimeoutSeconds;
             }
@@ -287,19 +275,19 @@ public partial class GuiManager : Control
         Task gameTask = Client.getGameList()
             .ContinueWith(t => {
                 if (!t.IsCompletedSuccessfully) {
-                    logger.Error($"Failed to fetch game list: {t.Exception}");
+                    GD.PushError($"Failed to fetch game list: {t.Exception}");
                     gameTitles = errorList;
                     return;
                 }
 
                 var res = t.Result.into_result<List<DevcadeGame>>();
                 if (!res.is_ok()) {
-                    logger.Error($"Failed to fetch game list: {res.err().unwrap()}");
+                    GD.PushError($"Failed to fetch game list: {res.err().unwrap()}");
                     gameTitles = errorList;
                     return;
                 }
 
-                logger.Info("Got game list, setting titles");
+                GD.Print("Got game list, setting titles");
 
                 gameTitles = res.unwrap();
 
@@ -329,7 +317,7 @@ public partial class GuiManager : Control
                 
             })
             .ContinueWith(_ => {
-                logger.Info("Setting cards");
+                GD.Print("Setting cards");
 
                 loadBanners();
 
@@ -364,7 +352,7 @@ public partial class GuiManager : Control
                     game.banner = texture;
                 }
                 catch (Exception e) {
-                    logger.Warn($"Unable to set card: {e.Message}");
+                    GD.PushWarning($"Unable to set card: {e.Message}");
                 }
             }
 
@@ -419,7 +407,7 @@ public partial class GuiManager : Control
     /// </summary>
     public void showScreenSaver()
     {
-        logger.Info("Showing Screen Saver");
+        GD.Print("Showing Screen Saver");
 
         screenSaver.CallDeferred("show");
         screenSaver.CallDeferred("play");
@@ -431,7 +419,7 @@ public partial class GuiManager : Control
     /// </summary>
     public void hideScreenSaver()
     {
-        logger.Info("Hiding Screen Saver");
+        GD.Print("Hiding Screen Saver");
 
         screenSaver.CallDeferred("hide");
         screenSaver.CallDeferred("stop");
@@ -470,7 +458,7 @@ public partial class GuiManager : Control
         guiSceneRootNode.ProcessMode = ProcessModeEnum.Disabled;
         
         this.gameLauched = true;
-        logger.Info("launching game: " + game.name);
+        GD.Print("launching game: " + game.name);
 
         showLoadingAnimation();
 
@@ -481,7 +469,7 @@ public partial class GuiManager : Control
                     hideLoadingAnimation();
                 }
                 else {
-                    logger.Error("Failed to launch game: " + res.Exception);
+                    GD.PushError("Failed to launch game: " + res.Exception);
                 }
                 // ProcessMode = ProcessModeEnum.Always; 
                 guiSceneRootNode.SetDeferred("process_mode", previousProcessMode);

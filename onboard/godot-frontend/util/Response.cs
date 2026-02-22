@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
-using log4net;
+using Godot;
 using Newtonsoft.Json;
 using onboard.devcade;
 
@@ -25,8 +25,6 @@ public class Response {
 
         Unknown,
     }
-
-    private ILog logger = LogManager.GetLogger(MethodBase.GetCurrentMethod()?.DeclaringType?.FullName);
     
     public ResponseType type { get; private set; }
     private object? data { get; set; }
@@ -61,12 +59,12 @@ public class Response {
         if (type == ResponseType.Err) {
             return Result<T, string>.Err(data);
         }
-        logger.Trace($"Serialized internal data to {data}");
+        GD.Print($"Serialized internal data to {data}");
         T deserializeT;
         try {
             deserializeT = JsonConvert.DeserializeObject<T>(data) ?? throw new NullReferenceException();
         } catch (Exception e) {
-            logger.Error($"Failed to deserialize {data} to {typeof(T)}", e);
+            GD.PushError($"Failed to deserialize {data} to {typeof(T)}", e);
             return Result<T, string>.Err("Failed to deserialize response");
         }
         if (deserializeT == null) {
@@ -82,7 +80,7 @@ public class Response {
             _ => throw new ArgumentOutOfRangeException()
         };
         if (typeof(T) != expected) {
-            logger.Error($"Invalid response type and data combination: {type}\nTypeof(T) was {typeof(T)} but expected {expected}");
+            GD.PushError($"Invalid response type and data combination: {type}\nTypeof(T) was {typeof(T)} but expected {expected}");
         }
         return type switch {
             ResponseType.Ok => Result<T, string>.Ok(deserializeT),
