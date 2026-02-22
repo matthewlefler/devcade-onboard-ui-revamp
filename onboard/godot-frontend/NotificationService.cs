@@ -10,7 +10,7 @@ public partial class NotificationService : Node
     {      
         notificationService = "~/.devcade/notification_service -t".Bash();
 
-        if(notificationService != null)
+        if(notificationService == null)
         {
             GD.PushError("Failed to start Notification Service");
         }
@@ -19,6 +19,7 @@ public partial class NotificationService : Node
             GD.Print("Suceeded in starting Notification Service");
 
             "wmctrl -r notifications -b add,above".Bash();
+            "wmctrl -r notifications -b add,sticky".Bash();
             "wmctrl -r godot-frontend -b remove,above".Bash();
             "wmctrl -r godot-frontend -b add,below".Bash();
         }
