@@ -21,7 +21,7 @@ config/icon="res://icon.svg"
 [autoload]
 
 LogConfigAutoLoad="*res://LogConfigAutoLoad.cs"
-NotificationService="*res://NotificationService.cs"
+NotificationService="*res://notification-system/NotificationService.cs"
 
 [debug]
 
@@ -33,7 +33,9 @@ file_logging/max_log_files=10
 window/size/viewport_width=2160
 window/size/viewport_height=3840
 window/size/borderless=true
+window/subwindows/embed_subwindows=false
 window/stretch/mode="canvas_items"
+window/per_pixel_transparency/allowed=true
 window/viewport_width=900
 window/viewport_height=1600
 window/size/width=900
