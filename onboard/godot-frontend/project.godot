@@ -25,7 +25,6 @@ NotificationService="*res://NotificationService.cs"
 
 window/size/viewport_width=2160
 window/size/viewport_height=3840
-window/size/mode=4
 window/size/borderless=true
 window/stretch/mode="canvas_items"
 window/viewport_width=900

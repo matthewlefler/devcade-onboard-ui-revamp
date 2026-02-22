@@ -180,21 +180,18 @@ vertical_alignment = 1
 script = ExtResource("3_anfla")
 end_color = Color(1, 1, 1, 0)
 
-[node name="CenterContainer" type="CenterContainer" parent="."]
+[node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
 offset_bottom = 10.0
 grow_horizontal = 2
+theme_override_constants/margin_left = 300
+theme_override_constants/margin_top = 100
+theme_override_constants/margin_right = 300
+theme_override_constants/margin_bottom = 100
 
-[node name="MarginContainer" type="MarginContainer" parent="CenterContainer"]
-layout_mode = 2
-theme_override_constants/margin_left = 5
-theme_override_constants/margin_top = 5
-theme_override_constants/margin_right = 5
-theme_override_constants/margin_bottom = 5
-
-[node name="DevcadeIcon" type="TextureRect" parent="CenterContainer"]
+[node name="DevcadeIcon" type="TextureRect" parent="MarginContainer"]
 z_index = 4096
 z_as_relative = false
 y_sort_enabled = true
