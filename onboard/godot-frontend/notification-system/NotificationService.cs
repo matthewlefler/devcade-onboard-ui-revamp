@@ -8,10 +8,11 @@ public partial class NotificationService : Node
 
     public override void _Ready()
     {      
+        GetViewport().GuiEmbedSubwindows = false;
+        
         var scene = GD.Load<PackedScene>("res://notification-system/notificationWindow.tscn");
         notificationWindow = scene.Instantiate<Window>();
-
-        GetTree().Root.CallDeferred("add_child", notificationWindow);
+        notificationWindow.AlwaysOnTop = true;
 
         notificationWindow.Show();
 
@@ -39,7 +40,6 @@ public partial class NotificationService : Node
 
     public override void _ExitTree()
     {
-        notificationWindow.Dispose();
         // if(notificationService != null)
         // {
         //     notificationService.Kill();   
