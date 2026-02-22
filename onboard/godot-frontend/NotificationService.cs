@@ -1,4 +1,6 @@
+using System;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using Godot;
 
 public partial class NotificationService : Node
@@ -6,40 +8,7 @@ public partial class NotificationService : Node
     private Process notificationService;
     public override void _Ready()
     {      
-        string command = "~/.devcade/notification_service -t";
-        var escapedArgs = command.Replace("\"", "\\\""); // Escape double quotes within the command (" become \")
-        
-        var startInfo = new ProcessStartInfo
-        {
-            FileName = "/bin/bash", // Specify the bash executable
-            Arguments = $"-c \"{escapedArgs}\"", // Pass the command using the -c option
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false, // Must be false to redirect streams
-            CreateNoWindow = false
-
-        };
-
-        notificationService = new Process
-        {
-            StartInfo = startInfo
-        };
-
-        notificationService.OutputDataReceived += (sender, args) =>
-        {
-            if (args.Data != null)
-                GD.Print($"notification-service: {args.Data}");
-        };
-
-        notificationService.ErrorDataReceived += (sender, args) =>
-        {
-            if (args.Data != null)
-                GD.PushError($"notification-service: {args.Data}");
-        };
-
-        bool started = notificationService.Start();
-        notificationService.BeginOutputReadLine();
-        notificationService.BeginErrorReadLine();
+        bool started = "~/.devcade/notification_service -t".Bash();
 
         if(!started)
         {
@@ -48,26 +17,10 @@ public partial class NotificationService : Node
         else
         {
             GD.Print("Suceeded in starting Notification Service");
-            
-            command = "wmctrl -r notifications -b add,above";
-            escapedArgs = command.Replace("\"", "\\\""); // Escape double quotes within the command (" become \")
-            
-            startInfo = new ProcessStartInfo
-            {
-                FileName = "/bin/bash", // Specify the bash executable
-                Arguments = $"-c \"{escapedArgs}\"", // Pass the command using the -c option
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false, // Must be false to redirect streams
-                CreateNoWindow = false
 
-            };
-
-            var windowManagerCtrl = new Process
-            {
-                StartInfo = startInfo
-            };
-            windowManagerCtrl.Start();
+            "wmctrl -r notifications -b add,above".Bash();
+            "wmctrl -r godot-frontend -b remove,above".Bash();
+            "wmctrl -r godot-frontend -b add,below".Bash();
         }
     }
 
@@ -83,5 +36,46 @@ public partial class NotificationService : Node
             notificationService.Kill();   
         }
     }
+}
 
+public static class ShellHelper
+{
+    public static bool Bash(this string cmd)
+    {
+        var source = new TaskCompletionSource<int>();
+        var escapedArgs = cmd.Replace("\"", "\\\"");
+        var process = new Process
+        {
+            StartInfo = new ProcessStartInfo
+            {
+                FileName = "bash",
+                Arguments = $"-c \"{escapedArgs}\"",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            },
+
+            EnableRaisingEvents = true
+        };
+        
+        process.Exited += (sender, args) =>
+        {
+            GD.PushWarning(process.StandardError.ReadToEnd());
+            GD.PushError(process.StandardOutput.ReadToEnd());
+
+            process.Dispose();
+        };
+
+        try
+        {
+            return process.Start();
+        }
+        catch (Exception e)
+        {
+            GD.PushError(e, "Command {} failed", cmd);
+        }
+
+        return false;
+    }
 }
