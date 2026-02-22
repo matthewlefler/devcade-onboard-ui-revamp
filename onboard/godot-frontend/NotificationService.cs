@@ -8,7 +8,7 @@ public partial class NotificationService : Node
     private Process notificationService;
     public override void _Ready()
     {      
-        notificationService = "~/.devcade/notification_service -t".Bash();
+        notificationService = "~/notification_service -t".Bash();
 
         if(notificationService == null)
         {

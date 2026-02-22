@@ -14,6 +14,7 @@ config/name="godot-frontend"
 run/main_scene="uid://br86segmlm7yg"
 run/enable_alt_space_menu=true
 config/features=PackedStringArray("4.4", "C#", "GL Compatibility")
+run/flush_stdout_on_print=true
 run/low_processor_mode=true
 config/icon="res://icon.svg"
 
