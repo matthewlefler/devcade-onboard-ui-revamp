@@ -16,6 +16,3 @@ func _ready() -> void:
 func _notification(what: int) -> void:
     if what == NOTIFICATION_WM_POSITION_CHANGED:
         get_window().position = window_position
-    if what == NOTIFICATION_WM_WINDOW_FOCUS_OUT:
-        get_window().always_on_top = true;
-        get_window().visible = true;

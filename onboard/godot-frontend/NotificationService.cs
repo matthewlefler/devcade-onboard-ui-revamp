@@ -48,6 +48,26 @@ public partial class NotificationService : Node
         else
         {
             GD.Print("Suceeded in starting Notification Service");
+            
+            command = "wmctrl -r notifications -b add,above";
+            escapedArgs = command.Replace("\"", "\\\""); // Escape double quotes within the command (" become \")
+            
+            startInfo = new ProcessStartInfo
+            {
+                FileName = "/bin/bash", // Specify the bash executable
+                Arguments = $"-c \"{escapedArgs}\"", // Pass the command using the -c option
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false, // Must be false to redirect streams
+                CreateNoWindow = false
+
+            };
+
+            var windowManagerCtrl = new Process
+            {
+                StartInfo = startInfo
+            };
+            windowManagerCtrl.Start();
         }
     }
 
