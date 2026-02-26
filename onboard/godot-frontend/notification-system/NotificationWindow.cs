@@ -15,7 +15,7 @@ public partial class NotificationWindow : Window
 
     public override void _Ready()
     {
-        this.Hide();
         this.Show();
+        this.GrabFocus();
     }
 }
