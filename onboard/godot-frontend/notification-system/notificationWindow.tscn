@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://cswy8mipsaud4"]
 
-[ext_resource type="Script" uid="uid://c1eg3dvdxhpri" path="res://notification-system/progress_bar.gd" id="1_8sfmt"]
 [ext_resource type="Script" uid="uid://bqco2vfdm8n1c" path="res://notification-system/NotificationWindow.cs" id="1_65dmo"]
+[ext_resource type="Script" uid="uid://br8tslvjy5jci" path="res://notification-system/VolumeBar.cs" id="2_65dmo"]
 
 [node name="NotificationWindow" type="Window"]
 transparent_bg = true
@@ -28,8 +28,8 @@ theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 50
 theme_override_constants/margin_bottom = 10
 
-[node name="ProgressBar" type="ProgressBar" parent="MarginContainer"]
+[node name="volumeBar" type="ProgressBar" parent="MarginContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 50
-max_value = 10.0
-script = ExtResource("1_8sfmt")
+max_value = 1.0
+script = ExtResource("2_65dmo")

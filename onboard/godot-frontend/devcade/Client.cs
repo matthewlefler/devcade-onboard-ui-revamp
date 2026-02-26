@@ -127,7 +127,10 @@ public static class Client {
                 continue;
             }
             
-            GD.Print("Received message: " + message);
+            if(message.Length < 100)
+            {
+                GD.Print("Received message: " + message);
+            }
             
             // Parse the message
             Response res = Response.deserialize(message);

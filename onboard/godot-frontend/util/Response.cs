@@ -59,7 +59,11 @@ public class Response {
         if (type == ResponseType.Err) {
             return Result<T, string>.Err(data);
         }
-        GD.Print($"Serialized internal data to {data}");
+        if(data.Length < 100)
+        {
+            GD.Print($"Serialized internal data to {data}");
+        }
+        
         T deserializeT;
         try {
             deserializeT = JsonConvert.DeserializeObject<T>(data) ?? throw new NullReferenceException();
