@@ -10,12 +10,17 @@ public partial class NotificationWindow : Window
         this.Position = screenSize - this.Size - new Vector2I((screenSize.X - this.Size.X) / 2, 0);
 
         this.AlwaysOnTop = true;
-        this.Transient = false;
     }
 
     public override void _Ready()
     {
         this.Show();
         this.GrabFocus();
+    }
+
+    public override void _ExitTree()
+    {
+        // when killed kill the main onboard window/process too
+        GetTree().Quit(0);
     }
 }

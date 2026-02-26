@@ -21,7 +21,6 @@ config/icon="res://icon.svg"
 [autoload]
 
 LogConfigAutoLoad="*res://LogConfigAutoLoad.cs"
-NotificationService="*res://notification-system/NotificationService.cs"
 
 [debug]
 

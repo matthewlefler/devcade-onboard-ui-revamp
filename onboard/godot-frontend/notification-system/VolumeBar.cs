@@ -24,10 +24,14 @@ public partial class VolumeBar : ProgressBar
     
     [Export]
     double lingerTime = 1.0;
-    private double lingerSec = 0.0;
+    private double lingerSec;
     public override void _Ready()
     {
+        lingerSec = lingerTime;
+
         this.Visible = false;
+
+        last_volume = getVolume();
     }
 
     public override void _Process(double delta)
@@ -35,9 +39,10 @@ public partial class VolumeBar : ProgressBar
         seconds += delta;
         lingerSec += delta;
 
-        if(lingerSec > lingerTime)
+        if(lingerSec >= lingerTime)
         {
             this.Visible = false;
+            lingerSec = lingerTime;
         }
         
         if(seconds < secondsBetweenPolls)
