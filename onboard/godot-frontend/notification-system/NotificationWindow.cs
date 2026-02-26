@@ -8,6 +8,9 @@ public partial class NotificationWindow : Window
         
         Vector2I screenSize = DisplayServer.ScreenGetSize();
         this.Position = screenSize - this.Size - new Vector2I((screenSize.X - this.Size.X) / 2, 0);
+
+        this.AlwaysOnTop = true;
+        this.Transient = false;
     }
 
     public override void _Ready()
