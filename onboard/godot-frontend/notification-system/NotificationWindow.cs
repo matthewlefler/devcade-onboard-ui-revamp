@@ -5,5 +5,8 @@ public partial class NotificationWindow : Window
     public override void _EnterTree()
     {
         this.CloseRequested += this.QueueFree;
+        
+        Vector2I screenSize = DisplayServer.ScreenGetSize();
+        this.Position = screenSize - this.Size - new Vector2I((screenSize.X - this.Size.X) / 2, 0);
     }
 }

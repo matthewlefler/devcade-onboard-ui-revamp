@@ -5,12 +5,13 @@
 
 [node name="NotificationWindow" type="Window"]
 transparent_bg = true
-initial_position = 2
+position = Vector2i(0, 36)
 size = Vector2i(1000, 200)
-borderless = true
+unresizable = true
 always_on_top = true
 transparent = true
 exclude_from_capture = true
+force_native = true
 script = ExtResource("1_65dmo")
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
