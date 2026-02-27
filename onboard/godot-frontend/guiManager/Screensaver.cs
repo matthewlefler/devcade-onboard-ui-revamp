@@ -28,11 +28,21 @@ public partial class Screensaver : Control
         currentGameAnimationIndex = 0;
         gamesAnimationsContainer.Position = startPosition;
         shader_offset = 0.0f;
+
+        foreach(var anim in gameAnimationNodes)
+        {
+            anim.Show();
+        }
     }
 
     public void stop()
     {
         playing = false;
+
+        foreach(var anim in gameAnimationNodes)
+        {
+            anim.Hide();
+        }
     }
 
     public override void _Ready()
