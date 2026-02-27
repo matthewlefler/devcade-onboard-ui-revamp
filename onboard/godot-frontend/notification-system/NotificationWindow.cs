@@ -23,4 +23,15 @@ public partial class NotificationWindow : Window
         // when killed kill the main onboard window/process too
         GetTree().Quit(0);
     }
+
+    public void show()
+    {
+        this.Show();
+        DisplayServer.WindowMoveToForeground(this.GetWindowId());
+    }
+
+    public void hide()
+    {
+        this.hide();
+    }
 }

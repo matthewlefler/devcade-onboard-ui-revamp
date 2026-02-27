@@ -3,6 +3,9 @@ using Godot;
 
 public partial class VolumeBar : ProgressBar
 {
+    [Export]
+    NotificationWindow window;
+
     private Process process = new Process {
         StartInfo = new ProcessStartInfo
         {
@@ -57,6 +60,7 @@ public partial class VolumeBar : ProgressBar
         {
             this.Visible = true;
             lingerSec = 0.0;
+            window.show();
         }
 
         last_volume = volume;
