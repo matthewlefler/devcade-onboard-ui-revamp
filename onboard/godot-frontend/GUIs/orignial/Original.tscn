@@ -40,7 +40,6 @@ descriptionLabel = NodePath("DescriptionContainer/TextureRect2/MarginContainer/V
 titleLabel = NodePath("DescriptionContainer/TextureRect2/MarginContainer/VBoxContainer/title")
 
 [node name="DescriptionContainer" type="MarginContainer" parent="."]
-visible = false
 z_as_relative = false
 layout_mode = 1
 anchors_preset = 15
@@ -48,10 +47,10 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 65
-theme_override_constants/margin_top = 90
-theme_override_constants/margin_right = 65
-theme_override_constants/margin_bottom = 85
+theme_override_constants/margin_left = 400
+theme_override_constants/margin_top = 300
+theme_override_constants/margin_right = 400
+theme_override_constants/margin_bottom = 300
 
 [node name="TextureRect2" type="TextureRect" parent="DescriptionContainer"]
 z_index = 200
@@ -86,7 +85,7 @@ z_index = 200
 y_sort_enabled = true
 layout_mode = 2
 theme_override_fonts/font = ExtResource("4_mmnpk")
-theme_override_font_sizes/font_size = 220
+theme_override_font_sizes/font_size = 180
 text = "Title"
 horizontal_alignment = 1
 autowrap_mode = 3
@@ -97,7 +96,7 @@ z_as_relative = false
 y_sort_enabled = true
 layout_mode = 2
 theme_override_fonts/font = ExtResource("4_mmnpk")
-theme_override_font_sizes/font_size = 120
+theme_override_font_sizes/font_size = 80
 text = "Description"
 autowrap_mode = 2
 
