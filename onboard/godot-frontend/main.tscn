@@ -78,7 +78,7 @@ sprite_frames = ExtResource("3_h2yge")
 layout_mode = 1
 
 [node name="NotificationWindow" parent="." instance=ExtResource("6_7mycd")]
-mode = 4
+mode = 0
 visible = false
 exclusive = false
 force_native = false
