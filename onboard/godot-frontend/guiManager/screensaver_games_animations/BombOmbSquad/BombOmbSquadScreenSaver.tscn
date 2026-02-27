@@ -34,6 +34,7 @@ grow_horizontal = 2
 grow_vertical = 2
 stream = ExtResource("2_2r8ub")
 autoplay = true
+paused = true
 expand = true
 loop = true
 buffering_msec = 200

@@ -8,10 +8,12 @@ public partial class WorldOfWallHoppersScreenSaver : ScreenSaverGameAnimation
     override public void play()
     {
         videoStreamPlayer.Play();
+        videoStreamPlayer.Paused = false;
     }
 
     public override void stop()
     {
         videoStreamPlayer.Stop();
+        videoStreamPlayer.Paused = true;
     }
 }

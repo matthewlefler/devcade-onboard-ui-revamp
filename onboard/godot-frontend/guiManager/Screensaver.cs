@@ -22,12 +22,13 @@ public partial class Screensaver : Control
     Vector2 endPosition;
     float screenWidth;
 
+    Vector2 shaderVelInit;
+
     public void play()
     {
         playing = true;   
         currentGameAnimationIndex = 0;
         gamesAnimationsContainer.Position = startPosition;
-        shader_offset = 0.0f;
 
         foreach(var anim in gameAnimationNodes)
         {
@@ -72,25 +73,21 @@ public partial class Screensaver : Control
 
             anim.Position = new Vector2(screenWidth * i, 0);
         }
+
+        shaderVelInit = getShaderVel();
     }
 
-    float shader_offset = 0.0f;
     public override void _Process(double delta)
     {
         if(!playing)
         {
+            setShaderVel(shaderVelInit);
             return;
         }
 
-        shader_offset += scrollSpeed / 500.0f;
-        if(shader_offset > 1)
-        {
-            shader_offset -= 1;
-        }
+        setShaderVel(new Vector2(-scrollSpeed / 2.918f, shaderVelInit.Y));
 
-        setShaderXOffest(shader_offset);
-
-        gamesAnimationsContainer.Position += new Vector2(-scrollSpeed, 0);
+        gamesAnimationsContainer.Position += new Vector2((float) delta * -scrollSpeed * 100.0f, 0);
 
         if(gamesAnimationsContainer.Position.X < endPosition.X)
         {
@@ -98,8 +95,13 @@ public partial class Screensaver : Control
         }
     }
 
-    private void setShaderXOffest(float x)
+    private void setShaderVel(Vector2 v)
     {
-        backgroundIcons.Material.Set("shader_parameter/x_offset", x);
+        backgroundIcons.Material.Set("shader_parameter/direction", v);
+    }
+
+    private Vector2 getShaderVel()
+    {
+        return backgroundIcons.Material.Get("shader_parameter/direction").AsVector2();
     }
 }
