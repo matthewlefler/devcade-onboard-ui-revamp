@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://cswy8mipsaud4"]
+[gd_scene load_steps=4 format=3 uid="uid://cswy8mipsaud4"]
 
 [ext_resource type="Script" uid="uid://bqco2vfdm8n1c" path="res://notification-system/NotificationWindow.cs" id="1_65dmo"]
 [ext_resource type="Script" uid="uid://br8tslvjy5jci" path="res://notification-system/VolumeBar.cs" id="2_65dmo"]
+[ext_resource type="FontFile" uid="uid://cnha1ohwbh3ts" path="res://CSHAssets/VT323-Regular.ttf" id="2_w84xk"]
 
 [node name="NotificationWindow" type="Window"]
 transparent_bg = true
@@ -32,6 +33,7 @@ theme_override_constants/margin_bottom = 10
 [node name="volumeBar" type="ProgressBar" parent="MarginContainer" node_paths=PackedStringArray("window")]
 visible = false
 layout_mode = 2
+theme_override_fonts/font = ExtResource("2_w84xk")
 theme_override_font_sizes/font_size = 50
 max_value = 1.0
 script = ExtResource("2_65dmo")

@@ -18,4 +18,4 @@ ffmpeg -i input_file.type -vf "scale=1080:1920,fps=30" -q:v 4 -q:a 1 output.ogv
 ```
 
 ## Videos **MUST** be under **100MB** or else GitHub will reject the Commit
-And fixing it is annoying, a 1:30 video took about 26MB of space for reference
+And fixing it is annoying, for reference a 1:30 video took about 26MB of space 
