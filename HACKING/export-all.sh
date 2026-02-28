@@ -11,7 +11,5 @@ fi
 
 # godot frontend
 $1 --path $2/onboard/godot-frontend --headless --export-release "Linux" $3/godot_frontend
-# notification service
-$1 --path $2/onboard/notifications-service --headless --export-release "Linux" $3/notification_service
 
 exit
