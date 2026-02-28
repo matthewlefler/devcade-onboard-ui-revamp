@@ -259,5 +259,6 @@ Player2_StickRight={
 
 [rendering]
 
+rendering_device/vsync/frame_queue_size=3
 textures/canvas_textures/default_texture_filter=0
 rendering_device/driver="d3d12"
