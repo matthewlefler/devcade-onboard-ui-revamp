@@ -37,4 +37,3 @@ autoplay = true
 paused = true
 expand = true
 loop = true
-buffering_msec = 200
