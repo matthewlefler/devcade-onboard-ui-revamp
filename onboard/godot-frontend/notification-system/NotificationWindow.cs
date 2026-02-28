@@ -30,7 +30,7 @@ public partial class NotificationWindow : Window
         if(Visible) { return; }
 
         this.Show();
-        // DisplayServer.WindowMoveToForeground(id);
+        DisplayServer.WindowMoveToForeground(id);
         this.GrabFocus();
     }
 
