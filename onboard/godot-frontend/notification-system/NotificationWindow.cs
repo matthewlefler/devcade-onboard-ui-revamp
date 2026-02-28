@@ -12,10 +12,12 @@ public partial class NotificationWindow : Window
         this.AlwaysOnTop = true;
     }
 
+    private int id;
     public override void _Ready()
     {
+        this.id = this.GetWindowId(); 
         this.Show();
-        DisplayServer.WindowMoveToForeground(this.GetWindowId());
+        DisplayServer.WindowMoveToForeground(id);
     }
 
     public override void _ExitTree()
@@ -26,12 +28,16 @@ public partial class NotificationWindow : Window
 
     public void show()
     {
+        if(Visible) { return; }
+        
         this.Show();
-        DisplayServer.WindowMoveToForeground(this.GetWindowId());
+        DisplayServer.WindowMoveToForeground(id);
     }
 
     public void hide()
     {
+        if(!Visible) { return; }
+
         this.hide();
     }
 }

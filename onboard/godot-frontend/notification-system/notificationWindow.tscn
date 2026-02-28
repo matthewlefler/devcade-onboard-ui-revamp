@@ -30,9 +30,10 @@ theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 50
 theme_override_constants/margin_bottom = 10
 
-[node name="volumeBar" type="ProgressBar" parent="MarginContainer"]
+[node name="volumeBar" type="ProgressBar" parent="MarginContainer" node_paths=PackedStringArray("window")]
 visible = false
 layout_mode = 2
 theme_override_font_sizes/font_size = 50
 max_value = 1.0
 script = ExtResource("2_65dmo")
+window = NodePath("../..")

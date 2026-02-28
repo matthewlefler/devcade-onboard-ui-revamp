@@ -58,9 +58,9 @@ public partial class VolumeBar : ProgressBar
 
         if(volume != last_volume)
         {
+            window.show();
             this.Visible = true;
             lingerSec = 0.0;
-            window.show();
         }
 
         last_volume = volume;
