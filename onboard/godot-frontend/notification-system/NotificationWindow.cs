@@ -16,8 +16,7 @@ public partial class NotificationWindow : Window
     public override void _Ready()
     {
         this.id = this.GetWindowId(); 
-        this.Show();
-        DisplayServer.WindowMoveToForeground(id);
+        this.show();
     }
 
     public override void _ExitTree()
@@ -32,6 +31,7 @@ public partial class NotificationWindow : Window
 
         this.Show();
         // DisplayServer.WindowMoveToForeground(id);
+        this.GrabFocus();
     }
 
     public void hide()
