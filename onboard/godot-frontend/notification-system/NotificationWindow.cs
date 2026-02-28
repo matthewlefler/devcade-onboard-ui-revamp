@@ -29,9 +29,9 @@ public partial class NotificationWindow : Window
     public void show()
     {
         if(Visible) { return; }
-        
+
         this.Show();
-        DisplayServer.WindowMoveToForeground(id);
+        // DisplayServer.WindowMoveToForeground(id);
     }
 
     public void hide()
