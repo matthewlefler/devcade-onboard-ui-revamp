@@ -80,7 +80,6 @@ layout_mode = 1
 [node name="NotificationWindow" parent="." instance=ExtResource("6_7mycd")]
 visible = false
 exclusive = false
-force_native = false
 
 [node name="fpsLabel" type="Label" parent="."]
 top_level = true

@@ -13,7 +13,6 @@ borderless = true
 always_on_top = true
 transparent = true
 exclude_from_capture = true
-force_native = true
 script = ExtResource("1_65dmo")
 
 [node name="MarginContainer" type="MarginContainer" parent="."]

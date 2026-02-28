@@ -40,6 +40,7 @@ descriptionLabel = NodePath("DescriptionContainer/TextureRect2/MarginContainer/V
 titleLabel = NodePath("DescriptionContainer/TextureRect2/MarginContainer/VBoxContainer/title")
 
 [node name="DescriptionContainer" type="MarginContainer" parent="."]
+visible = false
 z_as_relative = false
 layout_mode = 1
 anchors_preset = 15
@@ -145,10 +146,10 @@ grow_vertical = 2
 [node name="MarginContainer" type="MarginContainer" parent="Camera2D/background/gamesMenu"]
 y_sort_enabled = true
 layout_mode = 2
-theme_override_constants/margin_left = 5
-theme_override_constants/margin_top = 5
-theme_override_constants/margin_right = 5
-theme_override_constants/margin_bottom = 5
+theme_override_constants/margin_left = 300
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 300
+theme_override_constants/margin_bottom = 10
 
 [node name="DevcadeIcon" type="TextureRect" parent="Camera2D/background/gamesMenu/MarginContainer"]
 y_sort_enabled = true
@@ -196,13 +197,9 @@ percentYPositionValue = 60.0
 [node name="CenterContainer" type="CenterContainer" parent="."]
 y_sort_enabled = true
 layout_mode = 1
-anchors_preset = -1
-anchor_top = 0.25
-anchor_right = 1.0
-anchor_bottom = 0.350521
-offset_bottom = 109.0
-grow_horizontal = 2
-metadata/_edit_use_anchors_ = true
+offset_top = 800.0
+offset_right = 2100.0
+offset_bottom = 1089.0
 
 [node name="controlHelpTextGames" type="Label" parent="CenterContainer"]
 z_index = 100
@@ -219,15 +216,11 @@ autowrap_mode = 2
 
 [node name="CenterContainer2" type="CenterContainer" parent="."]
 y_sort_enabled = true
-layout_mode = 2
-anchor_left = 0.904535
-anchor_top = 0.175781
-anchor_right = 1.09991
-anchor_bottom = 0.175781
-offset_left = 211.0
-offset_top = 450.0
-offset_right = 689.0
-offset_bottom = 503.0
+layout_mode = 1
+offset_left = 2160.0
+offset_top = 800.0
+offset_right = 4260.0
+offset_bottom = 943.0
 
 [node name="controlHelpTextTags" type="Label" parent="CenterContainer2" node_paths=PackedStringArray("tagContainer")]
 y_sort_enabled = true
