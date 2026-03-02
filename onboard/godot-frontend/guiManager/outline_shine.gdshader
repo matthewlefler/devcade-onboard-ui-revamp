@@ -27,12 +27,11 @@ void fragment() {
 	vec4 normal_color = texture(TEXTURE, UV);
     COLOR = mix(max_alpha * outline_color, normal_color, normal_color.a);
 
-    float mod_val = max(TEXTURE_PIXEL_SIZE.x, TEXTURE_PIXEL_SIZE.y);
     float d = TIME * -shine_speed;
 
     for(int i = 0; i < num_segments; i++) {
         if(UV.x > mod(d + (float(i) * shine_width / float(num_segments)), 1.0) && UV.x < mod(d + (float(i + 1) * shine_width / float(num_segments)), 1.0)) {
-            COLOR = mix(vec4(1.0,1.0,1.0,1.0 * COLOR.a), COLOR, 1.0 * float(i) / float(num_segments));
+            COLOR = mix(vec4(1.0,1.0,1.0,1.0 * COLOR.a), COLOR, 1.0 * float(num_segments - i) / float(num_segments));
         }
     }
 

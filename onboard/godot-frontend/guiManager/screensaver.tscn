@@ -28,9 +28,9 @@ shader = ExtResource("10_dt653")
 shader_parameter/outline_width = 6
 shader_parameter/start_outline_color = Color(0.466667, 0, 1, 1)
 shader_parameter/end_outline_color = Color(1, 0.968627, 0, 1)
-shader_parameter/shine_speed = 0.0
-shader_parameter/shine_width = 1.0
-shader_parameter/num_segments = 3
+shader_parameter/shine_speed = -0.3
+shader_parameter/shine_width = 0.05
+shader_parameter/num_segments = 8
 
 [node name="Control" type="Control" node_paths=PackedStringArray("gamesAnimationsContainer", "backgroundIcons")]
 z_index = 4096
