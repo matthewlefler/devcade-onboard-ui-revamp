@@ -9,7 +9,7 @@
 [ext_resource type="Texture2D" uid="uid://d4nlo4q03fi77" path="res://CSHAssets/CSH.png" id="5_d5f7k"]
 [ext_resource type="PackedScene" uid="uid://camd641ivrd43" path="res://guiManager/screensaver_games_animations/worldOfWallHoppers/WorldOfWallHoppersScreenSaver.tscn" id="7_s0yr3"]
 [ext_resource type="PackedScene" uid="uid://rf2ubr76htca" path="res://guiManager/screensaver_games_animations/BombOmbSquad/BombOmbSquadScreenSaver.tscn" id="7_usgw7"]
-[ext_resource type="Shader" uid="uid://bh58gmppws1x4" path="res://guiManager/outline.gdshader" id="10_dt653"]
+[ext_resource type="Shader" uid="uid://b8yw4hl6yvxdq" path="res://guiManager/outline_shine.gdshader" id="10_dt653"]
 [ext_resource type="Texture2D" uid="uid://lqrfprpd7kh3" path="res://CSHAssets/transparent-logo.png" id="10_n0j55"]
 [ext_resource type="Script" uid="uid://62sckdwbwl8r" path="res://GUIs/orignial/DevcadeIcon.cs" id="11_dt653"]
 [ext_resource type="Texture2D" uid="uid://bj333tajmq7mt" path="res://CSHAssets/transparent-dev-logo.png" id="12_spuds"]
@@ -28,6 +28,9 @@ shader = ExtResource("10_dt653")
 shader_parameter/outline_width = 6
 shader_parameter/start_outline_color = Color(0.466667, 0, 1, 1)
 shader_parameter/end_outline_color = Color(1, 0.968627, 0, 1)
+shader_parameter/shine_speed = 0.0
+shader_parameter/shine_width = 1.0
+shader_parameter/num_segments = 3
 
 [node name="Control" type="Control" node_paths=PackedStringArray("gamesAnimationsContainer", "backgroundIcons")]
 z_index = 4096
