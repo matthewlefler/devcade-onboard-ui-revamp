@@ -106,13 +106,13 @@ public partial class GuiManager : Control
     /// </summary>
     public override void _Ready()
     {
-        supervisorButtonTimeoutSeconds = Env.get("SUPERVISOR_BUTTON_TIMEOUT_SEC").map_or(5.0, double.Parse); // default 5 seconds
+        supervisorButtonTimeoutSeconds = Env.SUPERVISOR_BUTTON_TIMEOUT_SEC(); // default 5 seconds
         supervisorButtonTimerSeconds = supervisorButtonTimeoutSeconds;
 
-        screenSaverTimeoutSeconds = Env.get("SCREENSAVER_TIMEOUT_SEC").map_or(120.0, double.Parse); // default 2 minutes
+        screenSaverTimeoutSeconds = Env.SCREENSAVER_TIMEOUT_SEC(); // default 2 minutes
         screenSaverTimerSeconds = screenSaverTimeoutSeconds;
         
-        isDemoMode = Env.get("DEMO_MODE").map_or(false, bool.Parse);
+        isDemoMode = Env.DEMO_MODE();
 
         // hide the loading screen by default
         hideLoadingAnimation();
@@ -341,7 +341,7 @@ public partial class GuiManager : Control
                 Client.downloadBanner(game.id);
             } // check if /tmp/ has the banner
             
-            string bannerPath = $"{Env.get("DEVCADE_PATH").unwrap_or_else(() => Env.get("HOME").unwrap() + "/.devcade")}/{game.id}/banner.png";
+            string bannerPath = $"{Env.DEVCADE_PATH()}/{game.id}/banner.png";
 
             if (File.Exists(bannerPath)) {
                 try {

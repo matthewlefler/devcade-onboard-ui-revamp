@@ -10,26 +10,26 @@ public static class Env {
 
     // Logging level for the backend
     // Allowed log levels: trace, debug, info, warn, error 
-    public static Option<string> RUST_LOG() { return get("RUST_LOG"); }
+    public static string RUST_LOG() { return get("RUST_LOG").unwrap_or("error"); }
     public static Option<string> DEVCADE_API_DOMAIN() { return get("DEVCADE_API_DOMAIN"); }
     public static Option<string> DEVCADE_DEV_API_DOMAIN() { return get("DEVCADE_DEV_API_DOMAIN"); }
     
     // Frontend 
     // Logging level for the frontend 
     // Allowed log levels: trace, verbose, debug, info, warn, error, fatal 
-    public static Option<string> FRONTEND_LOG() { return get("FRONTEND_LOG"); }
+    public static string FRONTEND_LOG() { return get("FRONTEND_LOG").unwrap_or("error"); }
     // Amount of time in seconds until the screen saver is shown
-    public static int SCREENSAVER_TIMEOUT_SEC() { return int.Parse( get("SCREENSAVER_TIMEOUT_SEC").unwrap_or("300") ); }
+    public static double SCREENSAVER_TIMEOUT_SEC() { return get("SCREENSAVER_TIMEOUT_SEC").map_or(5.0, double.Parse); }
     // Amount of time in seconds that the supervisor buttons need to be heldW
-    public static int SUPERVISOR_BUTTON_TIMEOUT_SEC() { return int.Parse( get("SUPERVISOR_BUTTON_TIMEOUT_SEC").unwrap_or("5") ); }
+    public static double SUPERVISOR_BUTTON_TIMEOUT_SEC() { return get("SUPERVISOR_BUTTON_TIMEOUT_SEC").map_or(5.0, double.Parse); }
 
     // Demo mode will not display games with certain tags (e.g. "CSH Only") 
     // Allowed values: true, false 
-    public static bool DEMO_MODE() { return get("DEMO_MODE").unwrap_or("true") == "true" ? true : false; }
+    public static bool DEMO_MODE() { return get("DEMO_MODE").map_or(true, bool.Parse); }
 
     // Shared 
-    // Games data and shared sockets will be placed here 
-    public static Option<string> DEVCADE_PATH() { return get("DEVCADE_PATH"); }
+    // Games data and shared sockets will be placed here, defaults to ~/devcade
+    public static string DEVCADE_PATH() { return get("DEVCADE_PATH").unwrap_or(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "/devcade" ); }
 
     
     static Env() {
