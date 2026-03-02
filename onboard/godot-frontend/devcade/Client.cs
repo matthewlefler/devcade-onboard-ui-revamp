@@ -12,6 +12,8 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace onboard.devcade;
+
+using System.Runtime.CompilerServices;
 using util;
 
 public static class Client {
@@ -37,6 +39,8 @@ public static class Client {
      */
 
     public static bool isProduction { get; private set; } = true;
+
+    public static bool gameLauched { get; private set; } = false;
     
     private static bool connected;
         
@@ -306,6 +310,7 @@ public static class Client {
     /// <returns>A Task that will be completed once the game has exited</returns>
     public static Task<Response> launchGame(string id) {
         GD.Print($"Launching game with id {id}");
+        gameLauched = true;
         return sendRequest(Request.LaunchGame(id));
     }
 

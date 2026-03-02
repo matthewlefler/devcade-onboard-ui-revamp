@@ -1,4 +1,6 @@
 using Godot;
+using onboard.devcade;
+using onboard.devcade.GUI;
 using onboard.util;
 using System;
 
@@ -15,7 +17,7 @@ public partial class SupervisorButtonHint : MarginContainer
 
     public override void _Process(double delta)
     {
-        if(Input.IsAnythingPressed())
+        if(Input.IsAnythingPressed() || !Client.gameLauched)
         {
             time = 0.0;
             this.Hide();
