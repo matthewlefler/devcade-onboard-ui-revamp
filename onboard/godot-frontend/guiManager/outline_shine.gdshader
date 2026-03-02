@@ -5,9 +5,9 @@ uniform int outline_width: hint_range(0, 50, 1) = 10;
 uniform vec4 start_outline_color: source_color = vec4(1.0, 0.0, 0.0, 1.0);
 uniform vec4 end_outline_color: source_color = vec4 (0.0, 1.0, 0.0, 1.0);
 
-uniform float shine_speed = 0.4f;
-uniform float shine_width = 0.05f;
-uniform int num_segments = 8;
+uniform float shine_speed = -0.2f;
+uniform float shine_width = 0.1f;
+uniform int num_segments = 10;
 
 void fragment() {
 
