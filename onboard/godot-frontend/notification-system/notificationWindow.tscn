@@ -1,9 +1,10 @@
-[gd_scene load_steps=9 format=3 uid="uid://cswy8mipsaud4"]
+[gd_scene load_steps=10 format=3 uid="uid://cswy8mipsaud4"]
 
 [ext_resource type="Script" uid="uid://bqco2vfdm8n1c" path="res://notification-system/NotificationWindow.cs" id="1_65dmo"]
 [ext_resource type="Script" uid="uid://br8tslvjy5jci" path="res://notification-system/VolumeBar.cs" id="2_65dmo"]
 [ext_resource type="Shader" uid="uid://bkjuh1qsaperx" path="res://notification-system/volume_bar_text.gdshader" id="2_evtjt"]
 [ext_resource type="FontFile" uid="uid://cnha1ohwbh3ts" path="res://CSHAssets/VT323-Regular.ttf" id="2_w84xk"]
+[ext_resource type="Script" uid="uid://daxmr7hxidxcx" path="res://notification-system/SupervisorButtonHint.cs" id="5_kn466"]
 [ext_resource type="PackedScene" uid="uid://bglh47iehhwwm" path="res://CSHAssets/button/devcade_button.tscn" id="5_trcrt"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_evtjt"]
@@ -74,6 +75,7 @@ theme_override_constants/margin_left = 10
 theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 10
+script = ExtResource("5_kn466")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/supervisor button hint"]
 clip_contents = true
