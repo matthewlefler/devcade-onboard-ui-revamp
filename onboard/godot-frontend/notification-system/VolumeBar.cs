@@ -6,6 +6,9 @@ public partial class VolumeBar : ProgressBar
     [Export]
     NotificationWindow window;
 
+    [Export]
+    Label percent_text;
+
     private Process process = new Process {
         StartInfo = new ProcessStartInfo
         {
@@ -35,6 +38,7 @@ public partial class VolumeBar : ProgressBar
         this.Visible = false;
 
         last_volume = getVolume();
+        set_text();
     }
 
     public override void _Process(double delta)
@@ -66,6 +70,7 @@ public partial class VolumeBar : ProgressBar
         last_volume = volume;
 
         this.Value = getVolume() / 100.0f;
+        set_text();
     }
 
     private int getVolume()
@@ -83,5 +88,10 @@ public partial class VolumeBar : ProgressBar
         string stdout = process.StandardOutput.ReadToEnd();
         
         return stdout.ToInt();
+    }
+
+    private void set_text()
+    {
+        percent_text.Text = ((int)(this.Value * 100)).ToString() + "%";
     }
 }

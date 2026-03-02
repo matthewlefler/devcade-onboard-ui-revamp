@@ -2,12 +2,15 @@ using Godot;
 
 public partial class NotificationWindow : Window
 {
+    private Vector2I correct_position;
+
     public override void _EnterTree()
     {
         this.CloseRequested += this.QueueFree;
         
         Vector2I screenSize = DisplayServer.ScreenGetSize();
-        this.Position = screenSize - this.Size - new Vector2I((screenSize.X - this.Size.X) / 2, 0);
+        correct_position = screenSize - this.Size - new Vector2I((screenSize.X - this.Size.X) / 2, 0);
+        this.Position = correct_position;
 
         this.AlwaysOnTop = true;
     }
