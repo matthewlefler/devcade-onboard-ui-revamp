@@ -311,7 +311,7 @@ public static class Client {
     public static Task<Response> launchGame(string id) {
         GD.Print($"Launching game with id {id}");
         gameLauched = true;
-        return sendRequest(Request.LaunchGame(id));
+        return sendRequest(Request.LaunchGame(id)).ContinueWith(task => {gameLauched = false; return task.Result;} );
     }
 
     /// <summary>
