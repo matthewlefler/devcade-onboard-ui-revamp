@@ -1,0 +1,120 @@
+[gd_scene load_steps=10 format=3 uid="uid://cswy8mipsaud4"]
+
+[ext_resource type="Script" uid="uid://bqco2vfdm8n1c" path="res://notification-system/NotificationWindow.cs" id="1_65dmo"]
+[ext_resource type="Script" uid="uid://br8tslvjy5jci" path="res://notification-system/VolumeBar.cs" id="2_65dmo"]
+[ext_resource type="Shader" uid="uid://bkjuh1qsaperx" path="res://notification-system/volume_bar_text.gdshader" id="2_evtjt"]
+[ext_resource type="FontFile" uid="uid://cnha1ohwbh3ts" path="res://CSHAssets/VT323-Regular.ttf" id="2_w84xk"]
+[ext_resource type="Script" uid="uid://daxmr7hxidxcx" path="res://notification-system/SupervisorButtonHint.cs" id="5_kn466"]
+[ext_resource type="PackedScene" uid="uid://bglh47iehhwwm" path="res://CSHAssets/button/devcade_button.tscn" id="5_trcrt"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_evtjt"]
+bg_color = Color(0, 0, 0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_w84xk"]
+bg_color = Color(1, 1, 1, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_w84xk"]
+shader = ExtResource("2_evtjt")
+
+[node name="NotificationWindow" type="Window"]
+transparent_bg = true
+size = Vector2i(1000, 200)
+exclusive = true
+unresizable = true
+borderless = true
+always_on_top = true
+transparent = true
+exclude_from_capture = true
+script = ExtResource("1_65dmo")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+texture_filter = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="volume" type="MarginContainer" parent="MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 50
+theme_override_constants/margin_top = 70
+theme_override_constants/margin_right = 50
+theme_override_constants/margin_bottom = 75
+
+[node name="volumeBar" type="ProgressBar" parent="MarginContainer/volume" node_paths=PackedStringArray("window", "percent_text")]
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_styles/background = SubResource("StyleBoxFlat_evtjt")
+theme_override_styles/fill = SubResource("StyleBoxFlat_w84xk")
+max_value = 1.0
+value = 0.35
+show_percentage = false
+script = ExtResource("2_65dmo")
+window = NodePath("../../..")
+percent_text = NodePath("Label")
+
+[node name="Label" type="Label" parent="MarginContainer/volume/volumeBar"]
+material = SubResource("ShaderMaterial_w84xk")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_fonts/font = ExtResource("2_w84xk")
+theme_override_font_sizes/font_size = 60
+text = "100%"
+horizontal_alignment = 1
+
+[node name="supervisor button hint" type="MarginContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+script = ExtResource("5_kn466")
+inactiveMaxTime = 180.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/supervisor button hint"]
+clip_contents = true
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/supervisor button hint/VBoxContainer"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_w84xk")
+theme_override_font_sizes/font_size = 49
+text = "Press and Hold the Two black buttons to Force Quit"
+horizontal_alignment = 1
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/supervisor button hint/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/margin_left = 170
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 170
+theme_override_constants/margin_bottom = 5
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/supervisor button hint/VBoxContainer/MarginContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="CenterContainer" type="CenterContainer" parent="MarginContainer/supervisor button hint/VBoxContainer/MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 6
+size_flags_vertical = 4
+
+[node name="DevcadeButton" parent="MarginContainer/supervisor button hint/VBoxContainer/MarginContainer/HBoxContainer/CenterContainer" instance=ExtResource("5_trcrt")]
+texture_filter = 3
+scale = Vector2(4.37556, 4.37556)
+
+[node name="CenterContainer2" type="CenterContainer" parent="MarginContainer/supervisor button hint/VBoxContainer/MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 6
+size_flags_vertical = 4
+
+[node name="DevcadeButton" parent="MarginContainer/supervisor button hint/VBoxContainer/MarginContainer/HBoxContainer/CenterContainer2" instance=ExtResource("5_trcrt")]
+texture_filter = 3
+scale = Vector2(4.37556, 4.37556)

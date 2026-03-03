@@ -63,8 +63,6 @@ public partial class SlerpCamera2d : Camera2D
 
     public override void _Process(double delta)
     {
-        base._Process(delta);
-
         time += (float)delta * animationSpeed;
 
         if (time > 1)

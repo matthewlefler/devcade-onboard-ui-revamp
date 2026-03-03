@@ -1,0 +1,39 @@
+[gd_scene load_steps=8 format=3 uid="uid://bglh47iehhwwm"]
+
+[ext_resource type="Texture2D" uid="uid://duav6epeka3wv" path="res://CSHAssets/button/button_up.png" id="1_2nnuo"]
+[ext_resource type="Shader" uid="uid://ckw5qtfpbste" path="res://CSHAssets/button/devcade_button.gdshader" id="1_iwpom"]
+[ext_resource type="Texture2D" uid="uid://c84vahhkvavi6" path="res://CSHAssets/button/button_mid.png" id="2_iwpom"]
+[ext_resource type="Texture2D" uid="uid://1fkjoxsm1ke8" path="res://CSHAssets/button/button_down.png" id="3_iqb3g"]
+[ext_resource type="Script" uid="uid://mk3x5165b4sv" path="res://CSHAssets/button/DevcadeButton.cs" id="5_iqb3g"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_iqb3g"]
+shader = ExtResource("1_iwpom")
+shader_parameter/color = Color(0.21, 0.21, 0.21, 1)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_b4mud"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_2nnuo")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_iwpom")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_iqb3g")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_iwpom")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[node name="DevcadeButton" type="AnimatedSprite2D"]
+texture_filter = 1
+texture_repeat = 1
+material = SubResource("ShaderMaterial_iqb3g")
+sprite_frames = SubResource("SpriteFrames_b4mud")
+speed_scale = 0.8
+script = ExtResource("5_iqb3g")
