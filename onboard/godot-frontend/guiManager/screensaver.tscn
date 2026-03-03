@@ -29,7 +29,7 @@ shader_parameter/outline_width = 7
 shader_parameter/start_outline_color = Color(0.466667, 0, 1, 1)
 shader_parameter/end_outline_color = Color(1, 0.968627, 0, 1)
 shader_parameter/shine_speed = -0.2
-shader_parameter/shine_width = 0.1
+shader_parameter/shine_width = 0.23
 shader_parameter/num_segments = 10
 
 [node name="Control" type="Control" node_paths=PackedStringArray("gamesAnimationsContainer", "backgroundIcons")]
