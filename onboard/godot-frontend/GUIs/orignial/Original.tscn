@@ -192,6 +192,7 @@ scale = Vector2(2, 2)
 size_flags_vertical = 3
 script = ExtResource("7_s6n7q")
 gameButtonsScale = 1.28
+cardScaleAmount = 0.37
 percentYPositionValue = 60.0
 
 [node name="CenterContainer" type="CenterContainer" parent="."]
