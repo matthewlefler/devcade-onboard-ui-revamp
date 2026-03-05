@@ -77,11 +77,6 @@ public partial class GuiManager : Control
     public bool reloadingGameList { get; private set; } = false;
 
     /// <summary>
-    /// True if one of the games is being run, false otherwise
-    /// </summary>
-    public bool gameLauched { get; private set; } = false;
-
-    /// <summary>
     /// The current GUI scene being shown
     /// </summary>
     GuiInterface guiScene;
@@ -158,6 +153,11 @@ public partial class GuiManager : Control
         {
             GD.Print(axis.Device, axis.Axis);
         }
+
+        if(showingScreenSaverAnimation)
+        {
+            GetViewport().SetInputAsHandled();
+        }
     }
 
     double supervisorButtonTimeoutSeconds;
@@ -232,12 +232,13 @@ public partial class GuiManager : Control
                 // if the timer has timed out
                 // kill the currently running game 
                 // and show the screensaver
-                if(gameLauched)
+                if(Client.gameLauched)
                 {
                     _ = killGame();
                 }
                 showingScreenSaverAnimation = true;
                 showScreenSaver();
+                
             }
         }
         else
@@ -249,18 +250,13 @@ public partial class GuiManager : Control
             }
             screenSaverTimerSeconds = screenSaverTimeoutSeconds;
         }
-        
-        
     }
 
     /// <summary>
-    /// the constructor of a class will run before the _Ready() function is called
+    /// fetches the game list from the backend
+    /// does take time to do so
     /// </summary>
-    public GuiManager()
-    {
-
-    }
-
+    /// <returns></returns>
     private Task reloadGameList()
     {
         showLoadingAnimation();        
@@ -331,6 +327,10 @@ public partial class GuiManager : Control
         return gameTask;
     }
 
+    /// <summary>
+    /// loads the banners from the downloaded files from the database
+    /// and saves the images to the DevcadeGame gamse
+    /// </summary>
     private void loadBanners()
     {
         foreach(DevcadeGame game in gameTitles)
@@ -457,7 +457,6 @@ public partial class GuiManager : Control
         // ProcessMode = ProcessModeEnum.Disabled;
         guiSceneRootNode.ProcessMode = ProcessModeEnum.Disabled;
         
-        this.gameLauched = true;
         GD.Print("launching game: " + game.name);
 
         showLoadingAnimation();
@@ -473,8 +472,6 @@ public partial class GuiManager : Control
                 }
                 // ProcessMode = ProcessModeEnum.Always; 
                 guiSceneRootNode.SetDeferred("process_mode", previousProcessMode);
-
-                this.gameLauched = false;
         });
     }
 

@@ -1,8 +1,8 @@
 [gd_resource type="Theme" load_steps=4 format=3 uid="uid://cfha8h63q5pfc"]
 
 [ext_resource type="FontFile" uid="uid://cnha1ohwbh3ts" path="res://CSHAssets/VT323-Regular.ttf" id="1_f6y80"]
-[ext_resource type="StyleBox" uid="uid://cybslsr5ecwor" path="res://GUIs/orignial/TagButtonStyleBoxFlat.tres" id="1_gcu4m"]
-[ext_resource type="StyleBox" uid="uid://cvou2scxpk5ho" path="res://GUIs/orignial/TagButtonStyleBoxFlatPressed.tres" id="3_ajf2s"]
+[ext_resource type="StyleBox" uid="uid://cybslsr5ecwor" path="res://GUIs/orignial/tagList/TagButtonStyleBoxFlat.tres" id="1_gcu4m"]
+[ext_resource type="StyleBox" uid="uid://cvou2scxpk5ho" path="res://GUIs/orignial/tagList/TagButtonStyleBoxFlatPressed.tres" id="3_ajf2s"]
 
 [resource]
 Button/colors/font_color = Color(0.525102, 0.525101, 0.525101, 1)

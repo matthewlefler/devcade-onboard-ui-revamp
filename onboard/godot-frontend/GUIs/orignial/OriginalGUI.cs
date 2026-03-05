@@ -96,13 +96,11 @@ public partial class OriginalGUI : Control, GuiInterface
     {
         // hide the description if it is not already hidden
         description.Hide();
-        // and hopefully make it appear on top of everything else
-        description.ZIndex = 1000;
 
         state = GuiState.ViewGames;
     }
 
-    public override void _Input(InputEvent @event)
+    public override void _UnhandledInput(InputEvent @event)
     {
         // back button (blue button)
         if (@event.IsActionPressed("Player1_A2") || @event.IsActionPressed("Player2_A2"))
