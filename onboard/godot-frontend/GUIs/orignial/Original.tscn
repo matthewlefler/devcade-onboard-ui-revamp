@@ -31,21 +31,35 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_eo6uj")
-camera = NodePath("Camera2D")
-gameContainer = NodePath("gamesContainer")
-tagsMenu = NodePath("ScrollContainer/tagContainer")
-tagContainer = NodePath("ScrollContainer/tagContainer")
-description = NodePath("DescriptionContainer")
-descriptionLabel = NodePath("DescriptionContainer/TextureRect2/MarginContainer/VBoxContainer/description")
-titleLabel = NodePath("DescriptionContainer/TextureRect2/MarginContainer/VBoxContainer/title")
+camera = NodePath("SubViewportContainer/SubViewport/Camera2D")
+gameContainer = NodePath("SubViewportContainer/SubViewport/gamesContainer")
+tagsMenu = NodePath("SubViewportContainer/SubViewport/ScrollContainer/tagContainer")
+tagContainer = NodePath("SubViewportContainer/SubViewport/ScrollContainer/tagContainer")
+description = NodePath("SubViewportContainer/SubViewport/DescriptionContainer")
+descriptionLabel = NodePath("SubViewportContainer/SubViewport/DescriptionContainer/TextureRect2/MarginContainer/VBoxContainer/description")
+titleLabel = NodePath("SubViewportContainer/SubViewport/DescriptionContainer/TextureRect2/MarginContainer/VBoxContainer/title")
 
-[node name="DescriptionContainer" type="MarginContainer" parent="."]
-visible = false
-z_as_relative = false
+[node name="SubViewportContainer" type="SubViewportContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="SubViewportContainer"]
+canvas_item_default_texture_filter = 0
+size = Vector2i(2160, 3840)
+
+[node name="DescriptionContainer" type="MarginContainer" parent="SubViewportContainer/SubViewport"]
+visible = false
+z_as_relative = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 288.0
+offset_bottom = 88.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/margin_left = 400
@@ -53,7 +67,7 @@ theme_override_constants/margin_top = 300
 theme_override_constants/margin_right = 400
 theme_override_constants/margin_bottom = 300
 
-[node name="TextureRect2" type="TextureRect" parent="DescriptionContainer"]
+[node name="TextureRect2" type="TextureRect" parent="SubViewportContainer/SubViewport/DescriptionContainer"]
 z_index = 200
 z_as_relative = false
 y_sort_enabled = true
@@ -61,7 +75,7 @@ layout_mode = 2
 texture = ExtResource("5_0ghq1")
 expand_mode = 1
 
-[node name="MarginContainer" type="MarginContainer" parent="DescriptionContainer/TextureRect2"]
+[node name="MarginContainer" type="MarginContainer" parent="SubViewportContainer/SubViewport/DescriptionContainer/TextureRect2"]
 z_index = 200
 y_sort_enabled = true
 layout_mode = 1
@@ -75,13 +89,13 @@ theme_override_constants/margin_top = 25
 theme_override_constants/margin_right = 45
 theme_override_constants/margin_bottom = 25
 
-[node name="VBoxContainer" type="VBoxContainer" parent="DescriptionContainer/TextureRect2/MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="SubViewportContainer/SubViewport/DescriptionContainer/TextureRect2/MarginContainer"]
 z_index = 200
 y_sort_enabled = true
 layout_mode = 2
 theme_override_constants/separation = 50
 
-[node name="title" type="Label" parent="DescriptionContainer/TextureRect2/MarginContainer/VBoxContainer"]
+[node name="title" type="Label" parent="SubViewportContainer/SubViewport/DescriptionContainer/TextureRect2/MarginContainer/VBoxContainer"]
 z_index = 200
 y_sort_enabled = true
 layout_mode = 2
@@ -91,7 +105,7 @@ text = "Title"
 horizontal_alignment = 1
 autowrap_mode = 3
 
-[node name="description" type="Label" parent="DescriptionContainer/TextureRect2/MarginContainer/VBoxContainer"]
+[node name="description" type="Label" parent="SubViewportContainer/SubViewport/DescriptionContainer/TextureRect2/MarginContainer/VBoxContainer"]
 z_index = 200
 z_as_relative = false
 y_sort_enabled = true
@@ -101,14 +115,14 @@ theme_override_font_sizes/font_size = 80
 text = "Description"
 autowrap_mode = 2
 
-[node name="Camera2D" type="Camera2D" parent="."]
+[node name="Camera2D" type="Camera2D" parent="SubViewportContainer/SubViewport"]
 y_sort_enabled = true
 anchor_mode = 0
 script = ExtResource("10_feq1j")
 easeAmount = 2.0
 animationSpeed = 5.0
 
-[node name="background" type="TextureRect" parent="Camera2D" node_paths=PackedStringArray("camera")]
+[node name="background" type="TextureRect" parent="SubViewportContainer/SubViewport/Camera2D" node_paths=PackedStringArray("camera")]
 z_index = -4096
 y_sort_enabled = true
 custom_minimum_size = Vector2(900, 0)
@@ -121,7 +135,7 @@ expand_mode = 1
 script = ExtResource("8_4asay")
 camera = NodePath("..")
 
-[node name="backgroundCSHIcons" type="TextureRect" parent="Camera2D/background"]
+[node name="backgroundCSHIcons" type="TextureRect" parent="SubViewportContainer/SubViewport/Camera2D/background"]
 y_sort_enabled = true
 texture_repeat = 2
 material = SubResource("ShaderMaterial_loec3")
@@ -134,7 +148,7 @@ grow_vertical = 2
 texture = ExtResource("3_x7jqg")
 expand_mode = 1
 
-[node name="gamesMenu" type="VBoxContainer" parent="Camera2D/background"]
+[node name="gamesMenu" type="VBoxContainer" parent="SubViewportContainer/SubViewport/Camera2D/background"]
 y_sort_enabled = true
 layout_mode = 1
 anchors_preset = 15
@@ -143,7 +157,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="Camera2D/background/gamesMenu"]
+[node name="MarginContainer" type="MarginContainer" parent="SubViewportContainer/SubViewport/Camera2D/background/gamesMenu"]
 y_sort_enabled = true
 layout_mode = 2
 theme_override_constants/margin_left = 300
@@ -151,7 +165,7 @@ theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 300
 theme_override_constants/margin_bottom = 10
 
-[node name="DevcadeIcon" type="TextureRect" parent="Camera2D/background/gamesMenu/MarginContainer"]
+[node name="DevcadeIcon" type="TextureRect" parent="SubViewportContainer/SubViewport/Camera2D/background/gamesMenu/MarginContainer"]
 y_sort_enabled = true
 layout_mode = 2
 texture = ExtResource("2_xc2fw")
@@ -160,19 +174,18 @@ script = ExtResource("10_84p7e")
 prodTexture = ExtResource("2_xc2fw")
 devTexture = ExtResource("11_7qoy5")
 
-[node name="ScrollContainer" type="ScrollContainer" parent="."]
+[node name="ScrollContainer" type="ScrollContainer" parent="SubViewportContainer/SubViewport"]
 y_sort_enabled = true
-layout_mode = 1
 anchors_preset = -1
 anchor_left = 1.0
 anchor_right = 2.0
 anchor_bottom = 1.0
 offset_top = 1548.0
-offset_bottom = 8.0
+offset_bottom = -2.0
 grow_horizontal = 0
 grow_vertical = 2
 
-[node name="tagContainer" type="GridContainer" parent="ScrollContainer"]
+[node name="tagContainer" type="GridContainer" parent="SubViewportContainer/SubViewport/ScrollContainer"]
 y_sort_enabled = true
 layout_mode = 2
 size_flags_horizontal = 3
@@ -181,9 +194,9 @@ columns = 2
 script = ExtResource("8_loec3")
 tagButtonTheme = ExtResource("12_vs4r3")
 
-[node name="gamesContainer" type="Control" parent="."]
+[node name="gamesContainer" type="Control" parent="SubViewportContainer/SubViewport"]
 y_sort_enabled = true
-layout_mode = 2
+layout_mode = 3
 anchors_preset = 0
 offset_top = 2268.0
 offset_right = 900.0
@@ -195,14 +208,13 @@ gameButtonsScale = 1.28
 cardScaleAmount = 0.37
 percentYPositionValue = 60.0
 
-[node name="CenterContainer" type="CenterContainer" parent="."]
+[node name="CenterContainer" type="CenterContainer" parent="SubViewportContainer/SubViewport"]
 y_sort_enabled = true
-layout_mode = 1
 offset_top = 800.0
 offset_right = 2100.0
 offset_bottom = 1089.0
 
-[node name="controlHelpTextGames" type="Label" parent="CenterContainer"]
+[node name="controlHelpTextGames" type="Label" parent="SubViewportContainer/SubViewport/CenterContainer"]
 z_index = 100
 z_as_relative = false
 y_sort_enabled = true
@@ -215,15 +227,14 @@ Press both black buttons to refresh"
 horizontal_alignment = 1
 autowrap_mode = 2
 
-[node name="CenterContainer2" type="CenterContainer" parent="."]
+[node name="CenterContainer2" type="CenterContainer" parent="SubViewportContainer/SubViewport"]
 y_sort_enabled = true
-layout_mode = 1
 offset_left = 2160.0
 offset_top = 800.0
 offset_right = 4260.0
 offset_bottom = 943.0
 
-[node name="controlHelpTextTags" type="Label" parent="CenterContainer2" node_paths=PackedStringArray("tagContainer")]
+[node name="controlHelpTextTags" type="Label" parent="SubViewportContainer/SubViewport/CenterContainer2" node_paths=PackedStringArray("tagContainer")]
 y_sort_enabled = true
 custom_minimum_size = Vector2(2100, 10.875)
 layout_mode = 2

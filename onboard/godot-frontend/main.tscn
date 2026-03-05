@@ -75,11 +75,9 @@ scale = Vector2(3.11989, 3.11989)
 sprite_frames = ExtResource("3_h2yge")
 
 [node name="screensaver" parent="." instance=ExtResource("5_lquwl")]
-visible = false
 layout_mode = 1
 
 [node name="NotificationWindow" parent="." instance=ExtResource("6_7mycd")]
-visible = false
 exclusive = false
 
 [node name="fpsLabel" type="Label" parent="."]
