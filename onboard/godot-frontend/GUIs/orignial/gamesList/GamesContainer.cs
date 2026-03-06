@@ -121,7 +121,10 @@ public partial class GamesContainer : Control
                     TextureNormal = game.banner,
                     TextureHover = game.banner,
                     TexturePressed = game.banner,
-                    TextureFocused = game.banner
+                    TextureFocused = game.banner,
+
+                    // dont use inbuilt navigation 
+                    FocusMode = FocusModeEnum.Click,
                 };
 
                 button = textureButton;
@@ -137,7 +140,9 @@ public partial class GamesContainer : Control
 
                     Name = game.name,
 
-                    Text = game.name
+                    Text = game.name,
+                    // dont use inbuilt navigation 
+                    FocusMode = FocusModeEnum.Click,
                 };
 
                 button = textButton;
