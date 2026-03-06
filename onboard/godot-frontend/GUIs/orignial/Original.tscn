@@ -7,7 +7,7 @@
 [ext_resource type="Texture2D" uid="uid://d4nlo4q03fi77" path="res://CSHAssets/CSH.png" id="3_x7jqg"]
 [ext_resource type="FontFile" uid="uid://cnha1ohwbh3ts" path="res://CSHAssets/VT323-Regular.ttf" id="4_mmnpk"]
 [ext_resource type="Texture2D" uid="uid://f61vcor4mcvi" path="res://CSHAssets/description.png" id="5_0ghq1"]
-[ext_resource type="Script" uid="uid://d15s735p2xr6b" path="res://GUIs/orignial/GamesContainer.cs" id="7_s6n7q"]
+[ext_resource type="Script" uid="uid://d15s735p2xr6b" path="res://GUIs/orignial/gamesList/GamesContainer.cs" id="7_s6n7q"]
 [ext_resource type="Script" uid="uid://cj0skhgydnii2" path="res://GUIs/orignial/Background.cs" id="8_4asay"]
 [ext_resource type="Script" uid="uid://bjnrrsq5svi0h" path="res://GUIs/orignial/tagList/TagContainer.cs" id="8_loec3"]
 [ext_resource type="Script" uid="uid://62sckdwbwl8r" path="res://GUIs/orignial/DevcadeIcon.cs" id="10_84p7e"]
@@ -49,8 +49,10 @@ grow_vertical = 2
 stretch = true
 
 [node name="SubViewport" type="SubViewport" parent="SubViewportContainer"]
+handle_input_locally = false
 canvas_item_default_texture_filter = 0
 size = Vector2i(2160, 3840)
+render_target_update_mode = 4
 
 [node name="DescriptionContainer" type="MarginContainer" parent="SubViewportContainer/SubViewport"]
 visible = false
@@ -58,8 +60,6 @@ z_as_relative = false
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_right = 288.0
-offset_bottom = 88.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/margin_left = 400
@@ -200,7 +200,7 @@ layout_mode = 3
 anchors_preset = 0
 offset_top = 2268.0
 offset_right = 900.0
-offset_bottom = 3379.0
+offset_bottom = 3051.0
 scale = Vector2(2, 2)
 size_flags_vertical = 3
 script = ExtResource("7_s6n7q")

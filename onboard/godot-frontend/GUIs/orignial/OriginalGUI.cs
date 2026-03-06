@@ -68,7 +68,7 @@ public partial class OriginalGUI : Control, GuiInterface
     /// the object that interfaces with the client to get the game list, tag list, etc
     /// the model, assuming a mvc like pattern
     /// </summary>
-    private GuiManager model = null;
+    private GuiManager guiManager = null;
 
     /// <summary>
     /// the list of games
@@ -121,6 +121,41 @@ public partial class OriginalGUI : Control, GuiInterface
                 lauchCurrentGame();
             }
         }
+
+        if (state == GuiState.ViewGames)
+        {
+            if (@event.IsActionPressed("Player1_StickUp") || @event.IsActionPressed("Player2_StickUp"))
+            {
+                gameContainer.previousGame();
+            }
+            if (@event.IsActionPressed("Player1_StickDown") || @event.IsActionPressed("Player2_StickDown"))
+            {
+                gameContainer.nextGame();
+            }
+        }
+        if (state == GuiState.Tags)
+        {
+            // stick up
+            if (@event.IsActionPressed("Player1_StickUp") || @event.IsActionPressed("Player2_StickUp"))
+            {
+                tagContainer.selectUp();
+            }
+            // stick down
+            if (@event.IsActionPressed("Player1_StickDown") || @event.IsActionPressed("Player2_StickDown"))
+            {
+                tagContainer.selectDown();
+            }
+            // stick left
+            if (@event.IsActionPressed("Player1_StickLeft") || @event.IsActionPressed("Player2_StickLeft"))
+            {
+                tagContainer.selectLeft();
+            }
+            // stick right
+            if (@event.IsActionPressed("Player1_StickRight") || @event.IsActionPressed("Player2_StickRight"))
+            {
+                tagContainer.selectRight();
+            }
+        }
         
         if (state != GuiState.Description)
         {
@@ -137,6 +172,7 @@ public partial class OriginalGUI : Control, GuiInterface
                 {
                     showTagList();
                 }
+                AcceptEvent();
             }
 
             // stick left
@@ -154,6 +190,8 @@ public partial class OriginalGUI : Control, GuiInterface
                 }
             }
         }
+
+
     }
 
     public override void _Process(double delta)
@@ -196,7 +234,7 @@ public partial class OriginalGUI : Control, GuiInterface
     {
         state = GuiState.GameLaunched;
         // this launches the selected game, and continues when the game closes
-        model.launchGame(game).ContinueWith(_ => state = GuiState.Description);
+        guiManager.launchGame(game).ContinueWith(_ => state = GuiState.Description);
     }
 
     /// <summary>
@@ -221,7 +259,6 @@ public partial class OriginalGUI : Control, GuiInterface
         leftRightStickMovement = 1;
 
         state = GuiState.Tags;
-        gameContainer.resetLastPressedButton();
         tagContainer.grabFocus();
         camera.setRelativeTargetIndex(1);
     }
@@ -231,13 +268,14 @@ public partial class OriginalGUI : Control, GuiInterface
         leftRightStickMovement = 0;
 
         state = GuiState.ViewGames;
+        gameContainer.resetLastPressedButton();
         gameContainer.grabFocus();
         camera.setRelativeTargetIndex(0);
     }
 
     public void setGameList(List<DevcadeGame> gameTitles, GuiManager model)
     {
-        this.model = model;
+        this.guiManager = model;
         games = gameTitles;
 
         updateGames = true;
@@ -249,7 +287,7 @@ public partial class OriginalGUI : Control, GuiInterface
     /// <param name="tag"> the new tag </param>
     public void setCurrentTag(Tag tag)
     {
-        model.setTag(tag);
+        guiManager.setTag(tag);
         showGameList();
     }
 

@@ -17,6 +17,69 @@ public partial class TagContainer : GridContainer
 
     private Button[] tagButtons;
 
+    public int numberOfTags {get; private set;} = 1;
+
+    private int maxX;
+    private int maxY;
+
+    private int currentX = 0;
+    private int currentY = 0;
+
+    /// <summary>
+    /// Attempt to select the tag above the current one
+    /// </summary>
+    public void selectUp()
+    {
+        select(currentX, currentY - 1);
+    }
+
+    /// <summary>
+    /// Attempt to select the tag below the current one
+    /// </summary>
+    public void selectDown()
+    {
+        select(currentX, currentY + 1);
+    }
+    
+    /// <summary>
+    /// Attempt to select the tag left of the current one
+    /// </summary>
+    public void selectLeft()
+    {
+        select(currentX - 1, currentY);
+    }
+    
+    /// <summary>
+    /// Attempt to select the tag right of the current one
+    /// </summary>
+    public void selectRight()
+    {
+        select(currentX + 1, currentY);
+    }
+
+    public void select(int x, int y)
+    {
+        if(x < 0)
+        {
+            x = 0;
+        }
+        if(x > maxX)
+        {
+            x = maxX;
+        }
+        if(y < 0)
+        {
+            y = 0;
+        }
+        if(y > maxY)
+        {
+            y = maxY;
+        }
+        currentX = x;
+        currentY = y;
+        this.tagButtons[y * Columns + x].CallDeferred("grab_focus");
+    }
+
     public void updateTags(List<Tag> tagList, Action<Tag> on_tag_pressed)
     {
         foreach (Node child in this.GetChildren())
@@ -28,6 +91,8 @@ public partial class TagContainer : GridContainer
         {
             return;
         }
+
+        numberOfTags = tagList.Count;
 
         tagButtons = new Button[tagList.Count];
 
@@ -42,7 +107,8 @@ public partial class TagContainer : GridContainer
 
                 Theme = tagButtonTheme,
 
-                Text = tagList[i].name
+                Text = tagList[i].name,
+                // Text = i.ToString(),
             };
 
             Tag tag = tagList[i];
@@ -56,17 +122,30 @@ public partial class TagContainer : GridContainer
                 SizeFlagsHorizontal = SizeFlags.ExpandFill,
                 SizeFlagsVertical = SizeFlags.ExpandFill,
 
-                Theme = tagButtonTheme
+                Theme = tagButtonTheme,
+
+                
             };
 
             marginContainer.AddChild(button);
 
             this.AddChild(marginContainer);
+
+            // Ignores basic ui_"whatever" input actions
+            // while still allowing them to be focused
+            marginContainer.FocusMode = FocusModeEnum.Click;
+            button.FocusMode = FocusModeEnum.Click;
         }
+
+        maxX = Columns - 1;
+        maxY = (int) Mathf.Ceil(numberOfTags / (float) Columns) - 1;
+
+        currentX = 0;
+        currentY = 0;
     }
 
     public void grabFocus()
     {
-        this.tagButtons[0].CallDeferred("grab_focus");
+        select(0, 0);
     }
 }
