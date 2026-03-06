@@ -180,6 +180,8 @@ public partial class GamesContainer : Control
 
             buttonsGames.Add(button, game);
         }
+
+        lastButtonPressed = gameButtons[0].childButton;
     }
 
     /// <summary>
@@ -266,6 +268,15 @@ public partial class GamesContainer : Control
     public void setLastPressedButton(int index)
     {
         lastButtonPressed = gameButtons[index].childButton;
+    }
+
+    /// <summary>
+    /// Sets the last pressed button to a button with an arbitrary index in the gameButtons list
+    /// </summary>
+    /// <param name="index">must be within or equal to the length of gameButtons and 0</param>
+    public void selectLastPressedButton()
+    {
+        lastButtonPressed.GrabFocus();
     }
 
 }

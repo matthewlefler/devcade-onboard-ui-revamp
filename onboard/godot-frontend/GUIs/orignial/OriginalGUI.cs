@@ -235,6 +235,7 @@ public partial class OriginalGUI : Control, GuiInterface
         state = GuiState.GameLaunched;
         // this launches the selected game, and continues when the game closes
         guiManager.launchGame(game).ContinueWith(_ => state = GuiState.Description);
+        gameContainer.selectLastPressedButton();
     }
 
     /// <summary>
