@@ -9,7 +9,7 @@ public partial class GamesContainer : Control
     /// <summary>
     /// the last game button that has been pressed
     /// </summary>
-    internal BaseButton lastButtonPressed = null;
+    internal GameButton lastButtonPressed = null;
 
     /// <summary>
     /// a scalar value for the size of the game buttons
@@ -160,6 +160,7 @@ public partial class GamesContainer : Control
             button.Rotation = i * cardSpacing;
             button.ZIndex = games.Count - i;
 
+            GameButton gameButton = new GameButton(i * cardSpacing, button, i);
             // skip error games
             if (game.name != "Error")
             {
@@ -167,7 +168,7 @@ public partial class GamesContainer : Control
                 // to the function showDescription called when the button is pressed
                 button.Pressed += () =>
                 {
-                    lastButtonPressed = button;
+                    lastButtonPressed = gameButton;
                     button.ReleaseFocus();
                     showDescription(game);
                 };
@@ -175,7 +176,7 @@ public partial class GamesContainer : Control
 
             // add the new button to the game container and the list of game buttons
             this.AddChild(button);
-            gameButtons.Add(new GameButton(i * cardSpacing, button));
+            gameButtons.Add(gameButton);
 
             if (i > 5)
             {
@@ -185,7 +186,7 @@ public partial class GamesContainer : Control
             buttonsGames.Add(button, game);
         }
 
-        lastButtonPressed = gameButtons[0].childButton;
+        lastButtonPressed = gameButtons[0];
     }
 
     /// <summary>
@@ -238,6 +239,7 @@ public partial class GamesContainer : Control
         }
 
         // add back the ones that have the tag
+        int i = 0;
         gameButtons.ForEach(buttonWrapper =>
         {
             DevcadeGame game = buttonsGames[buttonWrapper.childButton];
@@ -245,6 +247,8 @@ public partial class GamesContainer : Control
             if (game.tags.Contains(tag))
             {
                 this.AddChild(buttonWrapper.childButton);
+                buttonWrapper.index = i;
+                ++i;
             }
         });
     }
@@ -254,7 +258,7 @@ public partial class GamesContainer : Control
     /// </summary>
     public void grabFocus()
     {
-        lastButtonPressed.GrabFocus();
+        setFocusedGame(lastButtonPressed.index);
     }
 
     /// <summary>
@@ -263,7 +267,7 @@ public partial class GamesContainer : Control
     /// <param name="index">must be within or equal to the length of gameButtons and 0</param>
     public void setLastPressedButton(int index)
     {
-        lastButtonPressed = gameButtons[index].childButton;
+        lastButtonPressed = gameButtons[index];
     }
 
     /// <summary>
@@ -280,7 +284,7 @@ public partial class GamesContainer : Control
     /// <param name="index">must be within or equal to the length of gameButtons and 0</param>
     public void selectLastPressedButton()
     {
-        lastButtonPressed.GrabFocus();
+        setFocusedGame(lastButtonPressed.index);
     }
 
 }

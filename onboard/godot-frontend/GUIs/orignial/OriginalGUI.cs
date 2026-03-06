@@ -131,7 +131,7 @@ public partial class OriginalGUI : Control, GuiInterface
             if (state == GuiState.Description)
             {
                 description.Hide();
-                gameContainer.lastButtonPressed.GrabFocus();
+                gameContainer.selectLastPressedButton();
                 state = GuiState.ViewGames;
             }
         }
@@ -208,7 +208,7 @@ public partial class OriginalGUI : Control, GuiInterface
     /// </summary>
     private void lauchCurrentGame()
     {
-        DevcadeGame gameToLaunch = gameContainer.buttonsGames[gameContainer.lastButtonPressed];
+        DevcadeGame gameToLaunch = gameContainer.buttonsGames[gameContainer.lastButtonPressed.childButton];
         launchGame(gameToLaunch);
     }
 
