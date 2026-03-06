@@ -125,6 +125,8 @@ public partial class GamesContainer : Control
 
                     // dont use inbuilt navigation 
                     FocusMode = FocusModeEnum.Click,
+
+                    CustomMinimumSize = gameButtonsSize * gameButtonsScale,
                 };
 
                 button = textureButton;
@@ -139,17 +141,17 @@ public partial class GamesContainer : Control
                     // textButton.Theme = tagButtonTheme;
 
                     Name = game.name,
-
                     Text = game.name,
+
                     // dont use inbuilt navigation 
                     FocusMode = FocusModeEnum.Click,
+
+                    // size of game buttons
+                    CustomMinimumSize = gameButtonsSize * gameButtonsScale,
                 };
 
                 button = textButton;
             }
-
-            // size of game buttons
-            button.CustomMinimumSize = gameButtonsSize * gameButtonsScale;
 
             // pivot, inital rotation, and z-index (what should be draw on top of what)
             button.PivotOffset = new Vector2(0, gameButtonsSize.Y / 2 * gameButtonsScale);

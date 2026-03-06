@@ -90,8 +90,6 @@ public partial class OriginalGUI : Control, GuiInterface
     /// </summary>
     private bool updateGames = false;
 
-    private int leftRightStickMovement = 0;
-
     public override void _Ready()
     {
         // hide the description if it is not already hidden
@@ -102,6 +100,31 @@ public partial class OriginalGUI : Control, GuiInterface
 
     public override void _UnhandledInput(InputEvent @event)
     {
+        if (state != GuiState.Description)
+        {
+            // stick right
+            if (@event.IsActionPressed("Player1_StickRight") || @event.IsActionPressed("Player2_StickRight"))
+            {
+                if (state == GuiState.ViewGames)
+                {
+                    showTagList();
+                    AcceptEvent();
+                    return;
+                }
+            }
+
+            // stick left
+            if (@event.IsActionPressed("Player1_StickLeft") || @event.IsActionPressed("Player2_StickLeft"))
+            {
+                if (state == GuiState.Tags && tagContainer.currentX == 0)
+                {
+                    showGameList();
+                    AcceptEvent();
+                    return;
+                }
+            }
+        }
+
         // back button (blue button)
         if (@event.IsActionPressed("Player1_A2") || @event.IsActionPressed("Player2_A2"))
         {
@@ -156,42 +179,6 @@ public partial class OriginalGUI : Control, GuiInterface
                 tagContainer.selectRight();
             }
         }
-        
-        if (state != GuiState.Description)
-        {
-            // stick right
-            if (@event.IsActionPressed("Player1_StickRight") || @event.IsActionPressed("Player2_StickRight"))
-            {
-                leftRightStickMovement++;
-                if (leftRightStickMovement > tagContainer.Columns)
-                {
-                    leftRightStickMovement = tagContainer.Columns;
-                }
-
-                if (leftRightStickMovement == 1)
-                {
-                    showTagList();
-                }
-                AcceptEvent();
-            }
-
-            // stick left
-            if (@event.IsActionPressed("Player1_StickLeft") || @event.IsActionPressed("Player2_StickLeft"))
-            {
-                leftRightStickMovement--;
-                if (leftRightStickMovement < 0)
-                {
-                    leftRightStickMovement = 0;
-                }
-
-                if (leftRightStickMovement == 0)
-                {
-                    showGameList();
-                }
-            }
-        }
-
-
     }
 
     public override void _Process(double delta)
@@ -257,8 +244,6 @@ public partial class OriginalGUI : Control, GuiInterface
     /// </summary>
     public void showTagList()
     {
-        leftRightStickMovement = 1;
-
         state = GuiState.Tags;
         tagContainer.grabFocus();
         camera.setRelativeTargetIndex(1);
@@ -266,8 +251,6 @@ public partial class OriginalGUI : Control, GuiInterface
 
     private void showGameList()
     {
-        leftRightStickMovement = 0;
-
         state = GuiState.ViewGames;
         gameContainer.resetLastPressedButton();
         gameContainer.grabFocus();

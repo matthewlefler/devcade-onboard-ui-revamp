@@ -22,8 +22,8 @@ public partial class TagContainer : GridContainer
     private int maxX;
     private int maxY;
 
-    private int currentX = 0;
-    private int currentY = 0;
+    public int currentX {get; private set;} = 0;
+    public int currentY {get; private set;} = 0;
 
     /// <summary>
     /// Attempt to select the tag above the current one
@@ -75,8 +75,20 @@ public partial class TagContainer : GridContainer
         {
             y = maxY;
         }
+
+        if((y * Columns + x) > (numberOfTags - 1))
+        {
+            currentX = (numberOfTags - 1) % Columns;
+            currentY = (numberOfTags - 1) / Columns;
+            
+            this.tagButtons[numberOfTags - 1].CallDeferred("grab_focus");
+
+            return;
+        }
+
         currentX = x;
         currentY = y;
+
         this.tagButtons[y * Columns + x].CallDeferred("grab_focus");
     }
 
