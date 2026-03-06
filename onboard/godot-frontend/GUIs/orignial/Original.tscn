@@ -199,13 +199,11 @@ y_sort_enabled = true
 layout_mode = 3
 anchors_preset = 0
 offset_top = 2268.0
-offset_right = 900.0
-offset_bottom = 3051.0
-scale = Vector2(2, 2)
+offset_right = 2159.0
+offset_bottom = 3855.0
 size_flags_vertical = 3
 script = ExtResource("7_s6n7q")
-gameButtonsScale = 1.28
-cardScaleAmount = 0.37
+gameButtonsScale = 1.8
 percentYPositionValue = 60.0
 
 [node name="CenterContainer" type="CenterContainer" parent="SubViewportContainer/SubViewport"]

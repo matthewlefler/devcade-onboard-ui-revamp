@@ -127,6 +127,7 @@ public partial class GamesContainer : Control
                     FocusMode = FocusModeEnum.Click,
 
                     CustomMinimumSize = gameButtonsSize * gameButtonsScale,
+                    Scale = new Vector2(gameButtonsScale, gameButtonsScale),
                 };
 
                 button = textureButton;
@@ -148,6 +149,7 @@ public partial class GamesContainer : Control
 
                     // size of game buttons
                     CustomMinimumSize = gameButtonsSize * gameButtonsScale,
+                    Scale = new Vector2(gameButtonsScale, gameButtonsScale),
                 };
 
                 button = textButton;
@@ -256,20 +258,20 @@ public partial class GamesContainer : Control
     }
 
     /// <summary>
-    /// Sets the last pressed button to the first button
-    /// </summary>
-    public void resetLastPressedButton()
-    {
-        setLastPressedButton(0);
-    }
-
-    /// <summary>
     /// Sets the last pressed button to a button with an arbitrary index in the gameButtons list
     /// </summary>
     /// <param name="index">must be within or equal to the length of gameButtons and 0</param>
     public void setLastPressedButton(int index)
     {
         lastButtonPressed = gameButtons[index].childButton;
+    }
+
+    /// <summary>
+    /// Sets the last pressed button to the first button
+    /// </summary>
+    public void resetLastPressedButton()
+    {
+        setLastPressedButton(0);
     }
 
     /// <summary>
