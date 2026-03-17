@@ -246,7 +246,7 @@ public partial class GamesContainer : Control
 
             if (game.tags.Contains(tag))
             {
-                this.AddChild(buttonWrapper.childButton);
+                this.CallDeferred("add_child", buttonWrapper.childButton);
                 buttonWrapper.index = i;
                 ++i;
             }
