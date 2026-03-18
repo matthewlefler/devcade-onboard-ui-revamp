@@ -221,7 +221,7 @@ public partial class OriginalGUI : Control, GuiInterface
     {
         state = GuiState.GameLaunched;
         // this launches the selected game, and continues when the game closes
-        guiManager.launchGame(game).ContinueWith(_ => state = GuiState.Description);
+        GuiManagerGlobal.instance.launchGame(game).ContinueWith(_ => state = GuiState.Description);
         gameContainer.selectLastPressedButton();
     }
 
@@ -271,7 +271,7 @@ public partial class OriginalGUI : Control, GuiInterface
     /// <param name="tag"> the new tag </param>
     public void setCurrentTag(Tag tag)
     {
-        guiManager.setTag(tag);
+        GuiManagerGlobal.instance.setTag(tag);
         showGameList();
     }
 
