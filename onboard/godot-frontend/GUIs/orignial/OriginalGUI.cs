@@ -73,6 +73,9 @@ public partial class OriginalGUI : Control
         description.Hide();
 
         state = GuiState.ViewGames;
+
+        // poll the game list
+        GuiManagerGlobal.instance.reloadGameList();
     }
 
     // unhandled to ignore input that the gui manager consumes (aka when a game is launched)

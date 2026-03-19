@@ -150,7 +150,6 @@ public partial class GuiManagerGlobal : Node
         instance = this;
 
         isDemoMode = Env.DEMO_MODE();
-        reloadGameList();
     }
 
     public static void init()
