@@ -18,5 +18,7 @@ public partial class LogConfigAutoLoad : Node
 
         // start client (backend networked communicator)
         devcade.Client.init();
+        // force initalization of:
+        GuiManagerGlobal.init();
     }
 }

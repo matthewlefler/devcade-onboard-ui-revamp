@@ -35,12 +35,6 @@ public partial class OriginalGUI : Control
     public GamesContainer gameContainer;
 
     /// <summary>
-    /// the control node that is moved to show/hide the tag list
-    /// </summary>
-    [Export]
-    public TagContainer tagsMenu;
-
-    /// <summary>
     /// the node that has the tag buttons as children
     /// </summary>
     [Export]
@@ -64,40 +58,25 @@ public partial class OriginalGUI : Control
     [Export]
     public Label titleLabel;
 
-    /// <summary>
-    /// the object that interfaces with the client to get the game list, tag list, etc
-    /// the model, assuming a mvc like pattern
-    /// </summary>
-    private GuiManager guiManager = null;
-
-    /// <summary>
-    /// the list of games
-    /// </summary>
-    private List<DevcadeGame> games = new List<DevcadeGame>();
-
-    /// <summary>
-    /// the list of tags
-    /// </summary>
-    private List<Tag> tagList = new List<Tag>();
-
-    /// <summary>
-    /// used to update the tags within the Process loop
-    /// </summary>
-    private bool updateTags = false;
-
-    /// <summary>
-    /// used to update the game buttons within the Process loop
-    /// </summary>
-    private bool updateGames = false;
-
     public override void _Ready()
     {
+        GuiManagerGlobal.gameTitlesUpdated += (games) =>
+        {
+            gameContainer.updateGames(games, showDescription);
+        };
+
+        GuiManagerGlobal.tagListUpdated += (tags) =>
+        {
+            tagContainer.updateTags(tags, setCurrentTag);
+        };
+
         // hide the description if it is not already hidden
         description.Hide();
 
         state = GuiState.ViewGames;
     }
 
+    // unhandled to ignore input that the gui manager consumes (aka when a game is launched)
     public override void _UnhandledInput(InputEvent @event)
     {
         if (state != GuiState.Description)
@@ -181,26 +160,6 @@ public partial class OriginalGUI : Control
         }
     }
 
-    public override void _Process(double delta)
-    {
-        if (updateGames)
-        {
-            gameContainer.updateGames(games, showDescription);
-
-            updateGames = false;
-        }
-
-        if (updateTags)
-        {
-            // passes the new tag list and the function that the tags 
-            // should execute to the tag container
-            tagContainer.updateTags(tagList, setCurrentTag);
-
-            updateTags = false;
-        }
-    }
-
-
     /// <summary>
     /// lauches the game that is referenced by the button in the aspect ratio container
     /// in the lastButtonContainerPressed variable, 
@@ -228,7 +187,7 @@ public partial class OriginalGUI : Control
     /// <summary>
     /// show the description for an arbitrary game
     /// </summary>
-    /// <param name="game"></param>
+    /// <param name="game"> the game's description to show </param>
     private void showDescription(DevcadeGame game)
     {
         state = GuiState.Description;
@@ -249,20 +208,15 @@ public partial class OriginalGUI : Control
         camera.setRelativeTargetIndex(1);
     }
 
+    /// <summary>
+    /// shows the game list
+    /// </summary>
     private void showGameList()
     {
         state = GuiState.ViewGames;
         gameContainer.resetLastPressedButton();
         gameContainer.grabFocus();
         camera.setRelativeTargetIndex(0);
-    }
-
-    public void setGameList(List<DevcadeGame> gameTitles, GuiManager model)
-    {
-        this.guiManager = model;
-        games = gameTitles;
-
-        updateGames = true;
     }
 
     /// <summary>
@@ -273,20 +227,5 @@ public partial class OriginalGUI : Control
     {
         GuiManagerGlobal.setTag(tag);
         showGameList();
-    }
-
-    public void setTagList(List<Tag> tags)
-    {
-        tagList = tags;
-        updateTags = true;
-    }
-
-    /// <summary>
-    /// used by the GuiManager to set the tag
-    /// </summary>
-    /// <param name="tag"> the new tag </param>
-    public void setTag(Tag tag)
-    {
-        gameContainer.setTag(tag);
     }
 }

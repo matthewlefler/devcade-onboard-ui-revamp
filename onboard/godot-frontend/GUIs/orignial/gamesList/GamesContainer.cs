@@ -94,7 +94,7 @@ public partial class GamesContainer : Control
     {
         foreach (Node child in this.GetChildren())
         {
-            this.RemoveChild(child);
+            this.CallDeferred(Node.MethodName.AddChild, child);
         }
 
         this.numberOfGames = games.Count;
@@ -175,12 +175,12 @@ public partial class GamesContainer : Control
             }
 
             // add the new button to the game container and the list of game buttons
-            this.AddChild(button);
+            this.CallDeferred("add_child", button);
             gameButtons.Add(gameButton);
 
             if (i > 5)
             {
-                button.Hide();
+                button.CallDeferred(CanvasItem.MethodName.Hide);
             }
 
             buttonsGames.Add(button, game);

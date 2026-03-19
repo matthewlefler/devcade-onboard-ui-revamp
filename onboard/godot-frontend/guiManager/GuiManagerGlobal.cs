@@ -5,12 +5,16 @@ using System.Threading.Tasks;
 using Godot;
 using onboard.devcade;
 using onboard.util;
-using static Godot.Node;
 
 namespace onboard; 
 
-public static class GuiManagerGlobal
+public partial class GuiManagerGlobal : Node
 {
+    /// <summary>
+    /// The one instance of this class
+    /// </summary>
+    public static GuiManagerGlobal instance;
+
     /// <summary>
     /// If the cabneit is in demo mode
     /// i.e. show only the curated game list
@@ -24,7 +28,8 @@ public static class GuiManagerGlobal
     /// <summary>
     /// Emit to set the state of the loading animation
     /// </summary>
-    public static event Action<bool> setLoadingAnimation;
+    [Signal]
+    public delegate void setLoadingAnimationEventHandler(bool show);
 
     ////////////
 #region Tags ///
@@ -46,7 +51,8 @@ public static class GuiManagerGlobal
     /// <summary>
     /// Emitted when the current tag changes value
     /// </summary>
-    public static event Action<Tag> tagUpdated;
+    [Signal]
+    public delegate void tagUpdatedEventHandler();
 
     /// <summary>
     /// a list of all the tags
@@ -55,7 +61,8 @@ public static class GuiManagerGlobal
     /// <summary>
     /// Emitted when the tag list changes
     /// </summary>
-    public static event Action<List<Tag>> tagListUpdated;
+    [Signal]
+    public delegate void tagListUpdatedEventHandler();
 
     /// <summary>
     /// a list of all the tags
@@ -64,7 +71,8 @@ public static class GuiManagerGlobal
     /// <summary>
     /// Emitted when the tag list changes
     /// </summary>
-    public static event Action<Dictionary<string, List<DevcadeGame>>> tagListsUpdated;
+    [Signal]
+    public delegate void tagListsUpdatedEventHandler();
 
 #endregion
     /////////////
@@ -78,7 +86,8 @@ public static class GuiManagerGlobal
     /// <summary>
     /// Emitted when the reloading game list value is changed
     /// </summary>
-    public static event Action<bool> reloadingGameListUpdated;
+    [Signal]
+    public delegate void reloadingGameListUpdatedEventHandler(bool reloadGameList);
 
     /// <summary>
     /// The default game to use for errors
@@ -104,28 +113,39 @@ public static class GuiManagerGlobal
     /// <summary>
     /// Emitted when the game titles changes
     /// </summary>
-    public static event Action<List<DevcadeGame>> gameTitlesUpdated;
+    [Signal]
+    public delegate void gameTitlesUpdatedEventHandler();
 
     /// <summary>
     /// Emitted when a game is launched or closed
     /// True when launched, False when closed
     /// </summary>
-    public static event Action<bool> gameLaunched;
+    [Signal]
+    public delegate void onGameLaunchedEventHandler(bool launched);
 
 #endregion 
     ///////////////
 #region Methods ///
     ///////////////
     
-    static GuiManagerGlobal()
+    public GuiManagerGlobal()
     {
+        instance = this;
+
         isDemoMode = Env.DEMO_MODE();
+        reloadGameList();
     }
 
-    public static void setTag(Tag newTag)
+    public static void init()
+    {
+        // force initialization of the class
+    }
+
+    public void setTag(Tag newTag)
     {
         currentTag = newTag;
-        tagUpdated.Invoke(newTag);
+        
+        EmitSignal(SignalName.tagUpdated);
     }
 
     /// <summary>
@@ -133,11 +153,10 @@ public static class GuiManagerGlobal
     /// does take time to do so
     /// </summary>
     /// <returns></returns>
-    public static Task reloadGameList()
+    public Task reloadGameList()
     {
-        
         reloadingGameList = true;
-        reloadingGameListUpdated.Invoke(reloadingGameList);
+        EmitSignal(SignalName.reloadingGameListUpdated, reloadingGameList);
 
         tagLists = new Dictionary<string, List<DevcadeGame>> { { allTag.name, new List<DevcadeGame>() } };
         tagList = new List<Tag>() { allTag };
@@ -194,8 +213,8 @@ public static class GuiManagerGlobal
                 loadBanners();
 
                 reloadingGameList = false;
-                reloadingGameListUpdated.Invoke(reloadingGameList);
-                gameTitlesUpdated.Invoke(gameTitles);
+                EmitSignal(SignalName.reloadingGameListUpdated, reloadingGameList);
+                EmitSignal(SignalName.gameTitlesUpdated);
             });
         return gameTask;
     }
@@ -204,7 +223,7 @@ public static class GuiManagerGlobal
     /// loads the banners from the downloaded files from the database
     /// and saves the images to the DevcadeGame gamse
     /// </summary>
-    public static void loadBanners()
+    public void loadBanners()
     {
         foreach(DevcadeGame game in gameTitles)
         {            
@@ -247,8 +266,8 @@ public static class GuiManagerGlobal
                     tagList.Add(tag);
                 }
             }
-            tagListsUpdated.Invoke(tagLists);
-            tagListUpdated.Invoke(tagList);
+            EmitSignal(SignalName.tagListsUpdated);
+            EmitSignal(SignalName.tagListUpdated);
         }
     }
 
@@ -257,20 +276,20 @@ public static class GuiManagerGlobal
     /// launch the given game
     /// </summary>
     /// <param name="game"> the game to launch </param>
-    public static async Task launchGame(DevcadeGame game) 
+    public async Task launchGame(DevcadeGame game) 
     {  
-        gameLaunched.Invoke(true);
+        EmitSignal(SignalName.onGameLaunched, true);
         
         GD.Print("launching game: " + game.name);
 
-        setLoadingAnimation.Invoke(true);
+        EmitSignal(SignalName.setLoadingAnimation, true);
 
         await Client.launchGame(
             game.id).ContinueWith(res => {
                 if (res.IsCompletedSuccessfully) {
-                    gameLaunched.Invoke(false);
+                    EmitSignal(SignalName.onGameLaunched, false);
                     // runs after the game completes running
-                    setLoadingAnimation.Invoke(false);
+                    EmitSignal(SignalName.setLoadingAnimation, false);
                 }
                 else {
                     GD.PushError("Failed to launch game: " + res.Exception);
@@ -283,10 +302,10 @@ public static class GuiManagerGlobal
     /// kill the currently running game.
     /// will run async, but can await the function call
     /// </summary>
-    public static async Task killGame()
+    public async Task killGame()
     {
         await Client.killGame();
-        gameLaunched.Invoke(false);
+        EmitSignal(SignalName.onGameLaunched, false);
     }
 
     #endregion

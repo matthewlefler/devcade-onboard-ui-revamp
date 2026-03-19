@@ -96,26 +96,46 @@ public partial class GuiManager : Control
     /// </summary>
     public override void _Ready()
     {
-        GuiManagerGlobal.gameLaunched += (bool isOpened) =>
+        try 
         {
-            if(isOpened)
+            GuiManagerGlobal.gameLaunched += (bool isOpened) =>
             {
-                // pause when a game is launched so the onboard does not receive input when not focused 
-                // ProcessMode = ProcessModeEnum.Disabled;
-                guiSceneRootNode.ProcessMode = ProcessModeEnum.Disabled;  
-            }
-            else
-            {
-                guiSceneRootNode.SetDeferred("process_mode", (long) ProcessModeEnum.Inherit);
-            }
+                if(isOpened)
+                {
+                    // pause when a game is launched so the onboard does not receive input when not focused 
+                    // ProcessMode = ProcessModeEnum.Disabled;
+                    guiSceneRootNode.ProcessMode = ProcessModeEnum.Disabled;  
+                }
+                else
+                {
+                    guiSceneRootNode.SetDeferred("process_mode", (long) ProcessModeEnum.Inherit);
+                }
+            };
 
-        };
+            GuiManagerGlobal.setLoadingAnimation += (bool show) =>
+            {
+                if(show)
+                {
+                    showLoadingAnimation();
+                }
+                else
+                {
+                    hideLoadingAnimation();
+                }
+            };
+        } catch (Exception e)
+        {
+            GD.Print(e.Message);
+        }
 
         supervisorButtonTimeoutSeconds = Env.SUPERVISOR_BUTTON_TIMEOUT_SEC(); // default 5 seconds
         supervisorButtonTimerSeconds = supervisorButtonTimeoutSeconds;
 
         screenSaverTimeoutSeconds = Env.SCREENSAVER_TIMEOUT_SEC(); // default 2 minutes
         screenSaverTimerSeconds = screenSaverTimeoutSeconds;
+
+        GD.Print("supervisorButtonTimeoutSeconds: " + supervisorButtonTimeoutSeconds);
+        GD.Print("screenSaverTimeoutSeconds" + screenSaverTimeoutSeconds);
         
         // hide the loading screen by default
         hideLoadingAnimation();
@@ -123,7 +143,7 @@ public partial class GuiManager : Control
         hideScreenSaver();
 
         // spawn initial gui scene
-        this.guiSceneRootNode = initialGuiScene.Instantiate();
+        guiSceneRootNode = initialGuiScene.Instantiate();
         
         // add the new scene instance as a child of this node
         AddChild(guiSceneRootNode);
@@ -228,7 +248,6 @@ public partial class GuiManager : Control
                 }
                 showingScreenSaverAnimation = true;
                 showScreenSaver();
-                
             }
         }
         else
@@ -250,6 +269,8 @@ public partial class GuiManager : Control
     /// </summary>
     public void showLoadingAnimation()
     {
+        GD.Print("Showing Loading Animation");
+
         loadingScreen.CallDeferred("show");
         loadingAnimation.CallDeferred("play", "default", 1.0f, false);
     }
@@ -262,6 +283,8 @@ public partial class GuiManager : Control
     /// </summary>
     public void hideLoadingAnimation()
     {
+        GD.Print("Hiding Loading Animation");
+
         loadingScreen.CallDeferred("hide");
         loadingAnimation.CallDeferred("stop");
     }
