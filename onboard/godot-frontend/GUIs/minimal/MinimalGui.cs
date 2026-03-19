@@ -1,7 +1,6 @@
 using Godot;
 using System;
 
-using onboard.devcade;
 using System.Collections.Generic;
 
 namespace onboard.devcade.GUI.minimal;
@@ -67,8 +66,8 @@ public partial class MinimalGui : Control
     /// </summary>
     private Dictionary<AspectRatioContainer, DevcadeGame> gameContainers = new Dictionary<AspectRatioContainer, DevcadeGame>();
 
-    int screenHeight = 0;
-    int screenWidth = 0;
+    int screenHeight = -1;
+    int screenWidth = -1;
 
 
     /// <summary>
