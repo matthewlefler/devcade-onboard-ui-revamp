@@ -77,11 +77,6 @@ public partial class GuiManager : Control
     public bool reloadingGameList { get; private set; } = false;
 
     /// <summary>
-    /// The current GUI scene being shown
-    /// </summary>
-    GuiInterface guiScene;
-
-    /// <summary>
     /// The root node of the GUI scene
     /// </summary>
     Node guiSceneRootNode;
@@ -190,7 +185,7 @@ public partial class GuiManager : Control
         // switch between dev and normal mode
         if (Input.IsActionPressed("Player1_B4") && Input.IsActionPressed("Player2_B4") && switchDevButtonCooldownTimer <= 0)
         {
-            Client.setProduction(!Client.isProduction).ContinueWith(_ => { GuiManagerGlobal.setTag(allTag); reloadGameList(); });
+            Client.setProduction(!Client.isProduction).ContinueWith(_ => { GuiManagerGlobal.setTag(allTag); GuiManagerGlobal.reloadGameList(); });
             switchDevButtonCooldownTimer = switchDevButtonCooldown;
         }
 
@@ -294,14 +289,4 @@ public partial class GuiManager : Control
         screenSaver.CallDeferred("hide");
         screenSaver.CallDeferred("stop");
     }
-
-    /// <summary>
-    /// initilizes a gui object with the taglist and game list
-    /// </summary>
-    private void initGUI()
-    {
-        guiScene.setGameList(tagLists[currentTag.name], this);
-        guiScene.setTagList(tagList);
-    }
-
 }

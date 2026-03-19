@@ -11,7 +11,7 @@ namespace onboard.devcade.GUI.template;
 /// to show how to create a simple UI script
 /// all logic for creating buttons and adding functions to the buttons is done here
 /// </summary>
-public partial class TemplateGui : Control, GuiInterface
+public partial class TemplateGui : Control
 {
     GuiManager model;
     public List<DevcadeGame> gameTitles;
@@ -292,7 +292,7 @@ public partial class TemplateGui : Control, GuiInterface
     private void launchGame(DevcadeGame game)
     {
         // discard result, in this instance it is not requried to await the launched game to close
-        _ = model.launchGame(game);
+        _ = GuiManagerGlobal.launchGame(game);
     }
 
     /// <summary>
@@ -301,7 +301,7 @@ public partial class TemplateGui : Control, GuiInterface
     /// <param name="tag"> the new tag </param>
     private void setCurrentTag(Tag tag)
     {
-        model.setTag(tag);
+        GuiManagerGlobal.setTag(tag);
     }
 
     /// <summary>
@@ -313,7 +313,7 @@ public partial class TemplateGui : Control, GuiInterface
         // discard the result,
         // supresses the warning that:
         // Because this call is not awaited, execution of the current method continues before the call is completed
-        _ = model.killGame();
+        _ = GuiManagerGlobal.killGame();
     }
 
     /// <summary>

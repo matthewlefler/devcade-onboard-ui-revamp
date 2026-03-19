@@ -2,7 +2,7 @@ using Godot;
 using System.Collections.Generic;
 
 namespace onboard.devcade.GUI.originalGUI;
-public partial class OriginalGUI : Control, GuiInterface
+public partial class OriginalGUI : Control
 {
     /// <summary>
     /// the current state of the GUI
@@ -221,7 +221,7 @@ public partial class OriginalGUI : Control, GuiInterface
     {
         state = GuiState.GameLaunched;
         // this launches the selected game, and continues when the game closes
-        GuiManagerGlobal.instance.launchGame(game).ContinueWith(_ => state = GuiState.Description);
+        GuiManagerGlobal.launchGame(game).ContinueWith(_ => state = GuiState.Description);
         gameContainer.selectLastPressedButton();
     }
 
@@ -271,13 +271,13 @@ public partial class OriginalGUI : Control, GuiInterface
     /// <param name="tag"> the new tag </param>
     public void setCurrentTag(Tag tag)
     {
-        GuiManagerGlobal.instance.setTag(tag);
+        GuiManagerGlobal.setTag(tag);
         showGameList();
     }
 
     public void setTagList(List<Tag> tags)
     {
-        this.tagList = tags;
+        tagList = tags;
         updateTags = true;
     }
 
