@@ -94,7 +94,7 @@ public partial class GamesContainer : Control
     {
         foreach (Node child in this.GetChildren())
         {
-            this.CallDeferred(Node.MethodName.AddChild, child);
+            this.RemoveChild(child);
         }
 
         this.numberOfGames = games.Count;
@@ -175,7 +175,7 @@ public partial class GamesContainer : Control
             }
 
             // add the new button to the game container and the list of game buttons
-            this.CallDeferred("add_child", button);
+            this.AddChild(button);
             gameButtons.Add(gameButton);
 
             if (i > 5)
@@ -246,7 +246,7 @@ public partial class GamesContainer : Control
 
             if (game.tags.Contains(tag))
             {
-                this.CallDeferred("add_child", buttonWrapper.childButton);
+                this.AddChild(buttonWrapper.childButton);
                 buttonWrapper.index = i;
                 ++i;
             }

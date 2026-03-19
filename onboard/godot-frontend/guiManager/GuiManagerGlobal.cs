@@ -8,6 +8,14 @@ using onboard.util;
 
 namespace onboard; 
 
+/// <summary>
+/// A global interface for better interactions with the Client.cs script
+/// 
+/// 
+/// </summary>
+/// Notes: 
+/// the various call_ and state_ variables are used to call their related signals
+/// in the proccess loop aka the main thread.
 public partial class GuiManagerGlobal : Node
 {
     /// <summary>
@@ -30,6 +38,8 @@ public partial class GuiManagerGlobal : Node
     /// </summary>
     [Signal]
     public delegate void setLoadingAnimationEventHandler(bool show);
+    private bool call_setLoadingAnimation = false;
+    private bool state_setLoadingAnimation = false;
 
     ////////////
 #region Tags ///
@@ -52,7 +62,8 @@ public partial class GuiManagerGlobal : Node
     /// Emitted when the current tag changes value
     /// </summary>
     [Signal]
-    public delegate void tagUpdatedEventHandler();
+    public delegate void currentTagUpdatedEventHandler();
+    private bool call_currentTagUpdated = false;
 
     /// <summary>
     /// a list of all the tags
@@ -63,6 +74,7 @@ public partial class GuiManagerGlobal : Node
     /// </summary>
     [Signal]
     public delegate void tagListUpdatedEventHandler();
+    private bool call_tagListUpdated = false;
 
     /// <summary>
     /// a list of all the tags
@@ -73,6 +85,7 @@ public partial class GuiManagerGlobal : Node
     /// </summary>
     [Signal]
     public delegate void tagListsUpdatedEventHandler();
+    private bool call_tagListsUpdated = false;
 
 #endregion
     /////////////
@@ -88,6 +101,7 @@ public partial class GuiManagerGlobal : Node
     /// </summary>
     [Signal]
     public delegate void reloadingGameListUpdatedEventHandler(bool reloadGameList);
+    private bool call_reloadingGameListUpdated = false;
 
     /// <summary>
     /// The default game to use for errors
@@ -115,6 +129,7 @@ public partial class GuiManagerGlobal : Node
     /// </summary>
     [Signal]
     public delegate void gameTitlesUpdatedEventHandler();
+    private bool call_gameTitlesUpdated = false;
 
     /// <summary>
     /// Emitted when a game is launched or closed
@@ -122,6 +137,8 @@ public partial class GuiManagerGlobal : Node
     /// </summary>
     [Signal]
     public delegate void onGameLaunchedEventHandler(bool launched);
+    private bool call_onGameLaunched = false;
+    private bool state_onGameLaunched = false;
 
 #endregion 
     ///////////////
@@ -145,7 +162,7 @@ public partial class GuiManagerGlobal : Node
     {
         currentTag = newTag;
         
-        EmitSignal(SignalName.tagUpdated);
+        call_currentTagUpdated = true;
     }
 
     /// <summary>
@@ -156,7 +173,7 @@ public partial class GuiManagerGlobal : Node
     public Task reloadGameList()
     {
         reloadingGameList = true;
-        EmitSignal(SignalName.reloadingGameListUpdated, reloadingGameList);
+        call_reloadingGameListUpdated = true;
 
         tagLists = new Dictionary<string, List<DevcadeGame>> { { allTag.name, new List<DevcadeGame>() } };
         tagList = new List<Tag>() { allTag };
@@ -213,8 +230,9 @@ public partial class GuiManagerGlobal : Node
                 loadBanners();
 
                 reloadingGameList = false;
-                EmitSignal(SignalName.reloadingGameListUpdated, reloadingGameList);
-                EmitSignal(SignalName.gameTitlesUpdated);
+
+                call_reloadingGameListUpdated = true;
+                call_gameTitlesUpdated = true;
             });
         return gameTask;
     }
@@ -266,8 +284,9 @@ public partial class GuiManagerGlobal : Node
                     tagList.Add(tag);
                 }
             }
-            EmitSignal(SignalName.tagListsUpdated);
-            EmitSignal(SignalName.tagListUpdated);
+
+            call_tagListsUpdated = true;
+            call_tagListUpdated = true;
         }
     }
 
@@ -278,18 +297,23 @@ public partial class GuiManagerGlobal : Node
     /// <param name="game"> the game to launch </param>
     public async Task launchGame(DevcadeGame game) 
     {  
-        EmitSignal(SignalName.onGameLaunched, true);
+        call_setLoadingAnimation = true;
+        state_setLoadingAnimation = true;
+
+        call_onGameLaunched = true;
+        state_onGameLaunched = true;
         
         GD.Print("launching game: " + game.name);
-
-        EmitSignal(SignalName.setLoadingAnimation, true);
 
         await Client.launchGame(
             game.id).ContinueWith(res => {
                 if (res.IsCompletedSuccessfully) {
-                    EmitSignal(SignalName.onGameLaunched, false);
                     // runs after the game completes running
-                    EmitSignal(SignalName.setLoadingAnimation, false);
+                    call_onGameLaunched = true;
+                    state_onGameLaunched = false;
+
+                    call_setLoadingAnimation = true;
+                    state_setLoadingAnimation = false;
                 }
                 else {
                     GD.PushError("Failed to launch game: " + res.Exception);
@@ -305,8 +329,57 @@ public partial class GuiManagerGlobal : Node
     public async Task killGame()
     {
         await Client.killGame();
-        EmitSignal(SignalName.onGameLaunched, false);
+
+        call_onGameLaunched = true;
+        state_onGameLaunched = false;
     }
 
     #endregion
+
+    public override void _Process(double delta)
+    {
+        // call all signals in the main thread 
+        // don't want to deal with all the call_deffered calls and issues with that 
+        if(call_currentTagUpdated)
+        {
+            EmitSignal(SignalName.currentTagUpdated);
+            call_currentTagUpdated = false;
+        }
+
+        if(call_gameTitlesUpdated)
+        {
+            EmitSignal(SignalName.gameTitlesUpdated);
+            call_gameTitlesUpdated = false;
+        }
+
+        if(call_onGameLaunched)
+        {
+            EmitSignal(SignalName.onGameLaunched, state_onGameLaunched);
+            call_onGameLaunched = false;
+        }
+
+        if(call_reloadingGameListUpdated)
+        {
+            EmitSignal(SignalName.reloadingGameListUpdated, reloadingGameList);
+            call_reloadingGameListUpdated = false;
+        }
+
+        if(call_setLoadingAnimation)
+        {
+            EmitSignal(SignalName.setLoadingAnimation, state_setLoadingAnimation);
+            call_setLoadingAnimation = false;
+        }
+
+        if(call_tagListsUpdated)
+        {
+            EmitSignal(SignalName.tagListsUpdated);
+            call_tagListsUpdated = false;
+        }
+
+        if(call_tagListUpdated)
+        {
+            EmitSignal(SignalName.tagListUpdated);
+            call_tagListUpdated = false;
+        }
+    }
 }

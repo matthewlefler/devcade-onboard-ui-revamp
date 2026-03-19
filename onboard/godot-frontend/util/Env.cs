@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using Godot;
 
 namespace onboard.util; 
 
@@ -29,11 +30,16 @@ public static class Env {
 
     // Shared 
     // Games data and shared sockets will be placed here, defaults to ~/devcade
-    public static string DEVCADE_PATH() { return get("DEVCADE_PATH").unwrap_or(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "/devcade" ); }
+    public static string DEVCADE_PATH() { return get("DEVCADE_PATH").unwrap_or(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile) + "/devcade" ); }
 
     
     static Env() {
-        foreach (DictionaryEntry entry in Environment.GetEnvironmentVariables()) {
+        if(File.Exists("../.env"))
+        {
+            load("../.env");
+        }
+
+        foreach (DictionaryEntry entry in System.Environment.GetEnvironmentVariables()) {
             env.Add((string)entry.Key, (string)entry.Value);
         }
     }
@@ -56,12 +62,23 @@ public static class Env {
 
     public static void load(string path) {
         if (!File.Exists(path)) {
+            GD.PrintErr($"File: {path} does not exist");
             return;
         }
         string[] lines = File.ReadAllLines(path);
-        foreach (string line in lines) {
+        for (int i = 0; i < lines.Length; i++) {
+            string line = lines[i];
+            // remove all comments
+            int index = line.Find("#");
+            if(index != -1)
+            {
+                line = line.Remove(index);
+            }
+
             string[] parts = line.Split('=');
             if (parts.Length == 2) {
+                GD.Print($"found env value: {parts[0]} = {parts[1]}");
+
                 env[parts[0]] = parts[1];
             }
         }

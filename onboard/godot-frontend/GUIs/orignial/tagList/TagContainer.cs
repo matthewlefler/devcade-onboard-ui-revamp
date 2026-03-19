@@ -26,11 +26,6 @@ public partial class TagContainer : GridContainer
     public int currentY {get; private set;} = 0;
 
     /// <summary>
-    /// The child nodes of this node
-    /// </summary>
-    private List<Node> children = new List<Node>(); // note this is required b/c updateTags is called not on the main thread 
-
-    /// <summary>
     /// Attempt to select the tag above the current one
     /// </summary>
     public void selectUp()
@@ -99,9 +94,9 @@ public partial class TagContainer : GridContainer
 
     public void updateTags(List<Tag> tagList, Action<Tag> on_tag_pressed)
     {
-        foreach (Node child in children)
+        foreach (Node child in this.GetChildren())
         {
-            this.CallDeferred(Node.MethodName.RemoveChild, child);
+            this.RemoveChild(child);
         }
 
         if (tagList.Count <= 0)
@@ -132,6 +127,7 @@ public partial class TagContainer : GridContainer
             button.Pressed += () => on_tag_pressed(tag);
             button.FocusEntered += () => currentHoveredTag = tag;
 
+            GD.Print($"i: {i}, tagButton len: {tagButtons.Length}, taglist count: {tagList.Count}");
             tagButtons[i] = button;
 
             MarginContainer marginContainer = new MarginContainer
@@ -146,8 +142,7 @@ public partial class TagContainer : GridContainer
 
             marginContainer.CallDeferred(Node.MethodName.AddChild, button);
 
-            this.children.Add(marginContainer);
-            this.CallDeferred(Node.MethodName.AddChild, marginContainer);
+            this.AddChild(marginContainer);
 
             // Ignores basic ui_"whatever" input actions
             // while still allowing them to be focused

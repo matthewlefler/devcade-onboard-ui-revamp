@@ -292,7 +292,7 @@ public partial class TemplateGui : Control
     private void launchGame(DevcadeGame game)
     {
         // discard result, in this instance it is not requried to await the launched game to close
-        _ = GuiManagerGlobal.launchGame(game);
+        _ = GuiManagerGlobal.instance.launchGame(game);
     }
 
     /// <summary>
@@ -301,7 +301,7 @@ public partial class TemplateGui : Control
     /// <param name="tag"> the new tag </param>
     private void setCurrentTag(Tag tag)
     {
-        GuiManagerGlobal.setTag(tag);
+        GuiManagerGlobal.instance.setTag(tag);
     }
 
     /// <summary>
@@ -313,7 +313,7 @@ public partial class TemplateGui : Control
         // discard the result,
         // supresses the warning that:
         // Because this call is not awaited, execution of the current method continues before the call is completed
-        _ = GuiManagerGlobal.killGame();
+        _ = GuiManagerGlobal.instance.killGame();
     }
 
     /// <summary>

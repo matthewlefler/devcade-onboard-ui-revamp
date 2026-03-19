@@ -46,7 +46,7 @@ public partial class GuiManager : Control
     /// <summary>
     /// A list of all the games
     /// </summary>
-    public List<DevcadeGame> gameTitles;
+    public List<DevcadeGame> gameList;
 
     /// <summary>
     /// if the cabneit is in demo mode
@@ -98,7 +98,7 @@ public partial class GuiManager : Control
     {
         try 
         {
-            GuiManagerGlobal.gameLaunched += (bool isOpened) =>
+            GuiManagerGlobal.instance.onGameLaunched += (bool isOpened) =>
             {
                 if(isOpened)
                 {
@@ -112,7 +112,7 @@ public partial class GuiManager : Control
                 }
             };
 
-            GuiManagerGlobal.setLoadingAnimation += (bool show) =>
+            GuiManagerGlobal.instance.setLoadingAnimation += (bool show) =>
             {
                 if(show)
                 {
@@ -126,6 +126,7 @@ public partial class GuiManager : Control
         } catch (Exception e)
         {
             GD.Print(e.Message);
+            throw new ApplicationException("yeah this is unrecoverable");
         }
 
         supervisorButtonTimeoutSeconds = Env.SUPERVISOR_BUTTON_TIMEOUT_SEC(); // default 5 seconds
@@ -149,7 +150,7 @@ public partial class GuiManager : Control
         AddChild(guiSceneRootNode);
 
         // and reload the game list
-        GuiManagerGlobal.reloadGameList();
+        GuiManagerGlobal.instance.reloadGameList();
     }
 
     public override void _Input(InputEvent @event)
@@ -192,7 +193,7 @@ public partial class GuiManager : Control
         // frontend reset button, reloads all the games from the backend
         if (Input.IsActionPressed("Player1_Menu") && Input.IsActionPressed("Player2_Menu") && reloadButtonCooldownTimer <= 0)
         {
-            GuiManagerGlobal.reloadGameList();
+            GuiManagerGlobal.instance.reloadGameList();
             reloadButtonCooldownTimer = reloadButtonCooldown;
         }
 
@@ -205,7 +206,7 @@ public partial class GuiManager : Control
         // switch between dev and normal mode
         if (Input.IsActionPressed("Player1_B4") && Input.IsActionPressed("Player2_B4") && switchDevButtonCooldownTimer <= 0)
         {
-            Client.setProduction(!Client.isProduction).ContinueWith(_ => { GuiManagerGlobal.setTag(allTag); GuiManagerGlobal.reloadGameList(); });
+            Client.setProduction(!Client.isProduction).ContinueWith(_ => { GuiManagerGlobal.instance.setTag(allTag); GuiManagerGlobal.instance.reloadGameList(); });
             switchDevButtonCooldownTimer = switchDevButtonCooldown;
         }
 
@@ -220,7 +221,7 @@ public partial class GuiManager : Control
             {
                 // if the timer has timed out
                 // kill the currently running game
-                _ = GuiManagerGlobal.killGame();
+                _ = GuiManagerGlobal.instance.killGame();
                 GD.Print("log: Killing current running game");
                 
                 supervisorButtonTimerSeconds = supervisorButtonTimeoutSeconds;
@@ -244,7 +245,7 @@ public partial class GuiManager : Control
                 // and show the screensaver
                 if(Client.gameLauched)
                 {
-                    _ = GuiManagerGlobal.killGame();
+                    _ = GuiManagerGlobal.instance.killGame();
                 }
                 showingScreenSaverAnimation = true;
                 showScreenSaver();

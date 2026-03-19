@@ -3,22 +3,24 @@ using onboard.util;
 
 namespace onboard; 
 
-public partial class LogConfigAutoLoad : Node
+public partial class AutoLoad : Node
 {
-    public LogConfigAutoLoad() {} // must be empty?
+    public AutoLoad() {} // must be empty?
 
     /// <summary>
     /// load the config file as early as possible
     /// with set properties
     /// </summary>
-    public override void _EnterTree()
+    public override void _Ready()
     {
         // load the .env file (contains the enviorment variables)
+        GD.Print("loading env");
         Env.load("../.env");
 
-        // start client (backend networked communicator)
-        devcade.Client.init();
         // force initalization of:
-        GuiManagerGlobal.init();
+
+        // start client (backend networked communicator)
+        GD.Print("starting backend client");
+        devcade.Client.init();
     }
 }
