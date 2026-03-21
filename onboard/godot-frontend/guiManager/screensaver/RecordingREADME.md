@@ -17,6 +17,7 @@ A quality of 1 is recomended as no audio is played anyways.<br>
 ```Bash
 ffmpeg -i input_file.type -vf "scale=1080:1920,fps=30" -q:v 4 -q:a 1 output.ogv
 ```
+The reason for the half scale and lower frame rate is because the .ogv format only supports cpu sided decoding and is extremly laggy on the DCU which has an older i5-8500 cpu.
 
 ## Videos **MUST** be under **100MB** or else GitHub will reject the Commit
-And fixing it is annoying, for reference a 1 min, 30 sec video took about 26MB of space 
+And fixing it is annoying. For reference a 1 min, 30 sec video took about 26MB of space 
