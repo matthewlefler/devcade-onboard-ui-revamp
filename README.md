@@ -24,7 +24,7 @@ To setup and launch a development environment, you can do the following:
 
 ### Env Vars
 
-There is a file called `.env.template` in the `./onboard` folder. Copy the file to a new file called `.env` in the same directory. Then fill this in with appropriate values for the backend and frontend.
+There is a file called [.env.template](/onboard/.env.template) in the `./onboard` folder. Copy the file to a new file called `.env` in the same directory. Then fill this in with appropriate values for the backend and frontend.
 
 ### Running outside a container
 
@@ -47,7 +47,9 @@ cd HACKING
 
 ### Backend
 
+Nothing here yet
+
 ### Frontend
 For more information on:
-* Creating a new GUI see: `onboard/godot-frontend/GUIs/CreatingAGuiREADME.md`
-* Creating a new screensaver animation see: `onboard/godot-frontend/guiManager/screensaver/RecordingREADME.md`
+* Creating a new GUI see: [CreatingAGuiREADME.md](/onboard/godot-frontend/GUIs/CreatingAGuiREADME.md)
+* Creating a new screensaver animation see: [RecordingREADME.md](/onboard/godot-frontend/guiManager/screensaver/RecordingREADME.md)
