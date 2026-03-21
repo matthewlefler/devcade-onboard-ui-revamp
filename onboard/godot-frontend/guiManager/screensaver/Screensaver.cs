@@ -98,6 +98,8 @@ public partial class Screensaver : Control
     {
         if(games == null) { return; }
 
+        shownGameAnimationNodes.Clear();
+
         foreach(ScreenSaverGameAnimation anim in gameAnimationNodes)
         {
             if(anim.game_name == "Background" || anim.game_name == "Background2")
