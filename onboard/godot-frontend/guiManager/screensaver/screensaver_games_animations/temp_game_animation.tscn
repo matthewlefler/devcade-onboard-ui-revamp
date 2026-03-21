@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://dir1di2qk6g4o"]
 
-[ext_resource type="Script" uid="uid://3dod6y75r7mb" path="res://guiManager/screensaver_games_animations/ScreenSaverGameAnimation.cs" id="1_2ko63"]
+[ext_resource type="Script" uid="uid://3dod6y75r7mb" path="res://guiManager/screensaver/ScreenSaverGameAnimation.cs" id="1_2ko63"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2ko63"]
 bg_color = Color(0.454314, 0.165774, 0.263227, 1)

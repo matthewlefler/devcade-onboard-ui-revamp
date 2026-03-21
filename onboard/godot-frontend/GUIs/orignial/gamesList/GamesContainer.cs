@@ -1,5 +1,4 @@
 using Godot;
-using Newtonsoft.Json.Bson;
 using System;
 using System.Collections.Generic;
 
@@ -10,7 +9,7 @@ public partial class GamesContainer : Control
     /// <summary>
     /// the last game button that has been pressed
     /// </summary>
-    internal BaseButton lastButtonPressed = null;
+    internal GameButton lastButtonPressed = null;
 
     /// <summary>
     /// a scalar value for the size of the game buttons
@@ -54,11 +53,8 @@ public partial class GamesContainer : Control
     /// </summary>
     internal Dictionary<BaseButton, DevcadeGame> buttonsGames = new Dictionary<BaseButton, DevcadeGame>();
 
-    /// <summary>
-    /// b/c signals can have many actions connected to them, but for certine actions, in this case the setFocusedGame action,
-    /// we only want one, we need to keep track of the actions and remove them before adding them with different parameters again
-    /// </summary>
-    private Dictionary<BaseButton, Action> buttonFocusActions = new Dictionary<BaseButton, Action>();
+    public int index {get; private set;} = 0;
+    public int numberOfGames {get; private set;} = 1;
 
     public override void _Ready()
     {
@@ -74,12 +70,34 @@ public partial class GamesContainer : Control
         }
     }
 
+    public void nextGame()
+    {
+        ++index;
+        if(index > numberOfGames - 1)
+        {
+            index = numberOfGames - 1;
+        }
+        setFocusedGame(index);
+    }
+
+    public void previousGame()
+    {
+        index = --index;
+        if(index < 0)
+        {
+            index = 0;
+        }
+        setFocusedGame(index);
+    }
+
     public void updateGames(List<DevcadeGame> games, Action<DevcadeGame> showDescription)
     {
         foreach (Node child in this.GetChildren())
         {
             this.RemoveChild(child);
         }
+
+        this.numberOfGames = games.Count;
 
         gameButtons = new List<GameButton>();
 
@@ -103,7 +121,13 @@ public partial class GamesContainer : Control
                     TextureNormal = game.banner,
                     TextureHover = game.banner,
                     TexturePressed = game.banner,
-                    TextureFocused = game.banner
+                    TextureFocused = game.banner,
+
+                    // dont use inbuilt navigation 
+                    FocusMode = FocusModeEnum.Click,
+
+                    CustomMinimumSize = gameButtonsSize * gameButtonsScale,
+                    Scale = new Vector2(gameButtonsScale, gameButtonsScale),
                 };
 
                 button = textureButton;
@@ -117,30 +141,34 @@ public partial class GamesContainer : Control
 
                     // textButton.Theme = tagButtonTheme;
 
-
                     Name = game.name,
+                    Text = game.name,
 
-                    Text = game.name
+                    // dont use inbuilt navigation 
+                    FocusMode = FocusModeEnum.Click,
+
+                    // size of game buttons
+                    CustomMinimumSize = gameButtonsSize * gameButtonsScale,
+                    Scale = new Vector2(gameButtonsScale, gameButtonsScale),
                 };
 
                 button = textButton;
             }
 
-            // size of game buttons
-            button.CustomMinimumSize = gameButtonsSize * gameButtonsScale;
-
-            // pivot, inital rotation, and z-index (what should be draw on-top of what)
+            // pivot, inital rotation, and z-index (what should be draw on top of what)
             button.PivotOffset = new Vector2(0, gameButtonsSize.Y / 2 * gameButtonsScale);
             button.Rotation = i * cardSpacing;
             button.ZIndex = games.Count - i;
 
+            GameButton gameButton = new GameButton(i * cardSpacing, button, i);
+            // skip error games
             if (game.name != "Error")
             {
                 // lambda function is required to "bind" the game parameter 
                 // to the function showDescription called when the button is pressed
                 button.Pressed += () =>
                 {
-                    lastButtonPressed = button;
+                    lastButtonPressed = gameButton;
                     button.ReleaseFocus();
                     showDescription(game);
                 };
@@ -148,84 +176,17 @@ public partial class GamesContainer : Control
 
             // add the new button to the game container and the list of game buttons
             this.AddChild(button);
-            gameButtons.Add(new GameButton(i * cardSpacing, button));
+            gameButtons.Add(gameButton);
 
             if (i > 5)
             {
-                button.Hide();
+                button.CallDeferred(CanvasItem.MethodName.Hide);
             }
 
             buttonsGames.Add(button, game);
         }
 
-        setUpButtons();
-    }
-
-    /// <summary>
-    /// sets the neighbor values and the focus actions
-    /// </summary>
-    private void setUpButtons()
-    {
-        var currentGames = this.GetChildren();
-
-        for (int i = 0; i < currentGames.Count; i++)
-        {
-            BaseButton button = currentGames[i] as BaseButton;
-
-            // simply put lambda functions capture by reference by default
-            // so a copy of the int i is needed 
-            // see the answers in: https://stackoverflow.com/questions/451779/how-to-tell-a-lambda-function-to-capture-a-copy-instead-of-a-reference-in-c
-            int iCopy = i;
-            Action focusAction = () =>
-            {
-                setFocusedGame(iCopy);
-            };
-
-            if (buttonFocusActions.ContainsKey(button))
-            {
-                // remove the previous action
-                button.FocusEntered -= buttonFocusActions[button];
-
-                // add the new one
-                button.FocusEntered += focusAction;
-
-                // and save it in the dictionary
-                buttonFocusActions[button] = focusAction;
-            }
-            else
-            {
-                // if this is the first instance of this button
-                // add it to the focus actions dictionary and set the action
-                buttonFocusActions.Add(button, focusAction);
-                button.FocusEntered += focusAction;
-            }
-
-            // then set the default focus neighbor node paths
-            // so that going left/right/up/down doesn't go to random unintended places
-            button.FocusNeighborTop = button.GetPath();
-            button.FocusNeighborLeft = button.GetPath();
-            button.FocusNeighborRight = button.GetPath();
-            button.FocusNext = button.GetPath();
-            button.FocusPrevious = button.GetPath();
-            button.FocusNeighborBottom = button.GetPath();
-
-            // skipping the first button,
-            // override the rest to set the top and bottom neighbors
-            if (i != 0)
-            {
-                BaseButton aboveButton = currentGames[i - 1] as BaseButton;
-                button.FocusNeighborTop = aboveButton.GetPath();
-                aboveButton.FocusNeighborBottom = button.GetPath();
-            }
-
-            // make the first button focused by default,
-            // makes using the arrow keys and joysticks to navigate easy
-            if (i == 0)
-            {
-                button.CallDeferred("grab_focus");
-                lastButtonPressed = button;
-            }
-        }
+        lastButtonPressed = gameButtons[0];
     }
 
     /// <summary>
@@ -237,7 +198,7 @@ public partial class GamesContainer : Control
         var currentGames = this.GetChildren();
 
         // loops over all the game buttons in the saved list
-        // skiping the ones that are not part of the current tag (aka no in the tree)
+        // skiping the ones that are not part of the current tag (aka not in the tree)
         // and setting the z-index and rotation of the buttons based on the integer i
         // which represents the "index" of the button in the game container (0 being the first/top one)
         int i = 0;
@@ -256,6 +217,11 @@ public partial class GamesContainer : Control
             float scaleFactor = -cardScaleAmount * offset / 10.0f;
             gameButton.childButton.Scale = new Vector2(gameButtonsScale + scaleFactor, gameButtonsScale + scaleFactor);
 
+            if(i - index == 0)
+            {
+                gameButton.childButton.GrabFocus();
+            }
+
             ++i;
         }
     }
@@ -273,6 +239,7 @@ public partial class GamesContainer : Control
         }
 
         // add back the ones that have the tag
+        int i = 0;
         gameButtons.ForEach(buttonWrapper =>
         {
             DevcadeGame game = buttonsGames[buttonWrapper.childButton];
@@ -280,10 +247,10 @@ public partial class GamesContainer : Control
             if (game.tags.Contains(tag))
             {
                 this.AddChild(buttonWrapper.childButton);
+                buttonWrapper.index = i;
+                ++i;
             }
         });
-
-        setUpButtons();
     }
 
     /// <summary>
@@ -291,7 +258,16 @@ public partial class GamesContainer : Control
     /// </summary>
     public void grabFocus()
     {
-        lastButtonPressed.GrabFocus();
+        setFocusedGame(lastButtonPressed.index);
+    }
+
+    /// <summary>
+    /// Sets the last pressed button to a button with an arbitrary index in the gameButtons list
+    /// </summary>
+    /// <param name="index">must be within or equal to the length of gameButtons and 0</param>
+    public void setLastPressedButton(int index)
+    {
+        lastButtonPressed = gameButtons[index];
     }
 
     /// <summary>
@@ -306,9 +282,9 @@ public partial class GamesContainer : Control
     /// Sets the last pressed button to a button with an arbitrary index in the gameButtons list
     /// </summary>
     /// <param name="index">must be within or equal to the length of gameButtons and 0</param>
-    public void setLastPressedButton(int index)
+    public void selectLastPressedButton()
     {
-        lastButtonPressed = gameButtons[index].childButton;
+        setFocusedGame(lastButtonPressed.index);
     }
 
 }

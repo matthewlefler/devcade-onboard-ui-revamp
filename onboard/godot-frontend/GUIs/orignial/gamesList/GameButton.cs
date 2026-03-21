@@ -10,10 +10,13 @@ public partial class GameButton
 
 	public bool isInsideTree {get { return childButton.IsInsideTree(); } private set {} }
 
-	public GameButton(float targetRotation, BaseButton childButton)
+	public int index = -1;
+
+	public GameButton(float targetRotation, BaseButton childButton, int index)
 	{
 		this.targetRotation = targetRotation;
 		this.childButton = childButton;
+		this.index = index;
 	}
 
 	public void process(double delta)

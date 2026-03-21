@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://rf2ubr76htca"]
 
-[ext_resource type="Script" uid="uid://cgy5ytnue1rpw" path="res://guiManager/screensaver_games_animations/BombOmbSquad/BombOmbSquadScreenSaver.cs" id="1_2r8ub"]
-[ext_resource type="VideoStream" uid="uid://cufvdkpq44xob" path="res://guiManager/screensaver_games_animations/BombOmbSquad/BombOmbSquad.ogv" id="2_2r8ub"]
+[ext_resource type="Script" uid="uid://cgy5ytnue1rpw" path="res://guiManager/screensaver/screensaver_games_animations/BombOmbSquad/BombOmbSquadScreenSaver.cs" id="1_2r8ub"]
+[ext_resource type="VideoStream" uid="uid://cufvdkpq44xob" path="res://guiManager/screensaver/screensaver_games_animations/BombOmbSquad/BombOmbSquad.ogv" id="2_2r8ub"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2r8ub"]
 bg_color = Color(0, 0, 0, 1)

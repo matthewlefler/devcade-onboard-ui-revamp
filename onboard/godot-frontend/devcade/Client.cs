@@ -6,14 +6,12 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Net.Sockets;
-using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace onboard.devcade;
 
-using System.Runtime.CompilerServices;
 using util;
 
 public static class Client {
@@ -40,6 +38,9 @@ public static class Client {
 
     public static bool isProduction { get; private set; } = true;
 
+    /// <summary>
+    /// True if a game is currently launched/running
+    /// </summary>
     public static bool gameLauched { get; private set; } = false;
     
     private static bool connected;

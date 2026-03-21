@@ -1,23 +1,26 @@
-## initialization 
+## What Happens before a GUI is instantated 
+* First the enviormental values are loaded from the `.env` file
+* Then the `AutoLoad.cs` script is started by the Godot autoload system
+* Then the `Client.cs` script is started for communication with the backend from `AutoLoad.cs`
+* Then the `GuiManagerGlobal.cs` script is started by the Godot autoload system
+* Then the Scene Tree is created, loading the root node that has `GuiManager.cs` attached
+* Which then finally loads the selected Gui scene
 
-If you are creating a new GUI create a new folder in the GUIs folder with a name you like, 
-and either copy the template over or create a new class that inherits from the GuiInterface
+## Creating a GUI
+* First create a new folder under `onboard/godot-frontend/GUIs` with the name of the new GUI
+* Then create a new scene in that folder and start creating
+* Use the functions and variables of `GuiManagerGlobal.cs` to get the list of games, tags, etc.
 
-## required functionality
+## Required Functionality
 
-the GUI you create must:
-* have a way to select and set a tag from the list of all the tags
-* have a way to select and set another GUI from the list of all the GUIs
-* have a way to select and lauch a game from the list of the games
-* be able to view the description and author of a game
-* help text, explaining what the buttons do
+### The GUI you create must:
+* Have a way to select and set a tag from the list of all the tags
+* Have a way to select and lauch a game from the list of the games
+* Be able to view the description and author of a game
+* Help text, explaining what the buttons do
+* Accessiblility is of the upmost importance
 
-while not strictly necessary these are things that are nice to have:
-* animations, such as transisions between game 1 and 2 being selected
+### While not strictly necessary these are things that are nice to have:
+* Animations, such as transisions between game 1 and 2 being selected
 
-
-# tips
-the Control class and all inheriting nodes (such as the button class) have a top, bottom, left, and right neighbor property
-while the engine auto populates these fields to the best of its abilities, manualy seting these is better 
-and might be required in some situations such as in the original GUI
 

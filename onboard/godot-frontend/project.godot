@@ -20,7 +20,8 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-LogConfigAutoLoad="*res://LogConfigAutoLoad.cs"
+LogConfigAutoLoad="*res://AutoLoad.cs"
+GuiManagerGlobal="*res://guiManager/GuiManagerGlobal.cs"
 
 [debug]
 

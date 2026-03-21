@@ -1,8 +1,7 @@
 using Godot;
-using System.Collections.Generic;
 
 namespace onboard.devcade.GUI.originalGUI;
-public partial class OriginalGUI : Control, GuiInterface
+public partial class OriginalGUI : Control
 {
     /// <summary>
     /// the current state of the GUI
@@ -35,12 +34,6 @@ public partial class OriginalGUI : Control, GuiInterface
     public GamesContainer gameContainer;
 
     /// <summary>
-    /// the control node that is moved to show/hide the tag list
-    /// </summary>
-    [Export]
-    public TagContainer tagsMenu;
-
-    /// <summary>
     /// the node that has the tag buttons as children
     /// </summary>
     [Export]
@@ -64,53 +57,62 @@ public partial class OriginalGUI : Control, GuiInterface
     [Export]
     public Label titleLabel;
 
-    /// <summary>
-    /// the object that interfaces with the client to get the game list, tag list, etc
-    /// the model, assuming a mvc like pattern
-    /// </summary>
-    private GuiManager model = null;
-
-    /// <summary>
-    /// the list of games
-    /// </summary>
-    private List<DevcadeGame> games = new List<DevcadeGame>();
-
-    /// <summary>
-    /// the list of tags
-    /// </summary>
-    private List<Tag> tagList = new List<Tag>();
-
-    /// <summary>
-    /// used to update the tags within the Process loop
-    /// </summary>
-    private bool updateTags = false;
-
-    /// <summary>
-    /// used to update the game buttons within the Process loop
-    /// </summary>
-    private bool updateGames = false;
-
-    private int leftRightStickMovement = 0;
-
     public override void _Ready()
     {
+        GuiManagerGlobal.instance.gameTitlesUpdated += () =>
+        {
+            gameContainer.updateGames(GuiManagerGlobal.gameTitles, showDescription);
+        };
+
+        GuiManagerGlobal.instance.tagListUpdated += () =>
+        {
+            tagContainer.updateTags(GuiManagerGlobal.tagList, setCurrentTag);
+        };
+
         // hide the description if it is not already hidden
         description.Hide();
-        // and hopefully make it appear on top of everything else
-        description.ZIndex = 1000;
 
         state = GuiState.ViewGames;
+
+        // poll the game list
+        GuiManagerGlobal.instance.reloadGameList();
     }
 
-    public override void _Input(InputEvent @event)
+    // unhandled to ignore input that the gui manager consumes (aka when a game is launched)
+    public override void _UnhandledInput(InputEvent @event)
     {
+        if (state != GuiState.Description)
+        {
+            // stick right
+            if (@event.IsActionPressed("Player1_StickRight") || @event.IsActionPressed("Player2_StickRight"))
+            {
+                if (state == GuiState.ViewGames)
+                {
+                    showTagList();
+                    AcceptEvent();
+                    return;
+                }
+            }
+
+            // stick left
+            if (@event.IsActionPressed("Player1_StickLeft") || @event.IsActionPressed("Player2_StickLeft"))
+            {
+                if (state == GuiState.Tags && tagContainer.currentX == 0)
+                {
+                    showGameList();
+                    AcceptEvent();
+                    return;
+                }
+            }
+        }
+
         // back button (blue button)
         if (@event.IsActionPressed("Player1_A2") || @event.IsActionPressed("Player2_A2"))
         {
             if (state == GuiState.Description)
             {
                 description.Hide();
-                gameContainer.lastButtonPressed.GrabFocus();
+                gameContainer.selectLastPressedButton();
                 state = GuiState.ViewGames;
             }
         }
@@ -123,60 +125,42 @@ public partial class OriginalGUI : Control, GuiInterface
                 lauchCurrentGame();
             }
         }
-        
-        if (state != GuiState.Description)
+
+        if (state == GuiState.ViewGames)
         {
-            // stick right
-            if (@event.IsActionPressed("Player1_StickRight") || @event.IsActionPressed("Player2_StickRight"))
+            if (@event.IsActionPressed("Player1_StickUp") || @event.IsActionPressed("Player2_StickUp"))
             {
-                leftRightStickMovement++;
-                if (leftRightStickMovement > tagContainer.Columns)
-                {
-                    leftRightStickMovement = tagContainer.Columns;
-                }
-
-                if (leftRightStickMovement == 1)
-                {
-                    showTagList();
-                }
+                gameContainer.previousGame();
             }
-
+            if (@event.IsActionPressed("Player1_StickDown") || @event.IsActionPressed("Player2_StickDown"))
+            {
+                gameContainer.nextGame();
+            }
+        }
+        if (state == GuiState.Tags)
+        {
+            // stick up
+            if (@event.IsActionPressed("Player1_StickUp") || @event.IsActionPressed("Player2_StickUp"))
+            {
+                tagContainer.selectUp();
+            }
+            // stick down
+            if (@event.IsActionPressed("Player1_StickDown") || @event.IsActionPressed("Player2_StickDown"))
+            {
+                tagContainer.selectDown();
+            }
             // stick left
             if (@event.IsActionPressed("Player1_StickLeft") || @event.IsActionPressed("Player2_StickLeft"))
             {
-                leftRightStickMovement--;
-                if (leftRightStickMovement < 0)
-                {
-                    leftRightStickMovement = 0;
-                }
-
-                if (leftRightStickMovement == 0)
-                {
-                    showGameList();
-                }
+                tagContainer.selectLeft();
+            }
+            // stick right
+            if (@event.IsActionPressed("Player1_StickRight") || @event.IsActionPressed("Player2_StickRight"))
+            {
+                tagContainer.selectRight();
             }
         }
     }
-
-    public override void _Process(double delta)
-    {
-        if (updateGames)
-        {
-            gameContainer.updateGames(games, showDescription);
-
-            updateGames = false;
-        }
-
-        if (updateTags)
-        {
-            // passes the new tag list and the function that the tags 
-            // should execute to the tag container
-            tagContainer.updateTags(tagList, setCurrentTag);
-
-            updateTags = false;
-        }
-    }
-
 
     /// <summary>
     /// lauches the game that is referenced by the button in the aspect ratio container
@@ -185,7 +169,7 @@ public partial class OriginalGUI : Control, GuiInterface
     /// </summary>
     private void lauchCurrentGame()
     {
-        DevcadeGame gameToLaunch = gameContainer.buttonsGames[gameContainer.lastButtonPressed];
+        DevcadeGame gameToLaunch = gameContainer.buttonsGames[gameContainer.lastButtonPressed.childButton];
         launchGame(gameToLaunch);
     }
 
@@ -198,13 +182,14 @@ public partial class OriginalGUI : Control, GuiInterface
     {
         state = GuiState.GameLaunched;
         // this launches the selected game, and continues when the game closes
-        model.launchGame(game).ContinueWith(_ => state = GuiState.Description);
+        GuiManagerGlobal.instance.launchGame(game).ContinueWith(_ => state = GuiState.Description);
+        gameContainer.selectLastPressedButton();
     }
 
     /// <summary>
     /// show the description for an arbitrary game
     /// </summary>
-    /// <param name="game"></param>
+    /// <param name="game"> the game's description to show </param>
     private void showDescription(DevcadeGame game)
     {
         state = GuiState.Description;
@@ -220,29 +205,20 @@ public partial class OriginalGUI : Control, GuiInterface
     /// </summary>
     public void showTagList()
     {
-        leftRightStickMovement = 1;
-
         state = GuiState.Tags;
-        gameContainer.resetLastPressedButton();
         tagContainer.grabFocus();
         camera.setRelativeTargetIndex(1);
     }
 
+    /// <summary>
+    /// shows the game list
+    /// </summary>
     private void showGameList()
     {
-        leftRightStickMovement = 0;
-
         state = GuiState.ViewGames;
+        gameContainer.resetLastPressedButton();
         gameContainer.grabFocus();
         camera.setRelativeTargetIndex(0);
-    }
-
-    public void setGameList(List<DevcadeGame> gameTitles, GuiManager model)
-    {
-        this.model = model;
-        games = gameTitles;
-
-        updateGames = true;
     }
 
     /// <summary>
@@ -251,22 +227,7 @@ public partial class OriginalGUI : Control, GuiInterface
     /// <param name="tag"> the new tag </param>
     public void setCurrentTag(Tag tag)
     {
-        model.setTag(tag);
+        GuiManagerGlobal.instance.setTag(tag);
         showGameList();
-    }
-
-    public void setTagList(List<Tag> tags)
-    {
-        this.tagList = tags;
-        updateTags = true;
-    }
-
-    /// <summary>
-    /// used by the GuiManager to set the tag
-    /// </summary>
-    /// <param name="tag"> the new tag </param>
-    public void setTag(Tag tag)
-    {
-        gameContainer.setTag(tag);
     }
 }

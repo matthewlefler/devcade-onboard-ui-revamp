@@ -46,7 +46,7 @@ public partial class GuiManager : Control
     /// <summary>
     /// A list of all the games
     /// </summary>
-    public List<DevcadeGame> gameTitles;
+    public List<DevcadeGame> gameList;
 
     /// <summary>
     /// if the cabneit is in demo mode
@@ -77,19 +77,9 @@ public partial class GuiManager : Control
     public bool reloadingGameList { get; private set; } = false;
 
     /// <summary>
-    /// True if one of the games is being run, false otherwise
-    /// </summary>
-    public bool gameLauched { get; private set; } = false;
-
-    /// <summary>
-    /// The current GUI scene being shown
-    /// </summary>
-    GuiInterface guiScene;
-
-    /// <summary>
     /// The root node of the GUI scene
     /// </summary>
-    CanvasItem guiSceneRootNode;
+    Node guiSceneRootNode;
 
     private static readonly DevcadeGame defaultGame = new DevcadeGame {
         name = "Error",
@@ -106,45 +96,61 @@ public partial class GuiManager : Control
     /// </summary>
     public override void _Ready()
     {
+        try 
+        {
+            GuiManagerGlobal.instance.onGameLaunched += (bool isOpened) =>
+            {
+                if(isOpened)
+                {
+                    // pause when a game is launched so the onboard does not receive input when not focused 
+                    // ProcessMode = ProcessModeEnum.Disabled;
+                    guiSceneRootNode.ProcessMode = ProcessModeEnum.Disabled;  
+                }
+                else
+                {
+                    guiSceneRootNode.SetDeferred("process_mode", (long) ProcessModeEnum.Inherit);
+                }
+            };
+
+            GuiManagerGlobal.instance.setLoadingAnimation += (bool show) =>
+            {
+                if(show)
+                {
+                    showLoadingAnimation();
+                }
+                else
+                {
+                    hideLoadingAnimation();
+                }
+            };
+        } catch (Exception e)
+        {
+            GD.Print(e.Message);
+            throw new ApplicationException("yeah this is unrecoverable");
+        }
+
         supervisorButtonTimeoutSeconds = Env.SUPERVISOR_BUTTON_TIMEOUT_SEC(); // default 5 seconds
         supervisorButtonTimerSeconds = supervisorButtonTimeoutSeconds;
 
         screenSaverTimeoutSeconds = Env.SCREENSAVER_TIMEOUT_SEC(); // default 2 minutes
         screenSaverTimerSeconds = screenSaverTimeoutSeconds;
-        
-        isDemoMode = Env.DEMO_MODE();
 
+        GD.Print("supervisorButtonTimeoutSeconds: " + supervisorButtonTimeoutSeconds);
+        GD.Print("screenSaverTimeoutSeconds" + screenSaverTimeoutSeconds);
+        
         // hide the loading screen by default
         hideLoadingAnimation();
         // hide the screen saver by default
         hideScreenSaver();
 
         // spawn initial gui scene
-        this.guiSceneRootNode = initialGuiScene.Instantiate() as CanvasItem;
-
-        if(guiSceneRootNode == null)
-        {
-            GD.PushError("Assert Failed: gui scene root node is not a node that derives from the CanvasItem node");
-            throw new ApplicationException("Assert Failed: gui scene root node is not a node that derives from the CanvasItem node");
-        }
-        
-        // make sure it implements the GuiInterface interface
-        GuiInterface gui = guiSceneRootNode as GuiInterface;
-        if(gui != null) 
-        {
-            this.guiScene = gui;
-        }
-        else
-        {
-            GD.PushError("Assert Failed: gui scene root node script does not implement the GuiInterface interface");
-            throw new ApplicationException("Assert Failed: the gui scene's root node script does not implement the GuiInterface interface");
-        } 
+        guiSceneRootNode = initialGuiScene.Instantiate();
         
         // add the new scene instance as a child of this node
         AddChild(guiSceneRootNode);
 
         // and reload the game list
-        reloadGameList();
+        GuiManagerGlobal.instance.reloadGameList();
     }
 
     public override void _Input(InputEvent @event)
@@ -157,6 +163,11 @@ public partial class GuiManager : Control
         if(@event is InputEventJoypadMotion axis)
         {
             GD.Print(axis.Device, axis.Axis);
+        }
+
+        if(showingScreenSaverAnimation)
+        {
+            GetViewport().SetInputAsHandled();
         }
     }
 
@@ -182,7 +193,7 @@ public partial class GuiManager : Control
         // frontend reset button, reloads all the games from the backend
         if (Input.IsActionPressed("Player1_Menu") && Input.IsActionPressed("Player2_Menu") && reloadButtonCooldownTimer <= 0)
         {
-            reloadGameList();
+            GuiManagerGlobal.instance.reloadGameList();
             reloadButtonCooldownTimer = reloadButtonCooldown;
         }
 
@@ -195,7 +206,7 @@ public partial class GuiManager : Control
         // switch between dev and normal mode
         if (Input.IsActionPressed("Player1_B4") && Input.IsActionPressed("Player2_B4") && switchDevButtonCooldownTimer <= 0)
         {
-            Client.setProduction(!Client.isProduction).ContinueWith(_ => { setTag(allTag); reloadGameList(); });
+            Client.setProduction(!Client.isProduction).ContinueWith(_ => { GuiManagerGlobal.instance.setTag(allTag); GuiManagerGlobal.instance.reloadGameList(); });
             switchDevButtonCooldownTimer = switchDevButtonCooldown;
         }
 
@@ -210,7 +221,7 @@ public partial class GuiManager : Control
             {
                 // if the timer has timed out
                 // kill the currently running game
-                _ = killGame();
+                _ = GuiManagerGlobal.instance.killGame();
                 GD.Print("log: Killing current running game");
                 
                 supervisorButtonTimerSeconds = supervisorButtonTimeoutSeconds;
@@ -232,9 +243,9 @@ public partial class GuiManager : Control
                 // if the timer has timed out
                 // kill the currently running game 
                 // and show the screensaver
-                if(gameLauched)
+                if(Client.gameLauched)
                 {
-                    _ = killGame();
+                    _ = GuiManagerGlobal.instance.killGame();
                 }
                 showingScreenSaverAnimation = true;
                 showScreenSaver();
@@ -249,132 +260,6 @@ public partial class GuiManager : Control
             }
             screenSaverTimerSeconds = screenSaverTimeoutSeconds;
         }
-        
-        
-    }
-
-    /// <summary>
-    /// the constructor of a class will run before the _Ready() function is called
-    /// </summary>
-    public GuiManager()
-    {
-
-    }
-
-    private Task reloadGameList()
-    {
-        showLoadingAnimation();        
-
-        this.reloadingGameList = true;
-
-        tagLists = new Dictionary<string, List<DevcadeGame>> { { allTag.name, new List<DevcadeGame>() } };
-        tagList = new List<Tag>() { allTag };
-
-        gameTitles = errorList;
-
-        Task gameTask = Client.getGameList()
-            .ContinueWith(t => {
-                if (!t.IsCompletedSuccessfully) {
-                    GD.PushError($"Failed to fetch game list: {t.Exception}");
-                    gameTitles = errorList;
-                    return;
-                }
-
-                var res = t.Result.into_result<List<DevcadeGame>>();
-                if (!res.is_ok()) {
-                    GD.PushError($"Failed to fetch game list: {res.err().unwrap()}");
-                    gameTitles = errorList;
-                    return;
-                }
-
-                GD.Print("Got game list, setting titles");
-
-                gameTitles = res.unwrap();
-
-                // each game does not have the "all tag"
-                // adding it removes the requirement for an extra condition in each gui's code
-                gameTitles.ForEach(game =>
-                {
-                    game.tags.Add(allTag);
-                });
-                
-                // remove all games that do not have the curated tag if
-                // demo mode is enabled
-                if(isDemoMode)
-                {
-                    for (int i = 0; i < gameTitles.Count; i++)
-                    {
-                        DevcadeGame game = gameTitles[i];
-                        // if it does not have the curatedTag 
-                        if(!game.tags.Contains(curatedTag))
-                        {
-                            // remove it
-                            gameTitles.Remove(game);
-                            i--; // fix the index, so we don't skip any games
-                        }
-                    }
-                }
-                
-            })
-            .ContinueWith(_ => {
-                GD.Print("Setting cards");
-
-                loadBanners();
-
-                // initialize the GUI
-                initGUI();
-
-                hideLoadingAnimation();        
-
-                this.reloadingGameList = false;
-            });
-        return gameTask;
-    }
-
-    private void loadBanners()
-    {
-        foreach(DevcadeGame game in gameTitles)
-        {            
-            // Start downloading the textures
-            if (game.id != "error") {
-                // don't download the banner for the default game
-                Client.downloadBanner(game.id);
-            } // check if /tmp/ has the banner
-            
-            string bannerPath = $"{Env.DEVCADE_PATH()}/{game.id}/banner.png";
-
-            if (File.Exists(bannerPath)) {
-                try {
-                    // godot image class 
-                    Image image = Image.LoadFromFile(bannerPath);
-                    ImageTexture texture = ImageTexture.CreateFromImage(image); // inherits from godot texture2D class 
-
-                    game.banner = texture;
-                }
-                catch (Exception e) {
-                    GD.PushWarning($"Unable to set card: {e.Message}");
-                }
-            }
-
-            // for each tag that this game has, add it to the corresponding list
-            // this allows for easy filtering by tag
-            foreach(Tag tag in game.tags) {
-                // if the tag does not exist in the dictionary, 
-                // init it as an empty list
-                if(!tagLists.ContainsKey(tag.name))
-                {
-                    tagLists.Add(tag.name, new List<DevcadeGame>());
-                }
-                tagLists[tag.name].Add(game);
-
-                // if the overall tag list does not contain the tag
-                // add it to the list
-                if(!tagList.Contains(tag))
-                {
-                    tagList.Add(tag);
-                }
-            }
-        }
     }
 
     /// <summary>
@@ -385,6 +270,8 @@ public partial class GuiManager : Control
     /// </summary>
     public void showLoadingAnimation()
     {
+        GD.Print("Showing Loading Animation");
+
         loadingScreen.CallDeferred("show");
         loadingAnimation.CallDeferred("play", "default", 1.0f, false);
     }
@@ -397,6 +284,8 @@ public partial class GuiManager : Control
     /// </summary>
     public void hideLoadingAnimation()
     {
+        GD.Print("Hiding Loading Animation");
+
         loadingScreen.CallDeferred("hide");
         loadingAnimation.CallDeferred("stop");
     }
@@ -423,67 +312,5 @@ public partial class GuiManager : Control
 
         screenSaver.CallDeferred("hide");
         screenSaver.CallDeferred("stop");
-    }
-
-    /// <summary>
-    /// updates the current tag in use
-    /// and updates the game list to be only the games that have the current tag
-    /// </summary>
-    /// <param name="newTag"></param>
-    public void setTag(Tag newTag)
-    {
-        currentTag = newTag;
-        guiScene.setTag(currentTag);
-    }
-
-    /// <summary>
-    /// initilizes a gui object with the taglist and game list
-    /// </summary>
-    private void initGUI()
-    {
-        guiScene.setGameList(tagLists[currentTag.name], this);
-        guiScene.setTagList(tagList);
-    }
-
-    /// <summary>
-    /// launch the given game
-    /// </summary>
-    /// <param name="game"> the game to launch </param>
-    public async Task launchGame(DevcadeGame game) 
-    {
-        // this has to be a long because the SetDeferred func takes a variant that does not accept an enum
-        long previousProcessMode = (long) guiSceneRootNode.ProcessMode;
-        // pause when a game is launched so the onboard does not receive input when not focused 
-        // ProcessMode = ProcessModeEnum.Disabled;
-        guiSceneRootNode.ProcessMode = ProcessModeEnum.Disabled;
-        
-        this.gameLauched = true;
-        GD.Print("launching game: " + game.name);
-
-        showLoadingAnimation();
-
-        await Client.launchGame(
-            game.id).ContinueWith(res => {
-                if (res.IsCompletedSuccessfully) {
-                    // runs after the game completes running
-                    hideLoadingAnimation();
-                }
-                else {
-                    GD.PushError("Failed to launch game: " + res.Exception);
-                }
-                // ProcessMode = ProcessModeEnum.Always; 
-                guiSceneRootNode.SetDeferred("process_mode", previousProcessMode);
-
-                this.gameLauched = false;
-        });
-    }
-
-    /// <summary>
-    /// kill the currently running game.
-    /// will run async, but can await the function call
-    /// </summary>
-    public async Task killGame()
-    {
-        await Client.killGame();
     }
 }
