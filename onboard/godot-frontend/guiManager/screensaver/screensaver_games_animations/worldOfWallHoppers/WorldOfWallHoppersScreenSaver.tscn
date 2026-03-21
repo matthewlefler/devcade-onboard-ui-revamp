@@ -15,6 +15,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_pvo00")
 videoStreamPlayer = NodePath("Panel/VideoStreamPlayer")
+game_name = "World of Wallhoppers"
 
 [node name="Panel" type="Panel" parent="."]
 layout_mode = 1

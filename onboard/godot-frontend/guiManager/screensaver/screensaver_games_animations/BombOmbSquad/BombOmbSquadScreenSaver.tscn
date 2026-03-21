@@ -15,6 +15,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_2r8ub")
 videoStreamPlayer = NodePath("Panel/VideoStreamPlayer")
+game_name = "Bob-omb Squad"
 
 [node name="Panel" type="Panel" parent="."]
 layout_mode = 1

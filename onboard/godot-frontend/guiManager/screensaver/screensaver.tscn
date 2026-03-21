@@ -68,6 +68,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("4_q4yft")
+game_name = "Background"
 
 [node name="background" type="TextureRect" parent="gameAnimationsContainer/background"]
 z_index = 1000
@@ -122,6 +123,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("4_q4yft")
+game_name = "Background2"
 
 [node name="background" type="TextureRect" parent="gameAnimationsContainer/background2"]
 z_index = 1000

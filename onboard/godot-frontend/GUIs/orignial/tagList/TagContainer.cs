@@ -127,7 +127,6 @@ public partial class TagContainer : GridContainer
             button.Pressed += () => on_tag_pressed(tag);
             button.FocusEntered += () => currentHoveredTag = tag;
 
-            GD.Print($"i: {i}, tagButton len: {tagButtons.Length}, taglist count: {tagList.Count}");
             tagButtons[i] = button;
 
             MarginContainer marginContainer = new MarginContainer
