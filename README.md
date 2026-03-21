@@ -7,9 +7,9 @@ Run the `update_onboard.sh` script located in HACKING
 
 ## Building (manual)
 
-To build and run on the DCU, do the following from `./onboard/frontend`:
+To build and run on the DCU, do the following from `./onboard/godot-frontend`:
 ```Bash
-dotnet publish -c Release -r linux-x64 --no-self-contained
+godot-4.4.1 --path ./ --headless --export-release "Linux" out-path/godot_frontend
 ```
 And the following from `./onboard/backend`:
 ```Bash
@@ -42,3 +42,12 @@ cd HACKING
 ./build-environment.sh
 ./launch-environment.sh
 ``` -->
+
+## Further Devolopment
+
+### Backend
+
+### Frontend
+For more information on:
+* Creating a new GUI see: `onboard/godot-frontend/GUIs/CreatingAGuiREADME.md`
+* Creating a new screensaver animation see: `onboard/godot-frontend/guiManager/screensaver/RecordingREADME.md`

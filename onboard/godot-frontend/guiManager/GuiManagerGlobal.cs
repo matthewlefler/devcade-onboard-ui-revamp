@@ -174,6 +174,9 @@ public partial class GuiManagerGlobal : Node
         reloadingGameList = true;
         call_reloadingGameListUpdated = true;
 
+        state_setLoadingAnimation = true;
+        call_setLoadingAnimation = true;
+
         tagLists = new Dictionary<string, List<DevcadeGame>> { { allTag.name, new List<DevcadeGame>() } };
         tagList = new List<Tag>() { allTag };
 
@@ -232,6 +235,9 @@ public partial class GuiManagerGlobal : Node
 
                 call_reloadingGameListUpdated = true;
                 call_gameTitlesUpdated = true;
+
+                state_setLoadingAnimation = false;
+                call_setLoadingAnimation = true;
             });
         return gameTask;
     }
