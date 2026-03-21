@@ -47,7 +47,7 @@ Some of the functions that it provides are:
 * Set the current tag
 * Launching a given game
 * Loading/Reloading the game list from the backend
-* 
+* Interface for showing/hiding the loading animation
 
 ## SupervisorButton.cs
 Found in `onboard/godot-frontend/util/SupervisorButton.cs`
