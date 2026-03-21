@@ -25,7 +25,7 @@ Found in `onboard/godot-frontend/util/Env.cs`
 
 This script handles the enviormental values that are used by various parts of the onboard. See `.env.template` for the values it contains. It is also a static class.
 
-It provides its values in key, value pairs that 
+It provides its values in key, value pairs that map strings to strings
 
 ## GuiManager.cs
 Found in `onboard/godot-frontend/GuiManager.cs`
