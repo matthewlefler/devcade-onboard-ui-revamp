@@ -94,6 +94,8 @@ public partial class TagContainer : GridContainer
 
     public void updateTags(List<Tag> tagList, Action<Tag> on_tag_pressed)
     {
+        if(tagList == null) {return;}
+        
         foreach (Node child in this.GetChildren())
         {
             this.RemoveChild(child);
@@ -127,7 +129,6 @@ public partial class TagContainer : GridContainer
             button.Pressed += () => on_tag_pressed(tag);
             button.FocusEntered += () => currentHoveredTag = tag;
 
-            GD.Print($"i: {i}, tagButton len: {tagButtons.Length}, taglist count: {tagList.Count}");
             tagButtons[i] = button;
 
             MarginContainer marginContainer = new MarginContainer

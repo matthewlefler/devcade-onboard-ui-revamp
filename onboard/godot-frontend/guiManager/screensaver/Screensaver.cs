@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using Godot;
+using onboard;
+using onboard.devcade;
 
 public partial class Screensaver : Control
 {
@@ -13,13 +15,14 @@ public partial class Screensaver : Control
     [Export]
     private TextureRect backgroundIcons;
     
+    private List<ScreenSaverGameAnimation> shownGameAnimationNodes = new List<ScreenSaverGameAnimation>();
     private List<ScreenSaverGameAnimation> gameAnimationNodes = new List<ScreenSaverGameAnimation>();
 
     private bool playing = false;
     private int currentGameAnimationIndex = 0;
 
-    Vector2 startPosition;
-    Vector2 endPosition;
+    private readonly Vector2 startPosition = new Vector2(0, 0);
+    private Vector2 endPosition;
     float screenWidth;
 
     Vector2 shaderVelInit;
@@ -30,7 +33,7 @@ public partial class Screensaver : Control
         currentGameAnimationIndex = 0;
         gamesAnimationsContainer.Position = startPosition;
 
-        foreach(var anim in gameAnimationNodes)
+        foreach(var anim in shownGameAnimationNodes)
         {
             anim.Show();
         }
@@ -40,7 +43,7 @@ public partial class Screensaver : Control
     {
         playing = false;
 
-        foreach(var anim in gameAnimationNodes)
+        foreach(var anim in shownGameAnimationNodes)
         {
             anim.Hide();
         }
@@ -49,8 +52,6 @@ public partial class Screensaver : Control
     public override void _Ready()
     {
         screenWidth = GetViewportRect().Size.X;
-
-        startPosition = new Vector2(0, 0);
 
         foreach(Node node in gamesAnimationsContainer.GetChildren())
         {
@@ -65,16 +66,14 @@ public partial class Screensaver : Control
             }
         }
 
-        endPosition = new Vector2(-1 * screenWidth * (gameAnimationNodes.Count - 1), 0);
-
-        for (int i = 0; i < gameAnimationNodes.Count; i++)
-        {
-            ScreenSaverGameAnimation anim = gameAnimationNodes[i];
-
-            anim.Position = new Vector2(screenWidth * i, 0);
-        }
-
         shaderVelInit = getShaderVel();
+
+        setScreenSaversShown(GuiManagerGlobal.gameTitles);
+
+        GuiManagerGlobal.instance.gameTitlesUpdated += () =>
+        {
+            setScreenSaversShown(GuiManagerGlobal.gameTitles);
+        };
     }
 
     public override void _Process(double delta)
@@ -92,6 +91,39 @@ public partial class Screensaver : Control
         if(gamesAnimationsContainer.Position.X < endPosition.X)
         {
             gamesAnimationsContainer.Position = startPosition;
+        }
+    }
+
+    private void setScreenSaversShown(List<DevcadeGame> games)
+    {
+        if(games == null) { return; }
+
+        foreach(ScreenSaverGameAnimation anim in gameAnimationNodes)
+        {
+            if(anim.game_name == "Background" || anim.game_name == "Background2")
+            {
+                shownGameAnimationNodes.Add(anim);
+                continue;
+            }
+
+            foreach(DevcadeGame game in games)
+            {
+                string gameName = game.name;
+                if(anim.game_name == gameName)
+                {
+                    GD.Print($"found matching anim: {anim.game_name}");
+                    shownGameAnimationNodes.Add(anim);
+                }
+            }
+        }
+
+        endPosition = new Vector2(-1 * screenWidth * (shownGameAnimationNodes.Count - 1), 0);
+
+        for (int i = 0; i < shownGameAnimationNodes.Count; i++)
+        {
+            ScreenSaverGameAnimation anim = shownGameAnimationNodes[i];
+
+            anim.Position = new Vector2(screenWidth * i, 0);
         }
     }
 
