@@ -124,7 +124,6 @@ public partial class Screensaver : Control
         for (int i = 0; i < shownGameAnimationNodes.Count; i++)
         {
             ScreenSaverGameAnimation anim = shownGameAnimationNodes[i];
-            GD.PrintErr($"anim: {anim.game_name} in shown");
 
             anim.Position = new Vector2(screenWidth * i, 0);
         }
