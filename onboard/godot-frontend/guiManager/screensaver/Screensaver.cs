@@ -105,13 +105,13 @@ public partial class Screensaver : Control
                 shownGameAnimationNodes.Add(anim);
                 continue;
             }
-            
+
             foreach(DevcadeGame game in games)
             {
                 string gameName = game.name;
                 if(anim.game_name == gameName)
                 {
-                    GD.PrintErr($"found matching anim: {anim.game_name}");
+                    GD.Print($"found matching anim: {anim.game_name}");
                     shownGameAnimationNodes.Add(anim);
                 }
             }

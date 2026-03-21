@@ -94,6 +94,8 @@ public partial class TagContainer : GridContainer
 
     public void updateTags(List<Tag> tagList, Action<Tag> on_tag_pressed)
     {
+        if(tagList == null) {return;}
+        
         foreach (Node child in this.GetChildren())
         {
             this.RemoveChild(child);
