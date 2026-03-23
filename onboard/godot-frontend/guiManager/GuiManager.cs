@@ -189,12 +189,6 @@ public partial class GuiManager : Control
     [Export]
     private double secBetweenKeyRepeat = 0.2;
 
-    private List<string> actionsToRepeat = [
-        "Player1_StickDown", "Player1_StickUp", "Player1_StickRight", "Player1_StickLeft",
-        "Player2_StickDown", "Player2_StickUp", "Player2_StickRight", "Player2_StickLeft",
-    ];
-    private Dictionary<string, double> repeatedActions = new Dictionary<string, double>();
-
     public override void _Process(double delta)
     {
         reloadButtonCooldownTimer -= delta;
@@ -272,39 +266,7 @@ public partial class GuiManager : Control
                 hideScreenSaver();
             }
             screenSaverTimerSeconds = screenSaverTimeoutSeconds;
-        }
-
-
-        // repeat certian input actions
-        foreach(string actionName in actionsToRepeat)
-        {
-            if(Input.IsActionPressed(actionName))
-            {
-
-                double dt = repeatedActions[actionName];
-                dt += delta;
-                if(dt > secBeforeKeyRepeat)
-                {
-                    dt -= secBetweenKeyRepeat;
-
-                    // emit echo key event
-                    InputEventAction inputEventAction = new InputEventAction
-                    {
-                        Action = actionName,
-                        Pressed = true,
-                    };
-                    Input.ParseInputEvent(inputEventAction);
-                    
-                }
-
-                repeatedActions[actionName] = dt;
-            }
-            else
-            {
-                repeatedActions[actionName] = 0.0;
-            }
-        }
-        
+        }       
     }
 
     /// <summary>
