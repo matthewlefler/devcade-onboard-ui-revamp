@@ -156,7 +156,7 @@ public partial class GuiManager : Control
     public override void _Input(InputEvent @event)
     {   
         if(@event.IsEcho()) { GetViewport().SetInputAsHandled();}
-        
+
         if(@event is InputEventJoypadButton joy)
         {
             GD.Print(joy.Device, joy.ButtonIndex);
@@ -189,7 +189,10 @@ public partial class GuiManager : Control
     [Export]
     private double secBetweenKeyRepeat = 0.2;
 
-    private List<string> actionsToRepeat = ["", ""];
+    private List<string> actionsToRepeat = [
+        "Player1_StickDown", "Player1_StickUp", "Player1_StickRight", "Player1_StickLeft",
+        "Player2_StickDown", "Player2_StickUp", "Player2_StickRight", "Player2_StickLeft",
+    ];
     private Dictionary<string, double> repeatedActions = new Dictionary<string, double>();
 
     public override void _Process(double delta)
