@@ -192,15 +192,18 @@ public partial class OriginalGUI : Control
         }
 
         double actionDt = actionsPressTime[actionName];
-        actionDt += delta;
 
         if(Input.IsActionPressed(actionName))
         {
+            actionDt += delta;
+
             if(actionDt > secBeforeInputEcho)
             {
                 actionsPressTime[actionName] -= secBetweenInputEcho;
                 return true;
             }
+
+            actionsPressTime[actionName] = actionDt;
             return false;
         }
 

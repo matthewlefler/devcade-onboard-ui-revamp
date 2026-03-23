@@ -37,8 +37,7 @@ tagContainer = NodePath("SubViewportContainer/SubViewport/ScrollContainer/tagCon
 description = NodePath("SubViewportContainer/SubViewport/DescriptionContainer")
 descriptionLabel = NodePath("SubViewportContainer/SubViewport/DescriptionContainer/TextureRect2/MarginContainer/VBoxContainer/description")
 titleLabel = NodePath("SubViewportContainer/SubViewport/DescriptionContainer/TextureRect2/MarginContainer/VBoxContainer/title")
-secBeforeInputEcho = 1.0
-secBetweenInputEcho = 1.0
+secBeforeInputEcho = 0.3
 
 [node name="SubViewportContainer" type="SubViewportContainer" parent="."]
 layout_mode = 1
