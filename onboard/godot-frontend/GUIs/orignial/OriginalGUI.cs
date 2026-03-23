@@ -139,11 +139,11 @@ public partial class OriginalGUI : Control
     {
         if (state == GuiState.ViewGames)
         {
-            if (Input.IsActionPressed("Player1_StickUp") || Input.IsActionPressed("Player2_StickUp"))
+            if (isRepeatActionPressed("Player1_StickUp", delta) || isRepeatActionPressed("Player2_StickUp", delta))
             {
                 gameContainer.previousGame();
             }
-            if (Input.IsActionPressed("Player1_StickDown") || Input.IsActionPressed("Player2_StickDown"))
+            if (isRepeatActionPressed("Player1_StickDown", delta) || isRepeatActionPressed("Player2_StickDown", delta))
             {
                 gameContainer.nextGame();
             }
@@ -180,6 +180,11 @@ public partial class OriginalGUI : Control
     /// <param name="delta">Delta time in seconds</param>
     /// <returns>true if the action is pressed or should be repeated, false otherwise</returns>
     private bool isRepeatActionPressed(string actionName, double delta)
+    {
+        return isActionRepeated(actionName, delta) || Input.IsActionJustPressed(actionName);
+    }
+
+    private bool isActionRepeated(string actionName, double delta)
     {
         if(!actionsPressTime.ContainsKey(actionName))
         {
