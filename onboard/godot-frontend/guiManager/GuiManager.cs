@@ -286,9 +286,15 @@ public partial class GuiManager : Control
                 if(dt > secBeforeKeyRepeat)
                 {
                     dt -= secBetweenKeyRepeat;
-                    
+
                     // emit echo key event
-                    Input.ActionPress(actionName);
+                    InputEventAction inputEventAction = new InputEventAction
+                    {
+                        Action = actionName,
+                        Pressed = true,
+                    };
+                    Input.ParseInputEvent(inputEventAction);
+                    
                 }
 
                 repeatedActions[actionName] = dt;
