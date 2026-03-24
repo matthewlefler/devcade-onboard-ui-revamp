@@ -57,6 +57,9 @@ public partial class Screensaver : Control
         {
             if(node is ScreenSaverGameAnimation gameAnimation)
             {
+                gameAnimation.ZIndex = 4000;
+                gameAnimation.YSortEnabled = true;
+                
                 gameAnimationNodes.Add(gameAnimation);
                 gameAnimation.Position = startPosition;
             }
@@ -111,6 +114,8 @@ public partial class Screensaver : Control
             foreach(DevcadeGame game in games)
             {
                 string gameName = game.name;
+                // GD.Print($"found game: {game.name}");
+
                 if(anim.game_name == gameName)
                 {
                     GD.Print($"found matching anim: {anim.game_name}");

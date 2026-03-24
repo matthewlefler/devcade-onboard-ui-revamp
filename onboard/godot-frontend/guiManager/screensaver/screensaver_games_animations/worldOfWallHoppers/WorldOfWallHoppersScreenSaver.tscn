@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://camd641ivrd43"]
 
-[ext_resource type="Script" uid="uid://ceik4vls3rk1r" path="res://guiManager/screensaver/screensaver_games_animations/worldOfWallHoppers/WorldOfWallHoppersScreenSaver.cs" id="1_pvo00"]
+[ext_resource type="Script" uid="uid://3dod6y75r7mb" path="res://guiManager/screensaver/ScreenSaverGameAnimation.cs" id="1_d5uki"]
 [ext_resource type="VideoStream" uid="uid://djrj50vajtc3m" path="res://guiManager/screensaver/screensaver_games_animations/worldOfWallHoppers/world_of_wallhoppers_devcade_screensaver.ogv" id="2_pvo00"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pvo00"]
@@ -13,9 +13,9 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_pvo00")
-videoStreamPlayer = NodePath("Panel/VideoStreamPlayer")
+script = ExtResource("1_d5uki")
 game_name = "World of Wallhoppers"
+videoStreamPlayer = NodePath("Panel/VideoStreamPlayer")
 
 [node name="Panel" type="Panel" parent="."]
 layout_mode = 1
