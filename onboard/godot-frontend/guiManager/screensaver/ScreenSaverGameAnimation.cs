@@ -5,6 +5,9 @@ public partial class ScreenSaverGameAnimation : Control
     [Export]
     public string game_name = "Null";
 
+    [Export]
+    public VideoStreamPlayer videoStreamPlayer;
+
     public override void _Ready()
     {
         this.Hide();
@@ -25,13 +28,15 @@ public partial class ScreenSaverGameAnimation : Control
         }
     }
 
-    virtual public void play()
+    public void play()
     {
-        
+        videoStreamPlayer.Play();
+        videoStreamPlayer.Paused = false;
     }
 
-    virtual public void stop()
+    public void stop()
     {
-        
+        videoStreamPlayer.Stop();
+        videoStreamPlayer.Paused = true;
     }
 }

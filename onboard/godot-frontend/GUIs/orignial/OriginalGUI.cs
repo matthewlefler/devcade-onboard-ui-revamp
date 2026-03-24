@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Godot;
 
 namespace onboard.devcade.GUI.originalGUI;
@@ -125,14 +126,24 @@ public partial class OriginalGUI : Control
                 lauchCurrentGame();
             }
         }
+    }
 
+    [Export]
+    double secBeforeInputEcho = 0.2;
+    [Export]
+    double secBetweenInputEcho = 0.1;
+
+    Dictionary<string, double> actionsPressTime = new Dictionary<string, double>();
+
+    public override void _Process(double delta)
+    {
         if (state == GuiState.ViewGames)
         {
-            if (@event.IsActionPressed("Player1_StickUp") || @event.IsActionPressed("Player2_StickUp"))
+            if (isRepeatActionPressed("Player1_StickUp", delta) || isRepeatActionPressed("Player2_StickUp", delta))
             {
                 gameContainer.previousGame();
             }
-            if (@event.IsActionPressed("Player1_StickDown") || @event.IsActionPressed("Player2_StickDown"))
+            if (isRepeatActionPressed("Player1_StickDown", delta) || isRepeatActionPressed("Player2_StickDown", delta))
             {
                 gameContainer.nextGame();
             }
@@ -140,26 +151,64 @@ public partial class OriginalGUI : Control
         if (state == GuiState.Tags)
         {
             // stick up
-            if (@event.IsActionPressed("Player1_StickUp") || @event.IsActionPressed("Player2_StickUp"))
+            if (isRepeatActionPressed("Player1_StickUp", delta) || isRepeatActionPressed("Player2_StickUp", delta))
             {
                 tagContainer.selectUp();
             }
             // stick down
-            if (@event.IsActionPressed("Player1_StickDown") || @event.IsActionPressed("Player2_StickDown"))
+            if (isRepeatActionPressed("Player1_StickDown", delta) || isRepeatActionPressed("Player2_StickDown", delta))
             {
                 tagContainer.selectDown();
             }
             // stick left
-            if (@event.IsActionPressed("Player1_StickLeft") || @event.IsActionPressed("Player2_StickLeft"))
+            if (isRepeatActionPressed("Player1_StickLeft", delta) || isRepeatActionPressed("Player2_StickLeft", delta))
             {
                 tagContainer.selectLeft();
             }
             // stick right
-            if (@event.IsActionPressed("Player1_StickRight") || @event.IsActionPressed("Player2_StickRight"))
+            if (isRepeatActionPressed("Player1_StickRight", delta) || isRepeatActionPressed("Player2_StickRight", delta))
             {
                 tagContainer.selectRight();
             }
         }
+    }
+
+    /// <summary>
+    /// Returns if an action is pressed while taking in to account the handling of the repetition of joystick events
+    /// </summary>
+    /// <param name="actionName">The action to check</param>
+    /// <param name="delta">Delta time in seconds</param>
+    /// <returns>true if the action is pressed or should be repeated, false otherwise</returns>
+    private bool isRepeatActionPressed(string actionName, double delta)
+    {
+        return isActionRepeated(actionName, delta) || Input.IsActionJustPressed(actionName);
+    }
+
+    private bool isActionRepeated(string actionName, double delta)
+    {
+        if(!actionsPressTime.ContainsKey(actionName))
+        {
+            actionsPressTime.Add(actionName, 0.0);
+        }
+
+        double actionDt = actionsPressTime[actionName];
+
+        if(Input.IsActionPressed(actionName))
+        {
+            actionDt += delta;
+
+            if(actionDt > secBeforeInputEcho)
+            {
+                actionsPressTime[actionName] -= secBetweenInputEcho;
+                return true;
+            }
+
+            actionsPressTime[actionName] = actionDt;
+            return false;
+        }
+
+        actionsPressTime[actionName] = 0.0;
+        return false;
     }
 
     /// <summary>

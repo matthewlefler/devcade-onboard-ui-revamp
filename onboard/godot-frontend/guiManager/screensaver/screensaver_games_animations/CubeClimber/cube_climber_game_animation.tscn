@@ -1,0 +1,40 @@
+[gd_scene load_steps=4 format=3 uid="uid://bnpwhpnwx1dh2"]
+
+[ext_resource type="Script" uid="uid://3dod6y75r7mb" path="res://guiManager/screensaver/ScreenSaverGameAnimation.cs" id="1_jp3t1"]
+[ext_resource type="VideoStream" uid="uid://b0tiady62cu3w" path="res://guiManager/screensaver/screensaver_games_animations/CubeClimber/cube_climber.ogv" id="2_2eafm"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2ko63"]
+bg_color = Color(0, 0, 0, 1)
+
+[node name="CubeClimberScreenSaver" type="Control" node_paths=PackedStringArray("videoStreamPlayer")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_jp3t1")
+game_name = "Cube Climber"
+videoStreamPlayer = NodePath("Panel/VideoStreamPlayer")
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_2ko63")
+
+[node name="VideoStreamPlayer" type="VideoStreamPlayer" parent="Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+stream = ExtResource("2_2eafm")
+autoplay = true
+paused = true
+expand = true
+loop = true

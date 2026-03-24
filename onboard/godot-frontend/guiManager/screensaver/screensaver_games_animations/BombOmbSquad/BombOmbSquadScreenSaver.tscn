@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://rf2ubr76htca"]
 
-[ext_resource type="Script" uid="uid://cgy5ytnue1rpw" path="res://guiManager/screensaver/screensaver_games_animations/BombOmbSquad/BombOmbSquadScreenSaver.cs" id="1_2r8ub"]
+[ext_resource type="Script" uid="uid://3dod6y75r7mb" path="res://guiManager/screensaver/ScreenSaverGameAnimation.cs" id="1_wfpkx"]
 [ext_resource type="VideoStream" uid="uid://cufvdkpq44xob" path="res://guiManager/screensaver/screensaver_games_animations/BombOmbSquad/BombOmbSquad.ogv" id="2_2r8ub"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2r8ub"]
@@ -13,9 +13,9 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_2r8ub")
-videoStreamPlayer = NodePath("Panel/VideoStreamPlayer")
+script = ExtResource("1_wfpkx")
 game_name = "Bob-omb Squad"
+videoStreamPlayer = NodePath("Panel/VideoStreamPlayer")
 
 [node name="Panel" type="Panel" parent="."]
 layout_mode = 1

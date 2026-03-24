@@ -155,6 +155,8 @@ public partial class GuiManager : Control
 
     public override void _Input(InputEvent @event)
     {   
+        if(@event.IsEcho()) { GetViewport().SetInputAsHandled();}
+
         if(@event is InputEventJoypadButton joy)
         {
             GD.Print(joy.Device, joy.ButtonIndex);
@@ -181,6 +183,11 @@ public partial class GuiManager : Control
 
     double screenSaverTimeoutSeconds;
     double screenSaverTimerSeconds;
+
+    [Export]
+    private double secBeforeKeyRepeat = 0.3;
+    [Export]
+    private double secBetweenKeyRepeat = 0.2;
 
     public override void _Process(double delta)
     {
@@ -259,7 +266,7 @@ public partial class GuiManager : Control
                 hideScreenSaver();
             }
             screenSaverTimerSeconds = screenSaverTimeoutSeconds;
-        }
+        }       
     }
 
     /// <summary>
