@@ -7,10 +7,21 @@ namespace onboard.util;
 /// </summary>
 public static class Logger
 {
-    public static Log.Level currentLogLevel = Log.Level.debug;
-    public static Log GetLogger(string prepend)
+    public enum Level
     {
-        return new Log(prepend);
+        trace,
+        verbose,
+        debug,
+        info,
+        warn,
+        error,
+        fatal,
+    }
+
+    public static Level currentLogLevel = Level.debug;
+    public static Log GetLogger(string className)
+    {
+        return new Log(className);
     }
 
     /// <summary>
@@ -18,23 +29,47 @@ public static class Logger
     /// </summary>
     /// <param name="msg"> the message to send </param>
     /// <param name="logLevel"> The level to log </param>
-    public static void logMessage(string message, Log.Level logLevel)
+    public static void logMessage(string message, Level logLevel)
     {   
         if(
-            logLevel == Log.Level.warn ||
-            logLevel == Log.Level.debug
+            logLevel == Level.warn ||
+            logLevel == Level.debug
         )
         {
             GD.PushWarning(message);
         }
         if(
-            logLevel == Log.Level.error ||
-            logLevel == Log.Level.fatal
+            logLevel == Level.error ||
+            logLevel == Level.fatal
         )
         {
             GD.PushError(message);
         }   
 
         GD.Print(message);
+    }
+
+    public static string stringWrapLogLevelColor(string messageToWrap, Level logLevel)
+    {
+        switch(logLevel)
+        {
+            case Level.trace:
+                return $"[color=GREEN]{messageToWrap}[/color]";
+            case Level.verbose:
+                return $"[color=OLD_LACE]{messageToWrap}[/color]";
+            case Level.debug:
+                return $"[color=PURPLE]{messageToWrap}[/color]";
+            case Level.info:
+                return $"[color=GREEN]{messageToWrap}[/color]";
+            case Level.warn:
+                return $"[color=YELLOW]{messageToWrap}[/color]";
+            case Level.error:
+                return $"[color=RED]{messageToWrap}[/color]";
+            case Level.fatal:
+                return $"[color=RED]{messageToWrap}[/color]";
+
+            default:
+                return $"[color=green]{messageToWrap}[/color]";
+        }
     }
 }
