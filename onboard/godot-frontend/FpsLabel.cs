@@ -5,14 +5,16 @@ using System.Linq;
 
 public partial class FpsLabel : Label
 {
-
     int[] fpsSave = new int[100];
     int lowFps;
     int i = 0;
 
+    [Export]
+    public bool showRegardless = false;
+
     public override void _Process(double delta)
     {
-        if(Client.isProduction)
+        if(Client.isProduction && !showRegardless)
         {
             this.Hide();
             return;
