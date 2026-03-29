@@ -70,6 +70,11 @@ public partial class OriginalGUI : Control
             tagContainer.updateTags(GuiManagerGlobal.tagList, setCurrentTag);
         };
 
+        GuiManagerGlobal.instance.currentTagUpdated += () =>
+        {
+            gameContainer.setTag(GuiManagerGlobal.currentTag);
+        };
+
         // hide the description if it is not already hidden
         description.Hide();
 
