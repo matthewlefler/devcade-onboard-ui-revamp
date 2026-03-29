@@ -230,17 +230,35 @@ public partial class GuiManagerGlobal : Node
             .ContinueWith(_ => {
                 GD.Print("Setting cards");
 
-                loadBanners();
+                downloadBanners().ContinueWith(_ =>
+                {
+                    loadBanners();
 
-                reloadingGameList = false;
+                    reloadingGameList = false;
 
-                call_reloadingGameListUpdated++;
-                Interlocked.Increment(ref call_gameTitlesUpdated);
+                    call_reloadingGameListUpdated++;
+                    Interlocked.Increment(ref call_gameTitlesUpdated);
 
-                state_setLoadingAnimation = false;
-                Interlocked.Increment(ref call_setLoadingAnimation);
+                    state_setLoadingAnimation = false;
+                    Interlocked.Increment(ref call_setLoadingAnimation);
+                });
             });
         return gameTask;
+    }
+
+    public Task downloadBanners()
+    {
+        List<Task> bannerTasks = new();
+        foreach(DevcadeGame game in gameTitles)
+        {            
+            // Start downloading the textures
+            if (game.id != "error") {
+                // don't download the banner for the default game
+                 bannerTasks.Add(Client.downloadBanner(game.id));
+            } // check if /tmp/ has the banner
+        }
+
+        return Task.WhenAll(bannerTasks);
     }
 
     /// <summary>
@@ -250,13 +268,7 @@ public partial class GuiManagerGlobal : Node
     public void loadBanners()
     {
         foreach(DevcadeGame game in gameTitles)
-        {            
-            // Start downloading the textures
-            if (game.id != "error") {
-                // don't download the banner for the default game
-                Client.downloadBanner(game.id);
-            } // check if /tmp/ has the banner
-            
+        {                                    
             string bannerPath = $"{Env.DEVCADE_PATH()}/{game.id}/banner.png";
 
             if (File.Exists(bannerPath)) {
