@@ -227,7 +227,7 @@ public partial class GamesContainer : Control
     }
 
     /// <summary>
-    /// used by the GuiManager to set the tag
+    /// used by OriginalGUI.cs to set the tag
     /// </summary>
     /// <param name="tag"> the new tag </param>
     public void setTag(Tag tag)
@@ -251,6 +251,8 @@ public partial class GamesContainer : Control
                 ++i;
             }
         });
+        numberOfGames = i;
+        setFocusedGame(0);
     }
 
     /// <summary>
