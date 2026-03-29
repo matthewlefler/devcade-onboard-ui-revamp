@@ -31,6 +31,8 @@ public static class Env {
     // Shared 
     // Games data and shared sockets will be placed here, defaults to ~/devcade
     public static string DEVCADE_PATH() { return get("DEVCADE_PATH").unwrap_or(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile) + "/devcade" ); }
+    // Where to place the log files
+    public static string LOG_LOCATION() { return get("LOG_LOCATION").unwrap_or(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile) + "/devcade/logs" ); }
 
     
     static Env() {

@@ -1,3 +1,5 @@
+using System;
+using System.IO;
 using Godot;
 using onboard.util;
 
@@ -16,6 +18,20 @@ public partial class AutoLoad : Node
         // load the .env file (contains the enviorment variables)
         GD.Print("loading env");
         Env.load("../.env");
+
+        string logLocation = Env.LOG_LOCATION();
+        if(!Path.Exists(logLocation))
+        {
+            try
+            {
+                Directory.CreateDirectory(logLocation);
+                ProjectSettings.SetSetting("debug/file_logging/log_path", logLocation);
+            }
+            catch (Exception e)
+            {
+                GD.PrintErr(e.Message);
+            }
+        }
 
         // force initalization of:
 
