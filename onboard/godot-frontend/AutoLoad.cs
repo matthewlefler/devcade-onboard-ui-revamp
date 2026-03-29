@@ -25,13 +25,14 @@ public partial class AutoLoad : Node
             try
             {
                 Directory.CreateDirectory(logLocation);
-                ProjectSettings.SetSetting("debug/file_logging/log_path", logLocation);
             }
             catch (Exception e)
             {
                 GD.PrintErr(e.Message);
+                logLocation = "user://logs/godot.log"; // default godot log location, use if other log location fails
             }
         }
+        ProjectSettings.SetSetting("debug/file_logging/log_path", logLocation);
 
         // force initalization of:
 
