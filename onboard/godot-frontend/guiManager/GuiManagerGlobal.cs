@@ -166,8 +166,11 @@ public partial class GuiManagerGlobal : Node
     }
 
     /// <summary>
-    /// fetches the game list from the backend
-    /// does take time to do so
+    /// Fetches the game list from the backend, does take time to do so 
+    /// <list>
+    ///     <item>- Shows the loading animation</item>
+    ///     <item cref="gameTitlesUpdatedEventHandler">- Calls the gameTitlesUpdated signal</item>
+    /// </list>
     /// </summary>
     /// <returns></returns>
     public Task reloadGameList()
@@ -246,7 +249,11 @@ public partial class GuiManagerGlobal : Node
         return gameTask;
     }
 
-    public Task downloadBanners()
+    /// <summary>
+    /// Sends requests to the backend to download the banners for each game in gameTitles
+    /// </summary>
+    /// <returns> A task that completes when all banners are downloaded </returns>
+    private Task downloadBanners()
     {
         List<Task> bannerTasks = new();
         foreach(DevcadeGame game in gameTitles)
@@ -357,7 +364,7 @@ public partial class GuiManagerGlobal : Node
     public override void _Process(double delta)
     {
         // call all signals in the main thread 
-        // don't want to deal with all the call_deffered calls and issues with that 
+        // avoids having to deal with all the call_defered() calls and issues with that 
         if(call_currentTagUpdated > 0)
         {
             EmitSignal(SignalName.currentTagUpdated);
