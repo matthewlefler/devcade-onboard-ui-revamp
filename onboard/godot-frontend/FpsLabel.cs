@@ -28,9 +28,7 @@ public partial class FpsLabel : Label
         fps = (int) fpsSave.Average();
         lowFps = fpsSave.Min();
 
-        this.Text = 
-            "avg: " + fps.ToString() + "\n" +
-            "low: " + lowFps.ToString();
+        this.Text = $"avg: {fps}\n + low: {lowFps}";
 
         Color color;
         if(fps < 30)
