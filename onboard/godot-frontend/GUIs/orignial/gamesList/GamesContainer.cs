@@ -251,6 +251,8 @@ public partial class GamesContainer : Control
                 ++i;
             }
         });
+        numberOfGames = i;
+        setFocusedGame(0);
     }
 
     /// <summary>
