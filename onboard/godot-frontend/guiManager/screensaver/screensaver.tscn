@@ -25,8 +25,6 @@ shader_parameter/direction = Vector2(-0.4, -0.4)
 shader_parameter/x_offset = 1.0
 shader_parameter/alphaScale = 0.72
 
-[sub_resource type="Theme" id="Theme_q4yft"]
-
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_spuds"]
 shader = ExtResource("10_dt653")
 shader_parameter/outline_width = 7
@@ -35,6 +33,8 @@ shader_parameter/end_outline_color = Color(1, 0.968627, 0, 1)
 shader_parameter/shine_speed = -0.2
 shader_parameter/shine_width = 0.23
 shader_parameter/num_segments = 20
+
+[sub_resource type="Theme" id="Theme_q4yft"]
 
 [node name="Control" type="Control" node_paths=PackedStringArray("gamesAnimationsContainer", "backgroundIcons")]
 z_index = 4096
@@ -105,6 +105,29 @@ grow_vertical = 2
 texture = ExtResource("5_d5f7k")
 expand_mode = 1
 
+[node name="MarginContainer" type="MarginContainer" parent="gameAnimationsContainer/background"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 464.444
+grow_horizontal = 2
+theme_override_constants/margin_left = 300
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 300
+theme_override_constants/margin_bottom = 10
+
+[node name="DevcadeIcon" type="TextureRect" parent="gameAnimationsContainer/background/MarginContainer"]
+z_index = 4096
+z_as_relative = false
+y_sort_enabled = true
+material = SubResource("ShaderMaterial_spuds")
+layout_mode = 2
+texture = ExtResource("10_n0j55")
+expand_mode = 5
+script = ExtResource("11_dt653")
+prodTexture = ExtResource("10_n0j55")
+devTexture = ExtResource("12_spuds")
+
 [node name="WorldOfWallHoppersScreenSaver" parent="gameAnimationsContainer" instance=ExtResource("7_s0yr3")]
 z_index = 4000
 z_as_relative = false
@@ -172,6 +195,29 @@ grow_vertical = 2
 texture = ExtResource("5_d5f7k")
 expand_mode = 1
 
+[node name="MarginContainer" type="MarginContainer" parent="gameAnimationsContainer/background2"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 742.222
+grow_horizontal = 2
+theme_override_constants/margin_left = 300
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 300
+theme_override_constants/margin_bottom = 10
+
+[node name="DevcadeIcon" type="TextureRect" parent="gameAnimationsContainer/background2/MarginContainer"]
+z_index = 4096
+z_as_relative = false
+y_sort_enabled = true
+material = SubResource("ShaderMaterial_spuds")
+layout_mode = 2
+texture = ExtResource("10_n0j55")
+expand_mode = 5
+script = ExtResource("11_dt653")
+prodTexture = ExtResource("10_n0j55")
+devTexture = ExtResource("12_spuds")
+
 [node name="continueText" type="RichTextLabel" parent="."]
 z_index = 4096
 z_as_relative = false
@@ -202,26 +248,3 @@ horizontal_alignment = 1
 vertical_alignment = 1
 script = ExtResource("3_anfla")
 end_color = Color(1, 1, 1, 0)
-
-[node name="MarginContainer" type="MarginContainer" parent="."]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_bottom = 10.0
-grow_horizontal = 2
-theme_override_constants/margin_left = 300
-theme_override_constants/margin_top = 10
-theme_override_constants/margin_right = 300
-theme_override_constants/margin_bottom = 10
-
-[node name="DevcadeIcon" type="TextureRect" parent="MarginContainer"]
-z_index = 4096
-z_as_relative = false
-y_sort_enabled = true
-material = SubResource("ShaderMaterial_spuds")
-layout_mode = 2
-texture = ExtResource("10_n0j55")
-expand_mode = 5
-script = ExtResource("11_dt653")
-prodTexture = ExtResource("10_n0j55")
-devTexture = ExtResource("12_spuds")
