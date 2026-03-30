@@ -5,7 +5,7 @@ namespace onboard.util;
 /// <summary>
 /// 
 /// </summary>
-public static class Logger
+public static class Log
 {
     public enum Level
     {
@@ -19,9 +19,9 @@ public static class Logger
     }
 
     public static Level currentLogLevel = Level.debug;
-    public static Log GetLogger(string className)
+    public static Logger GetLogger(string className)
     {
-        return new Log(className);
+        return new Logger(className);
     }
 
     /// <summary>

@@ -15,19 +15,20 @@ namespace onboard.devcade;
 using util;
 
 public static class Client {
+    private static readonly Logger LOG = Log.GetLogger("Client");
 
     public static event EventHandler<DevcadeGame> onBannerFinished = (_, _) => {
-        GD.Print("onBannerFinished Invoked");
+        LOG.Info("onBannerFinished Invoked");
     };
     public static event EventHandler<DevcadeGame> onIconFinished = (_, _) => {
-        GD.Print("onIconFinished Invoked");
+        LOG.Info("onIconFinished Invoked");
     };
     public static event EventHandler<DevcadeGame> onGameFinished = (_, _) => {
-        GD.Print("onGameFinished Invoked");
+        LOG.Info("onGameFinished Invoked");
     };
     
     /**
-     * FS
+     * File System
      *   tmp/
      *   |- {game.id}/
      *       |- banner.png
@@ -36,6 +37,9 @@ public static class Client {
      *          |- {game.name} (executable)
      */
 
+    /// <summary>
+    /// 
+    /// </summary>
     public static bool isProduction { get; private set; } = true;
 
     /// <summary>
@@ -45,21 +49,31 @@ public static class Client {
     
     private static bool connected;
         
-    // Thread handle for the client
+    /// <summary>
+    /// Thread handle for the client
+    /// </summary>
     private static readonly Thread clientThread;
 
-    // Path to the working directory
+    /// <summary>
+    /// Path to the working directory
+    /// </summary>
     private static readonly string workingDir;
     
-    // Unix socket for communication with backend
+    /// <summary>
+    /// Unix socket for communication with backend
+    /// </summary>
     private static Socket socket;
     private static StreamReader reader;
     private static StreamWriter writer;
     private static bool brokenPipe;
     
-    // Dictionary of started tasks by request id
+    /// <summary>
+    /// Dictionary of started tasks by request id
+    /// </summary>
     private static readonly Dictionary<uint, TaskCompletionSource<Response>> tasks = new();
-    // List of requests to be sent to the backend. Only used when the backend is not connected yet.
+    /// <summary>
+    /// List of requests to be sent to the backend. Only used when the backend is not connected yet.
+    /// </summary>
     private static readonly List<Request> requests = new();
 
     /// <summary>
@@ -73,17 +87,17 @@ public static class Client {
     /// Static constructor for the client, initializes the client thread and path variables
     /// </summary>
     static Client() {
-        GD.Print("Initializing Devcade Client");
+        LOG.Info("Initializing Devcade Client");
 
         workingDir = Env.get("DEVCADE_PATH").match(
             v => v,
             () => {
-                GD.PrintErr("DEVCADE_PATH not set, using default");
+                LOG.Error("DEVCADE_PATH not set, using default");
 
                 return "/tmp/devcade";
             });
 
-        GD.Print("DEVCADE_PATH: " + workingDir);
+        LOG.Info("DEVCADE_PATH: " + workingDir);
 
         clientThread = new Thread(start) {
             IsBackground = true
@@ -97,7 +111,7 @@ public static class Client {
     /// </summary>
     [DoesNotReturn]
     private static void start() {
-        GD.Print("Starting Devcade Client");
+        LOG.Info("Starting Devcade Client");
         
         // Open the read/write pipe to the backend
         
@@ -106,19 +120,19 @@ public static class Client {
             if (!socketResult.is_err()) {
                 break;
             }
-            GD.PushWarning($"Failed to open backend socket, retrying in 500ms: {socketResult.unwrap_err()}");
+            LOG.Warn($"Failed to open backend socket, retrying in 500ms: {socketResult.unwrap_err()}");
 
             Thread.Sleep(500);
         }
 
-        GD.Print($"Opened read pipe: {workingDir}/onboard.sock");
+        LOG.Info($"Opened read pipe: {workingDir}/onboard.sock");
 
         repeatPing(5000, 5000);
 
         // Start the main loop
         while (true) {
             if (brokenPipe) {
-                GD.Print("Attempting to fix broken pipe");
+                LOG.Info("Attempting to fix broken pipe");
 
                 fixPipes();
                 Thread.Sleep(500);
@@ -132,16 +146,13 @@ public static class Client {
                 continue;
             }
             
-            if(message.Length < 100)
-            {
-                GD.Print("Received message: " + message);
-            }
+            LOG.Info("Received message: " + message);
             
             // Parse the message
             Response res = Response.deserialize(message);
 
             if (!tasks.ContainsKey(res.request_id)) {
-                GD.PushWarning("Received response for unknown request id: " + res.request_id);
+                LOG.Warn("Received response for unknown request id: " + res.request_id);
 
                 continue;
             }
@@ -158,33 +169,33 @@ public static class Client {
             // Log the response
             switch (res.type) {
                 case Response.ResponseType.Pong:
-                    GD.Print($"Received pong response for request {res.request_id}");
+                    LOG.Info($"Received pong response for request {res.request_id}");
                     break;
                 case Response.ResponseType.Err:
                     // Result is always an error here, so type parameter doesn't matter
-                    GD.PushError($"Received error response for request {res.request_id}: {res.into_result<uint>().unwrap_err()}");
+                    LOG.Error($"Received error response for request {res.request_id}: {res.into_result<uint>().unwrap_err()}");
                     break;
                 case Response.ResponseType.Ok:
-                    GD.Print($"Received ok response for request {res.request_id}");
+                    LOG.Info($"Received ok response for request {res.request_id}");
                     break;
                 case Response.ResponseType.Game:
-                    GD.Print($"Received game response for request {res.request_id}");
+                    LOG.Info($"Received game response for request {res.request_id}");
                     break;
                 case Response.ResponseType.GameList:
-                    GD.Print($"Received game list response for request {res.request_id} (contained {res.unwrap<List<DevcadeGame>>().Count} games)");
+                    LOG.Info($"Received game list response for request {res.request_id} (contained {res.unwrap<List<DevcadeGame>>().Count} games)");
                     break;
                 case Response.ResponseType.TagList:
-                    GD.Print($"Received tag list response for request {res.request_id} (contained {res.unwrap<List<Tag>>().Count} tags)");
+                    LOG.Info($"Received tag list response for request {res.request_id} (contained {res.unwrap<List<Tag>>().Count} tags)");
                     break;
                 case Response.ResponseType.Tag:
-                    GD.Print($"Received tag response for request {res.request_id}");
+                    LOG.Info($"Received tag response for request {res.request_id}");
                     break;
                 case Response.ResponseType.User:
-                    GD.Print($"Received user response for request {res.request_id}");
+                    LOG.Info($"Received user response for request {res.request_id}");
                     break;
                 default:
-                    GD.PushWarning($"Received unknown response type for request {res.request_id}: {res.type}");
-                    GD.PushWarning("Did you forget to add a case to the switch statement?");
+                    LOG.Warn($"Received unknown response type for request {res.request_id}: {res.type}");
+                    LOG.Warn("Did you forget to add a case to the switch statement?");
                     break;
             }
         }
@@ -222,7 +233,7 @@ public static class Client {
         try {
             return reader.ReadLine() ?? "";
         } catch (Exception e) {
-            GD.PushError("Failed to read from read pipe: " + e);
+            LOG.Error("Failed to read from read pipe: " + e);
             brokenPipe = true;
             return "";
         }
@@ -247,7 +258,7 @@ public static class Client {
     /// </summary>
     /// <returns>A Task that will be completed when the backend responds, containing a list of games or an error</returns>
     public static Task<Response> getGameList() {
-        GD.Print("Getting game list");
+        LOG.Info("Getting game list");
         return sendRequest(Request.GetGameList());
     }
     
@@ -257,7 +268,7 @@ public static class Client {
     /// <param name="id">The id of the game to fetch</param>
     /// <returns>A Task that will be completed when the backend responds, containing a game or an error</returns>
     public static Task<Response> getGame(string id) {
-        GD.Print($"Getting game with id {id}");
+        LOG.Info($"Getting game with id {id}");
         return sendRequest(Request.GetGame(id));
     }
     
@@ -268,7 +279,7 @@ public static class Client {
     /// <param name="id">The id of the game to download the banner for</param>
     /// <returns>A Task that will be completed once the banner has been downloaded</returns>
     public static Task downloadBanner(string id) {
-        GD.Print($"Downloading banner for game with id {id}");
+        LOG.Info($"Downloading banner for game with id {id}");
         return sendRequest(Request.DownloadBanner(id))
             .ContinueWith(response => {
                 onBannerFinished.Invoke(null, getGame(id).Result.into_option<DevcadeGame>().unwrap_or(new DevcadeGame()));
@@ -282,7 +293,7 @@ public static class Client {
     /// <param name="id">The id of the game to download the icon for</param>
     /// <returns>A Task that will be completed once the icon has been downloaded</returns>
     public static Task downloadIcon(string id) {
-        GD.Print($"Downloading icon for game with id {id}");
+        LOG.Info($"Downloading icon for game with id {id}");
         return sendRequest(Request.DownloadIcon(id))
             .ContinueWith(_ => {
                 onIconFinished.Invoke(null, getGame(id).Result.into_option<DevcadeGame>().unwrap_or(new DevcadeGame()));
@@ -296,7 +307,7 @@ public static class Client {
     /// <param name="id">The id of the game to download</param>
     /// <returns>A Task that will be completed once the game has been downloaded</returns>
     public static Task downloadGame(string id) {
-        GD.Print($"Downloading game with id {id}");
+        LOG.Info($"Downloading game with id {id}");
         return sendRequest(Request.DownloadGame(id))
             .ContinueWith(_ => {
                 onGameFinished.Invoke(null, getGame(id).Result.into_option<DevcadeGame>().unwrap_or(new DevcadeGame()));
@@ -310,7 +321,7 @@ public static class Client {
     /// <param name="id">The id of the game to launch</param>
     /// <returns>A Task that will be completed once the game has exited</returns>
     public static Task<Response> launchGame(string id) {
-        GD.Print($"Launching game with id {id}");
+        LOG.Info($"Launching game with id {id}");
         gameLauched = true;
         return sendRequest(Request.LaunchGame(id)).ContinueWith(task => {gameLauched = false; return task.Result;} );
     }
@@ -320,7 +331,7 @@ public static class Client {
     /// </summary>
     /// <returns>A Task that will be completed once the game has exited</returns>
     public static Task<Response> killGame() {
-        GD.Print($"Killing game");
+        LOG.Info($"Killing game");
         return sendRequest(Request.KillGame());
     }
 
@@ -331,7 +342,7 @@ public static class Client {
     /// <returns>A Task that will be completed when the backend has responded</returns>
     public static Task setProduction(bool prod) {
         string prodStr = prod ? "Production" : "Development";
-        GD.Print($"Setting API to {prodStr}");
+        LOG.Info($"Setting API to {prodStr}");
         return sendRequest(Request.SetProduction(prod)).ContinueWith(res => {
             if (res.Result.type == Response.ResponseType.Ok) {
                 isProduction = prod;
@@ -341,19 +352,19 @@ public static class Client {
     
     public static Task<Response> getTags() {
         Request req = Request.GetTagList();
-        GD.Print($"Getting tags list (id {req.request_id})");
+        LOG.Info($"Getting tags list (id {req.request_id})");
         return sendRequest(req);
     }
 
     public static Task<Response> getTag(string name) {
         Request req = Request.GetTag(name);
-        GD.Print($"Getting tag with name '{name}' (id {req.request_id})");
+        LOG.Info($"Getting tag with name '{name}' (id {req.request_id})");
         return sendRequest(req);
     }
     
     public static Task<Response> getGamesWithTag(string name) {
         Request req = Request.GetGameListFromTag(name);
-        GD.Print($"Getting games with tag '{name}' (id {req.request_id})");
+        LOG.Info($"Getting games with tag '{name}' (id {req.request_id})");
         return sendRequest(req);
     }
     
@@ -363,7 +374,7 @@ public static class Client {
     
     public static Task<Response> getUser(string username) {
         Request req = Request.getUser(username);
-        GD.Print($"Getting user with username '{username}' (id {req.request_id})");
+        LOG.Info($"Getting user with username '{username}' (id {req.request_id})");
         return sendRequest(req);
     }
 
@@ -379,14 +390,14 @@ public static class Client {
                 .ContinueWith(res => {
                     if (res is { IsCompletedSuccessfully: true, Result.type: Response.ResponseType.Pong }) {
                         DateTime end = DateTime.Now;
-                        GD.Print($"Ping successful ({(int)Math.Round((end - start).TotalMilliseconds)}ms)");
+                        LOG.Info($"Ping successful ({(int)Math.Round((end - start).TotalMilliseconds)}ms)");
                         if (!connected) {
                             sendQueuedRequests();
                         }
                         connected = true;
                     }
                     else {
-                        GD.PushError($"Failed to ping backend (no response after {_timeoutMillis}ms)");
+                        LOG.Error($"Failed to ping backend (no response after {_timeoutMillis}ms)");
                         connected = false;
                     }
                 })
@@ -418,7 +429,7 @@ public static class Client {
             try {
                 write(req.serialize());
             } catch (Exception e) {
-                GD.PushError($"Failed to send request {req.request_id} to backend: {e.Message}");
+                LOG.Error($"Failed to send request {req.request_id} to backend: {e.Message}");
                 connected = false;
                 brokenPipe = true;
                 return Task.FromResult(Response.fromError(req.request_id, e.Message));
@@ -447,7 +458,7 @@ public static class Client {
         try {
             write(req.serialize());
         } catch (Exception e) {
-            GD.PushError($"Failed to send request {req.request_id} to backend: {e.Message}");
+            LOG.Error($"Failed to send request {req.request_id} to backend: {e.Message}");
             connected = false;
             brokenPipe = true;
             return Task.FromResult(Response.fromError(req.request_id, e.Message));
@@ -469,7 +480,7 @@ public static class Client {
             try {
                 t.TrySetCanceled();
             } catch (Exception e) {
-                GD.PushError("Failed to cancel task: " + e);
+                LOG.Error("Failed to cancel task: " + e);
             }
         }
     }
@@ -492,11 +503,11 @@ public static class Client {
         var socketResult = tryOpenSocket($"{workingDir}/onboard.sock");
         if (socketResult.is_ok()) { 
             brokenPipe = false;
-            GD.Print("Reconnected to backend");
+            LOG.Info("Reconnected to backend");
             return true;
         }
 
-        GD.PushWarning("Failed to reconnect to backend (is it running?)");
+        LOG.Warn("Failed to reconnect to backend (is it running?)");
         return false;
     }
 }

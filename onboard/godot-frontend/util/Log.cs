@@ -1,13 +1,12 @@
-using System.Dynamic;
 using Godot;
 
 namespace onboard.util; 
 
-public class Log
+public class Logger
 {
-    public string className {get; private set;} = "null";
+    public string className {get; private set;}= "null";
 
-    public Log(string className)
+    public Logger(string className)
     {
         this.className = className;
     }
@@ -17,49 +16,49 @@ public class Log
     /// </summary>
     /// <param name="msg"> the message to send </param>
     /// <param name="logLevel"> The level to log </param>
-    public void logMessage(string msg, Logger.Level logLevel)
+    public void logMessage(string msg, Log.Level logLevel)
     {
         string time = Time.GetTimeStringFromSystem();
 
-        string message = $"[{time} {Logger.stringWrapLogLevelColor(logLevel.ToString().ToUpperInvariant(), logLevel)} {className}] {msg}";
+        string message = $"[{time} {Log.stringWrapLogLevelColor(logLevel.ToString().ToUpperInvariant(), logLevel)} {className}] {msg}";
 
-        Logger.logMessage(message, logLevel);
+        Log.logMessage(message, logLevel);
     }
 
     // trace, verbose, debug, info, warn, error, fatal methods
     
     public void Trace(string msg)
     {
-        logMessage(msg, Logger.Level.trace);
+        logMessage(msg, Log.Level.trace);
     }
 
     public void Verbose(string msg)
     {
-        logMessage(msg, Logger.Level.verbose);
+        logMessage(msg, Log.Level.verbose);
     }
 
     public void Debug(string msg)
     {
-        logMessage(msg, Logger.Level.debug);
+        logMessage(msg, Log.Level.debug);
     }
 
     public void Info(string msg)
     {
-        logMessage(msg, Logger.Level.info);
+        logMessage(msg, Log.Level.info);
     }
 
     public void Warn(string msg)
     {
-        logMessage(msg, Logger.Level.warn);
+        logMessage(msg, Log.Level.warn);
     }
 
     public void Error(string msg)
     {
-        logMessage(msg, Logger.Level.error);
+        logMessage(msg, Log.Level.error);
     }
 
     public void Fatal(string msg)
     {
-        logMessage(msg, Logger.Level.fatal);
+        logMessage(msg, Log.Level.fatal);
     }
 }
