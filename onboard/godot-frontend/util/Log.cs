@@ -20,7 +20,7 @@ public class Logger
     {
         string time = Time.GetTimeStringFromSystem();
 
-        string message = $"[{time} {Log.stringWrapLogLevelColor(logLevel.ToString().ToUpperInvariant(), logLevel)} {className}] {msg}";
+        string message = $"[{time} {logLevel.ToString().ToUpperInvariant()} {className}] {msg}";
 
         Log.logMessage(message, logLevel);
     }

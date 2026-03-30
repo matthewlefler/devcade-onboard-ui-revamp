@@ -48,28 +48,4 @@ public static class Log
 
         GD.Print(message);
     }
-
-    public static string stringWrapLogLevelColor(string messageToWrap, Level logLevel)
-    {
-        switch(logLevel)
-        {
-            case Level.trace:
-                return $"[color=GREEN]{messageToWrap}[/color]";
-            case Level.verbose:
-                return $"[color=OLD_LACE]{messageToWrap}[/color]";
-            case Level.debug:
-                return $"[color=PURPLE]{messageToWrap}[/color]";
-            case Level.info:
-                return $"[color=GREEN]{messageToWrap}[/color]";
-            case Level.warn:
-                return $"[color=YELLOW]{messageToWrap}[/color]";
-            case Level.error:
-                return $"[color=RED]{messageToWrap}[/color]";
-            case Level.fatal:
-                return $"[color=RED]{messageToWrap}[/color]";
-
-            default:
-                return $"[color=green]{messageToWrap}[/color]";
-        }
-    }
 }
