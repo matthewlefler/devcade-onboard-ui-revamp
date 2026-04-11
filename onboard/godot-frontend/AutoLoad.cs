@@ -7,6 +7,8 @@ namespace onboard;
 
 public partial class AutoLoad : Node
 {
+    Logger LOG = Log.get();
+
     public AutoLoad() {} // must be empty?
 
     /// <summary>

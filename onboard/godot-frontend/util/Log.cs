@@ -2,13 +2,26 @@ using Godot;
 
 namespace onboard.util; 
 
-public class Logger
+/// <summary>
+/// 
+/// </summary>
+public static class Log
 {
-    public string className {get; private set;}= "null";
-
-    public Logger(string className)
+    public enum Level
     {
-        this.className = className;
+        trace,
+        verbose,
+        debug,
+        info,
+        warn,
+        error,
+        fatal,
+    }
+
+    public static Level currentLogLevel = Level.debug;
+    public static Logger get(System.Type classType)
+    {
+        return new Logger(classType.Name);
     }
 
     /// <summary>
@@ -16,49 +29,23 @@ public class Logger
     /// </summary>
     /// <param name="msg"> the message to send </param>
     /// <param name="logLevel"> The level to log </param>
-    public void logMessage(string msg, Log.Level logLevel)
-    {
-        string time = Time.GetTimeStringFromSystem();
+    public static void logMessage(string message, Level logLevel)
+    {   
+        if(
+            logLevel == Level.warn ||
+            logLevel == Level.debug
+        )
+        {
+            GD.PushWarning(message);
+        }
+        if(
+            logLevel == Level.error ||
+            logLevel == Level.fatal
+        )
+        {
+            GD.PushError(message);
+        }   
 
-        string message = $"[{time} {logLevel.ToString().ToUpperInvariant()} {className}] {msg}";
-
-        Log.logMessage(message, logLevel);
-    }
-
-    // trace, verbose, debug, info, warn, error, fatal methods
-    
-    public void Trace(string msg)
-    {
-        logMessage(msg, Log.Level.trace);
-    }
-
-    public void Verbose(string msg)
-    {
-        logMessage(msg, Log.Level.verbose);
-    }
-
-    public void Debug(string msg)
-    {
-        logMessage(msg, Log.Level.debug);
-    }
-
-    public void Info(string msg)
-    {
-        logMessage(msg, Log.Level.info);
-    }
-
-    public void Warn(string msg)
-    {
-        logMessage(msg, Log.Level.warn);
-    }
-
-    public void Error(string msg)
-    {
-        logMessage(msg, Log.Level.error);
-    }
-
-    public void Fatal(string msg)
-    {
-        logMessage(msg, Log.Level.fatal);
+        GD.Print(message);
     }
 }
