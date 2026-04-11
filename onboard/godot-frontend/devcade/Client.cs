@@ -146,7 +146,7 @@ public static class Client {
                 continue;
             }
             
-            LOG.Info("Received message: " + message);
+            LOG.Verbose("Received message: " + message);
             
             // Parse the message
             Response res = Response.deserialize(message);

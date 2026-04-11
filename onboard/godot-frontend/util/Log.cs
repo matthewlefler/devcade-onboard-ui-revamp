@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Godot;
 
 namespace onboard.util; 
@@ -7,6 +8,8 @@ namespace onboard.util;
 /// </summary>
 public static class Log
 {
+    private static Level logLevel;
+
     public enum Level
     {
         trace,
@@ -16,6 +19,21 @@ public static class Log
         warn,
         error,
         fatal,
+    }
+
+    static Log()
+    {
+        string level = Env.FRONTEND_LOG();
+
+        logLevel = Level.error;
+        if(level == "trace")   { logLevel = Level.trace; }
+        if(level == "verbose") { logLevel = Level.verbose; }
+        if(level == "debug")   { logLevel = Level.debug; }
+        if(level == "info")    { logLevel = Level.info; }
+        if(level == "warn")    { logLevel = Level.warn; }
+        if(level == "error")   { logLevel = Level.error; }
+        if(level == "fatal")   { logLevel = Level.fatal; }
+        
     }
 
     public static Level currentLogLevel = Level.debug;
@@ -31,6 +49,11 @@ public static class Log
     /// <param name="logLevel"> The level to log </param>
     public static void logMessage(string message, Level logLevel)
     {   
+        if(logLevel < Log.logLevel)
+        {
+            return;
+        }
+        
         if(
             logLevel == Level.warn ||
             logLevel == Level.debug

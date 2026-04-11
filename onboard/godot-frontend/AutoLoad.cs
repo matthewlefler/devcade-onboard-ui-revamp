@@ -12,7 +12,7 @@ public partial class AutoLoad : Node
     public AutoLoad() {} // must be empty?
 
     /// <summary>
-    /// load the config file as early as possible
+    /// load the required services as early as possible
     /// with set properties
     /// </summary>
     public override void _Ready()
@@ -27,19 +27,20 @@ public partial class AutoLoad : Node
             try
             {
                 Directory.CreateDirectory(logLocation);
+                string logPath = ProjectSettings.GetSetting("debug/file_logging/log_path").AsString();
+                Directory.CreateSymbolicLink(logLocation, ProjectSettings.GlobalizePath(logPath));
+                LOG.Info("created symlink to: " + logPath);
             }
             catch (Exception e)
             {
-                LOG.Error(e.Message);
-                logLocation = "user://logs/godot.log"; // default godot log location, use if other log location fails
+                LOG.Error("Unable to create symlink: " + e.Message);
             }
         }
-        ProjectSettings.SetSetting("debug/file_logging/log_path", logLocation);
 
         // force initalization of:
 
         // start client (backend networked communicator)
-        LOG.Info("starting backend client");
+        LOG.Info("starting backend client interface ");
         devcade.Client.init();
     }
 }
