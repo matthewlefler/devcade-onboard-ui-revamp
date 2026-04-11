@@ -7,7 +7,7 @@ namespace onboard;
 
 public partial class AutoLoad : Node
 {
-    Logger LOG = Log.get();
+    Logger LOG = Log.get(nameof(AutoLoad));
 
     public AutoLoad() {} // must be empty?
 
@@ -18,7 +18,7 @@ public partial class AutoLoad : Node
     public override void _Ready()
     {
         // load the .env file (contains the enviorment variables)
-        GD.Print("loading env");
+        LOG.Info("loading env");
         Env.load("../.env");
 
         string logLocation = Env.LOG_LOCATION();
@@ -30,7 +30,7 @@ public partial class AutoLoad : Node
             }
             catch (Exception e)
             {
-                GD.PrintErr(e.Message);
+                LOG.Error(e.Message);
                 logLocation = "user://logs/godot.log"; // default godot log location, use if other log location fails
             }
         }
@@ -39,7 +39,7 @@ public partial class AutoLoad : Node
         // force initalization of:
 
         // start client (backend networked communicator)
-        GD.Print("starting backend client");
+        LOG.Info("starting backend client");
         devcade.Client.init();
     }
 }

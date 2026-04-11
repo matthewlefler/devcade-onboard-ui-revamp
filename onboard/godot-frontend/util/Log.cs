@@ -19,9 +19,9 @@ public static class Log
     }
 
     public static Level currentLogLevel = Level.debug;
-    public static Logger get(System.Type classType)
+    public static Logger get(string className)
     {
-        return new Logger(classType.Name);
+        return new Logger(className);
     }
 
     /// <summary>

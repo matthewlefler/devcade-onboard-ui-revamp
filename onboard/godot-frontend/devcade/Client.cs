@@ -15,7 +15,7 @@ namespace onboard.devcade;
 using util;
 
 public static class Client {
-    private static readonly Logger LOG = Log.GetLogger("Client");
+    private static readonly Logger LOG = Log.get(nameof(Client));
 
     public static event EventHandler<DevcadeGame> onBannerFinished = (_, _) => {
         LOG.Info("onBannerFinished Invoked");
