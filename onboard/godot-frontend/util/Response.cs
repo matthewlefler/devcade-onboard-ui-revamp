@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Reflection;
 using Godot;
 using Newtonsoft.Json;
 using onboard.devcade;
@@ -10,6 +9,8 @@ using onboard.devcade;
 namespace onboard.util;
 
 public class Response {
+    Logger LOG = Log.get(nameof(Response));
+
     public enum ResponseType {
         Pong,
         
@@ -68,7 +69,7 @@ public class Response {
         try {
             deserializeT = JsonConvert.DeserializeObject<T>(data) ?? throw new NullReferenceException();
         } catch (Exception e) {
-            GD.PushError($"Failed to deserialize {data} to {typeof(T)}", e);
+            LOG.Error($"Failed to deserialize {data} to {typeof(T)}: {e}");
             return Result<T, string>.Err("Failed to deserialize response");
         }
         if (deserializeT == null) {
@@ -84,7 +85,7 @@ public class Response {
             _ => throw new ArgumentOutOfRangeException()
         };
         if (typeof(T) != expected) {
-            GD.PushError($"Invalid response type and data combination: {type}\nTypeof(T) was {typeof(T)} but expected {expected}");
+            LOG.Error($"Invalid response type and data combination: {type}\nTypeof(T) was {typeof(T)} but expected {expected}");
         }
         return type switch {
             ResponseType.Ok => Result<T, string>.Ok(deserializeT),

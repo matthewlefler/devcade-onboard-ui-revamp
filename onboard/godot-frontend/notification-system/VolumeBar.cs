@@ -1,8 +1,11 @@
 using System.Diagnostics;
 using Godot;
+using onboard.util;
 
 public partial class VolumeBar : ProgressBar
 {
+    private Logger LOG = Log.get(nameof(VolumeBar));
+
     [Export]
     NotificationWindow window;
 
@@ -79,7 +82,7 @@ public partial class VolumeBar : ProgressBar
 
         if(!started)
         {
-            GD.PushWarning("command not run");
+            LOG.Warn("command not run");
             return -1;
         }
 
