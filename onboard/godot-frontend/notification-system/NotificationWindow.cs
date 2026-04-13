@@ -32,9 +32,9 @@ public partial class NotificationWindow : Window
     {
         if(Visible) { return; }
 
-        this.Show();
-        DisplayServer.WindowMoveToForeground(id);
-        this.GrabFocus();
+        // this.Show();
+        // DisplayServer.WindowMoveToForeground(id);
+        // this.GrabFocus();
     }
 
     public void hide()

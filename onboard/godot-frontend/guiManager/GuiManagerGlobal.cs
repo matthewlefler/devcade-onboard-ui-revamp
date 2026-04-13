@@ -19,6 +19,8 @@ namespace onboard;
 /// in the proccess loop aka the main thread.
 public partial class GuiManagerGlobal : Node
 {
+    Logger LOG = Log.get(nameof(GuiManagerGlobal));
+
     /// <summary>
     /// The one instance of this class
     /// </summary>
@@ -189,19 +191,19 @@ public partial class GuiManagerGlobal : Node
         Task gameTask = Client.getGameList()
             .ContinueWith(t => {
                 if (!t.IsCompletedSuccessfully) {
-                    GD.PushError($"Failed to fetch game list: {t.Exception}");
+                    LOG.Error($"Failed to fetch game list: {t.Exception}");
                     gameTitles = errorList;
                     return;
                 }
 
                 var res = t.Result.into_result<List<DevcadeGame>>();
                 if (!res.is_ok()) {
-                    GD.PushError($"Failed to fetch game list: {res.err().unwrap()}");
+                    LOG.Error($"Failed to fetch game list: {res.err().unwrap()}");
                     gameTitles = errorList;
                     return;
                 }
 
-                GD.Print("Got game list, setting titles");
+                LOG.Info("Got game list, setting titles");
 
                 gameTitles = res.unwrap();
 
@@ -231,7 +233,7 @@ public partial class GuiManagerGlobal : Node
                 
             })
             .ContinueWith(_ => {
-                GD.Print("Setting cards");
+                LOG.Info("Setting cards");
 
                 downloadBanners().ContinueWith(_ =>
                 {
@@ -287,7 +289,7 @@ public partial class GuiManagerGlobal : Node
                     game.banner = texture;
                 }
                 catch (Exception e) {
-                    GD.PushWarning($"Unable to set card: {e.Message}");
+                    LOG.Warn($"Unable to set card: {e.Message}");
                 }
             }
 
@@ -328,7 +330,7 @@ public partial class GuiManagerGlobal : Node
         Interlocked.Increment(ref call_onGameLaunched);
         state_onGameLaunched = true;
         
-        GD.Print("launching game: " + game.name);
+        LOG.Info("launching game: " + game.name);
 
         await Client.launchGame(
             game.id).ContinueWith(res => {
@@ -341,7 +343,7 @@ public partial class GuiManagerGlobal : Node
                     state_setLoadingAnimation = false;
                 }
                 else {
-                    GD.PushError("Failed to launch game: " + res.Exception);
+                    LOG.Error("Failed to launch game: " + res.Exception);
                 }
                 // ProcessMode = ProcessModeEnum.Always; 
         });
@@ -367,42 +369,49 @@ public partial class GuiManagerGlobal : Node
         // avoids having to deal with all the call_defered() calls and issues with that 
         if(call_currentTagUpdated > 0)
         {
+            LOG.Info("currentTagUpdated emitted");
             EmitSignal(SignalName.currentTagUpdated);
             Interlocked.Decrement(ref call_currentTagUpdated);
         }
 
         if(call_gameTitlesUpdated > 0)
         {
+            LOG.Info("gameTitlesUpdated emitted");
             EmitSignal(SignalName.gameTitlesUpdated);
             Interlocked.Decrement(ref call_gameTitlesUpdated);
         }
 
         if(call_onGameLaunched > 0)
         {
+            LOG.Info("onGameLaunched emitted");
             EmitSignal(SignalName.onGameLaunched, state_onGameLaunched);
             Interlocked.Decrement(ref call_onGameLaunched);
         }
 
         if(call_reloadingGameListUpdated > 0)
         {
+            LOG.Info("reloadingGameListUpdated emitted");
             EmitSignal(SignalName.reloadingGameListUpdated, reloadingGameList);
             Interlocked.Decrement(ref call_reloadingGameListUpdated);
         }
 
         if(call_setLoadingAnimation > 0)
         {
+            LOG.Info("setLoadingAnimation emitted");
             EmitSignal(SignalName.setLoadingAnimation, state_setLoadingAnimation);
             Interlocked.Decrement(ref call_setLoadingAnimation);
         }
 
         if(call_tagListsUpdated > 0)
         {
+            LOG.Info("tagListsUpdated emitted");
             EmitSignal(SignalName.tagListsUpdated);
             Interlocked.Decrement(ref call_tagListsUpdated);
         }
 
         if(call_tagListUpdated > 0)
         {
+            LOG.Info("tagListUpdated emitted");
             EmitSignal(SignalName.tagListUpdated);
             Interlocked.Decrement(ref call_tagListUpdated);
         }

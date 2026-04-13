@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
 
 using onboard.util;
 
@@ -12,6 +10,8 @@ namespace onboard.devcade.GUI;
 
 public partial class GuiManager : Control
 {
+    Logger LOG = Log.get(nameof(GuiManager));
+
     /// <summary>
     /// the initial GUI scene to show when devcade starts up
     /// </summary>
@@ -125,8 +125,8 @@ public partial class GuiManager : Control
             };
         } catch (Exception e)
         {
-            GD.Print(e.Message);
-            throw new ApplicationException("yeah this is unrecoverable");
+            LOG.Error(e.Message);
+            throw new ApplicationException("unable to set proccess mode onGameLaunched and show/hide loading animation, yeah this is unrecoverable");
         }
 
         supervisorButtonTimeoutSeconds = Env.SUPERVISOR_BUTTON_TIMEOUT_SEC(); // default 5 seconds
@@ -135,8 +135,8 @@ public partial class GuiManager : Control
         screenSaverTimeoutSeconds = Env.SCREENSAVER_TIMEOUT_SEC(); // default 2 minutes
         screenSaverTimerSeconds = screenSaverTimeoutSeconds;
 
-        GD.Print("supervisorButtonTimeoutSeconds: " + supervisorButtonTimeoutSeconds);
-        GD.Print("screenSaverTimeoutSeconds" + screenSaverTimeoutSeconds);
+        LOG.Info("supervisorButtonTimeoutSeconds: " + supervisorButtonTimeoutSeconds);
+        LOG.Info("screenSaverTimeoutSeconds" + screenSaverTimeoutSeconds);
         
         // hide the loading screen by default
         hideLoadingAnimation();
@@ -159,12 +159,12 @@ public partial class GuiManager : Control
 
         if(@event is InputEventJoypadButton joy)
         {
-            GD.Print(joy.Device, joy.ButtonIndex);
+            LOG.Verbose($"{joy.Device}, {joy.ButtonIndex}");
         }
 
         if(@event is InputEventJoypadMotion axis)
         {
-            GD.Print(axis.Device, axis.Axis);
+            LOG.Verbose($"{axis.Device}, {axis.Axis}");
         }
 
         if(showingScreenSaverAnimation)
@@ -229,7 +229,7 @@ public partial class GuiManager : Control
                 // if the timer has timed out
                 // kill the currently running game
                 _ = GuiManagerGlobal.instance.killGame();
-                GD.Print("log: Killing current running game");
+                LOG.Info("log: Killing current running game");
                 
                 supervisorButtonTimerSeconds = supervisorButtonTimeoutSeconds;
             }
@@ -277,7 +277,7 @@ public partial class GuiManager : Control
     /// </summary>
     public void showLoadingAnimation()
     {
-        GD.Print("Showing Loading Animation");
+        LOG.Info("Showing Loading Animation");
 
         loadingScreen.CallDeferred("show");
         loadingAnimation.CallDeferred("play", "default", 1.0f, false);
@@ -291,7 +291,7 @@ public partial class GuiManager : Control
     /// </summary>
     public void hideLoadingAnimation()
     {
-        GD.Print("Hiding Loading Animation");
+        LOG.Info("Hiding Loading Animation");
 
         loadingScreen.CallDeferred("hide");
         loadingAnimation.CallDeferred("stop");
@@ -303,7 +303,7 @@ public partial class GuiManager : Control
     /// </summary>
     public void showScreenSaver()
     {
-        GD.Print("Showing Screen Saver");
+        LOG.Info("Showing Screen Saver");
 
         screenSaver.CallDeferred("show");
         screenSaver.CallDeferred("play");
@@ -315,7 +315,7 @@ public partial class GuiManager : Control
     /// </summary>
     public void hideScreenSaver()
     {
-        GD.Print("Hiding Screen Saver");
+        LOG.Info("Hiding Screen Saver");
 
         screenSaver.CallDeferred("hide");
         screenSaver.CallDeferred("stop");

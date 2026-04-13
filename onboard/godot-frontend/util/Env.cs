@@ -7,6 +7,8 @@ using Godot;
 namespace onboard.util; 
 
 public static class Env {
+    private static readonly Logger LOG = Log.get(nameof(Env));
+
     private static readonly Dictionary<string, string> env = new();
 
     // Logging level for the backend
@@ -31,6 +33,8 @@ public static class Env {
     // Shared 
     // Games data and shared sockets will be placed here, defaults to ~/devcade
     public static string DEVCADE_PATH() { return get("DEVCADE_PATH").unwrap_or(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile) + "/devcade" ); }
+    // Where to place the log files
+    public static string LOG_LOCATION() { return get("LOG_LOCATION").unwrap_or(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile) + "/devcade/logs" ); }
 
     
     static Env() {
@@ -62,7 +66,7 @@ public static class Env {
 
     public static void load(string path) {
         if (!File.Exists(path)) {
-            GD.PrintErr($"File: {path} does not exist");
+            LOG.Error($"File: {path} does not exist");
             return;
         }
         string[] lines = File.ReadAllLines(path);
@@ -77,7 +81,7 @@ public static class Env {
 
             string[] parts = line.Split('=');
             if (parts.Length == 2) {
-                GD.Print($"found env value: {parts[0]} = {parts[1]}");
+                LOG.Verbose($"found env value: {parts[0]} = {parts[1]}");
 
                 env[parts[0]] = parts[1];
             }

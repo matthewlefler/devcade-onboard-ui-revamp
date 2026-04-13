@@ -15,7 +15,9 @@ public partial class ScreenSaverGameAnimation : Control
 
     public override void _Notification(int what)
     {
-        if(what == NotificationVisibilityChanged && this.IsInsideTree())
+        if(videoStreamPlayer == null) { return; }
+
+        if(what == NotificationVisibilityChanged && this.videoStreamPlayer.IsInsideTree())
         {
             if(this.Visible)
             {
@@ -30,12 +32,16 @@ public partial class ScreenSaverGameAnimation : Control
 
     public void play()
     {
+        if(videoStreamPlayer == null) { return; }
+
         videoStreamPlayer.Play();
         videoStreamPlayer.Paused = false;
     }
 
     public void stop()
     {
+        if(videoStreamPlayer == null) { return; }
+
         videoStreamPlayer.Stop();
         videoStreamPlayer.Paused = true;
     }
