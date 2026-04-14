@@ -274,7 +274,7 @@ public partial class OriginalGUI : Control
     private void showGameList()
     {
         state = GuiState.ViewGames;
-        gameContainer.grabFocus();
+        gameContainer.selectLastPressedButton();
         camera.setRelativeTargetIndex(0);
     }
 
