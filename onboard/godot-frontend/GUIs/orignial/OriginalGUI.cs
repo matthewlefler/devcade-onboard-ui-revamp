@@ -238,9 +238,10 @@ public partial class OriginalGUI : Control
         // this launches the selected game, and continues when the game closes
         GuiManagerGlobal.instance.launchGame(game).ContinueWith(_ => 
         {
-            description.Hide();
             showGameList();
         });
+
+        description.Hide();
     }
 
     /// <summary>
