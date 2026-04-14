@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using Godot;
 using onboard.util;
 
@@ -25,6 +26,9 @@ public partial class AutoLoad : Node
         try
         {
             string logPath = ProjectSettings.GetSetting("debug/file_logging/log_path").AsString();
+            string[] subStrings = logPath.Split('/');
+            logPath.Left(logPath.Length - subStrings.Last().Length); // remove file from right side
+
             Directory.CreateSymbolicLink(logLocation, ProjectSettings.GlobalizePath(logPath));
             LOG.Info("created symlink to: " + logPath);
         }
