@@ -312,9 +312,10 @@ public partial class GuiManagerGlobal : Node
                 }
             }
 
-            Interlocked.Increment(ref call_tagListsUpdated);
-            Interlocked.Increment(ref call_tagListUpdated);
         }
+        
+        Interlocked.Increment(ref call_tagListsUpdated);
+        Interlocked.Increment(ref call_tagListUpdated);
     }
 
 
