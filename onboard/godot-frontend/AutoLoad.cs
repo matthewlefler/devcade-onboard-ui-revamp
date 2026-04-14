@@ -27,6 +27,10 @@ public partial class AutoLoad : Node
         {
             string targetLogPath = ProjectSettings.GetSetting("debug/file_logging/log_path").AsString();
             string[] subStrings = targetLogPath.Split('/');
+            foreach (string item in subStrings)
+            {
+                LOG.Error(item);
+            }
   
             targetLogPath = targetLogPath.Substring(0, targetLogPath.LastIndexOf(subStrings.Last())); // remove file ie "godot.log" from right side
             targetLogPath = ProjectSettings.GlobalizePath(targetLogPath);
