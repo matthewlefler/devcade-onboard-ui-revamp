@@ -242,6 +242,7 @@ public partial class OriginalGUI : Control
         });
 
         description.Hide();
+        showGameList();
     }
 
     /// <summary>
