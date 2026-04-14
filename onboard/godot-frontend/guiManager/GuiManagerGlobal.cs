@@ -267,7 +267,7 @@ public partial class GuiManagerGlobal : Node
             } // check if /tmp/ has the banner
         }
 
-        return Task.WhenAll(bannerTasks);
+        return Task.WhenAll(bannerTasks).WaitAsync(TimeSpan.FromSeconds(10));
     }
 
     /// <summary>
@@ -312,9 +312,10 @@ public partial class GuiManagerGlobal : Node
                 }
             }
 
-            Interlocked.Increment(ref call_tagListsUpdated);
-            Interlocked.Increment(ref call_tagListUpdated);
         }
+        
+        Interlocked.Increment(ref call_tagListsUpdated);
+        Interlocked.Increment(ref call_tagListUpdated);
     }
 
 

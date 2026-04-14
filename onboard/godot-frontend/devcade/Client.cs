@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 
 namespace onboard.devcade;
 
+using System.Runtime.CompilerServices;
 using util;
 
 public static class Client {
@@ -147,6 +148,7 @@ public static class Client {
             }
             
             LOG.Verbose("Received message: " + message);
+            LOG.Debug(tasks.ToString());
             
             // Parse the message
             Response res = Response.deserialize(message);
@@ -442,6 +444,7 @@ public static class Client {
         
         TaskCompletionSource<Response> tcs = new();
         
+        LOG.Debug($"created task with id: {req.request_id}");
         tasks.Add(req.request_id, tcs);
         
         return tcs.Task;
