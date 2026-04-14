@@ -35,7 +35,7 @@ public static class Log
         if(level == "fatal")   { logLevel = Level.fatal; }
 
         string time = Time.GetTimeStringFromSystem();
-        logMessage($"[{time} INFO Log] Set current Log level to {logLevel}", Level.info);           
+        logMessage($"[{time} INFO Log] Set current Log level to {logLevel}", Level.info);
     }
 
     public static Level currentLogLevel = Level.debug;

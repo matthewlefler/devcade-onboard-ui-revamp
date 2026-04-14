@@ -25,12 +25,26 @@ public partial class AutoLoad : Node
         string logLocation = Env.LOG_LOCATION();
         try
         {
-            string logPath = ProjectSettings.GetSetting("debug/file_logging/log_path").AsString();
-            string[] subStrings = logPath.Split('/');
-            logPath.Left(logPath.Length - subStrings.Last().Length); // remove file from right side
+            string targetLogPath = ProjectSettings.GetSetting("debug/file_logging/log_path").AsString();
+            string[] subStrings = targetLogPath.Split('/');
+  
+            targetLogPath = targetLogPath.Substring(0, targetLogPath.LastIndexOf(subStrings.Last())); // remove file ie "godot.log" from right side
+            targetLogPath = ProjectSettings.GlobalizePath(targetLogPath);
 
-            Directory.CreateSymbolicLink(logLocation, ProjectSettings.GlobalizePath(logPath));
-            LOG.Info("created symlink to: " + logPath);
+            // remove link if target locations differ
+            if(File.Exists(logLocation))
+            {
+                FileInfo linkInfo = new FileInfo(logLocation);
+                FileSystemInfo target = linkInfo.ResolveLinkTarget(returnFinalTarget: true);
+                if(target.FullName != targetLogPath)
+                {
+                    LOG.Info("removing link with target: " + target.FullName);
+                    File.Delete(logLocation);
+                }
+            }
+
+            Directory.CreateSymbolicLink(logLocation, targetLogPath);
+            LOG.Info("created symlink to: " + targetLogPath);
         }
         catch (Exception e)
         {
