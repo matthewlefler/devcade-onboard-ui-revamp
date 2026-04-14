@@ -189,7 +189,8 @@ public partial class GuiManagerGlobal : Node
         gameTitles = errorList;
 
         Task gameTask = Client.getGameList()
-            .ContinueWith(t => {
+            .ContinueWith(t => 
+            {
                 if (!t.IsCompletedSuccessfully) {
                     LOG.Error($"Failed to fetch game list: {t.Exception}");
                     gameTitles = errorList;
@@ -232,7 +233,8 @@ public partial class GuiManagerGlobal : Node
                 }
                 
             })
-            .ContinueWith(_ => {
+            .ContinueWith(_ => 
+            {
                 LOG.Info("Setting cards");
 
                 downloadBanners().ContinueWith(_ =>
@@ -261,7 +263,8 @@ public partial class GuiManagerGlobal : Node
         foreach(DevcadeGame game in gameTitles)
         {            
             // Start downloading the textures
-            if (game.id != "error") {
+            if (game.id != "error") 
+            {
                 // don't download the banner for the default game
                  bannerTasks.Add(Client.downloadBanner(game.id));
             } // check if /tmp/ has the banner
@@ -280,8 +283,10 @@ public partial class GuiManagerGlobal : Node
         {                                    
             string bannerPath = $"{Env.DEVCADE_PATH()}/{game.id}/banner.png";
 
-            if (File.Exists(bannerPath)) {
-                try {
+            if (File.Exists(bannerPath)) 
+            {
+                try 
+                {
                     // godot image class 
                     Image image = Image.LoadFromFile(bannerPath);
                     ImageTexture texture = ImageTexture.CreateFromImage(image); // inherits from godot texture2D class 
@@ -295,7 +300,8 @@ public partial class GuiManagerGlobal : Node
 
             // for each tag that this game has, add it to the corresponding list
             // this allows for easy filtering by tag
-            foreach(Tag tag in game.tags) {
+            foreach(Tag tag in game.tags) 
+            {
                 // if the tag does not exist in the dictionary, 
                 // init it as an empty list
                 if(!tagLists.ContainsKey(tag.name))
@@ -362,7 +368,6 @@ public partial class GuiManagerGlobal : Node
         state_onGameLaunched = false;
     }
 
-    #endregion
 
     public override void _Process(double delta)
     {
@@ -417,4 +422,6 @@ public partial class GuiManagerGlobal : Node
             Interlocked.Decrement(ref call_tagListUpdated);
         }
     }
+
+    #endregion
 }
