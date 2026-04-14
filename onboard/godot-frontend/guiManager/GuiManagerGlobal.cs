@@ -267,7 +267,7 @@ public partial class GuiManagerGlobal : Node
             } // check if /tmp/ has the banner
         }
 
-        return Task.WhenAll(bannerTasks).WaitAsync(TimeSpan.FromSeconds(20));
+        return Task.WhenAll(bannerTasks).WaitAsync(TimeSpan.FromSeconds(10));
     }
 
     /// <summary>
