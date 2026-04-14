@@ -22,19 +22,15 @@ public partial class AutoLoad : Node
         Env.load("../.env");
 
         string logLocation = Env.LOG_LOCATION();
-        if(!Path.Exists(logLocation))
+        try
         {
-            try
-            {
-                Directory.CreateDirectory(logLocation);
-                string logPath = ProjectSettings.GetSetting("debug/file_logging/log_path").AsString();
-                Directory.CreateSymbolicLink(logLocation, ProjectSettings.GlobalizePath(logPath));
-                LOG.Info("created symlink to: " + logPath);
-            }
-            catch (Exception e)
-            {
-                LOG.Error("Unable to create symlink: " + e.Message);
-            }
+            string logPath = ProjectSettings.GetSetting("debug/file_logging/log_path").AsString();
+            Directory.CreateSymbolicLink(logLocation, ProjectSettings.GlobalizePath(logPath));
+            LOG.Info("created symlink to: " + logPath);
+        }
+        catch (Exception e)
+        {
+            LOG.Error("Unable to create symlink: " + e.Message);
         }
 
         // force initalization of:
