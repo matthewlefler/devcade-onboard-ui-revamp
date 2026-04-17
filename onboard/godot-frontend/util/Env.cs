@@ -36,11 +36,18 @@ public static class Env {
     // Where to place the log files
     public static string LOG_LOCATION() { return get("LOG_LOCATION").unwrap_or(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile) + "/devcade/logs" ); }
 
+    // toggle for low performance features
+    public static bool LOW_PERFORMANCE_MODE() { return get("LOW_PERFORMANCE_MODE").map_or(false, bool.Parse); }
+
     
     static Env() {
         if(File.Exists("../.env"))
         {
             load("../.env");
+        }
+        else
+        {
+            LOG.Error("File: ../.env does not exist");
         }
 
         foreach (DictionaryEntry entry in System.Environment.GetEnvironmentVariables()) {

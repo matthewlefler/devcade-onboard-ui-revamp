@@ -53,21 +53,7 @@ public partial class Screensaver : Control
     {
         screenWidth = GetViewportRect().Size.X;
 
-        foreach(Node node in gamesAnimationsContainer.GetChildren())
-        {
-            if(node is ScreenSaverGameAnimation gameAnimation)
-            {
-                gameAnimation.ZIndex = 4000;
-                gameAnimation.YSortEnabled = true;
-                
-                gameAnimationNodes.Add(gameAnimation);
-                gameAnimation.Position = startPosition;
-            }
-            else
-            {
-                GD.PrintErr($"found child node {node.Name} that is not a ScreenSaverGameAnimation");
-            }
-        }
+        create_screensavers();
 
         shaderVelInit = getShaderVel();
 
@@ -77,6 +63,18 @@ public partial class Screensaver : Control
         {
             setScreenSaversShown(GuiManagerGlobal.gameTitles);
         };
+    }
+
+    private void create_screensavers()
+    {
+        // download videos from backend
+        
+        
+        // gameAnimation.ZIndex = 4000;
+        // gameAnimation.YSortEnabled = true;
+        
+        // gameAnimationNodes.Add(gameAnimation);
+        // gameAnimation.Position = startPosition;
     }
 
     public override void _Process(double delta)
