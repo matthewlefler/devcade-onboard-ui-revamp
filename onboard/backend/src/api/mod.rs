@@ -106,6 +106,13 @@ mod route {
     }
 
     /**
+     * Get a specific game's video by ID
+     */
+    pub fn game_icon(id: &str) -> String {
+        format!("games/{id}/video")
+    }
+
+    /**
      * Get a specific game's binary by ID
      */
     pub fn game_download(id: &str) -> String {
@@ -245,6 +252,34 @@ pub async fn download_icon(game_id: String) -> Result<(), Error> {
 
     let bytes = network::request_bytes(
         format!("{}/{}", api_url, route::game_icon(game_id.as_str())).as_str(),
+    )
+    .await?;
+    std::fs::write(path, bytes)?;
+    Ok(())
+}
+
+/**
+ * Download's a game's video from the API.
+ *
+ * # Errors
+ * This function will return an error if the request fails, or if the filesystem cannot be written to.
+ */
+pub async fn download_video(game_id: String) -> Result<(), Error> {
+    let api_url = api_url();
+    let file_path = devcade_path();
+
+    let path = Path::new(file_path.as_str())
+        .join(game_id.clone())
+        .join("video.ogv");
+    if path.exists() {
+        return Ok(());
+    }
+    if !path.parent().unwrap().exists() {
+        std::fs::create_dir_all(path.parent().unwrap())?;
+    }
+
+    let bytes = network::request_bytes(
+        format!("{}/{}", api_url, route::game_video(game_id.as_str())).as_str(),
     )
     .await?;
     std::fs::write(path, bytes)?;
