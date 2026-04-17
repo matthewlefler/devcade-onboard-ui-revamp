@@ -18,6 +18,7 @@ public class Request {
         DownloadGame,
         DownloadIcon,
         DownloadBanner,
+        DownloadVideo,
         
         GetTagList,
         GetTag,
@@ -77,6 +78,10 @@ public class Request {
 
     public static Request DownloadBanner(string game_id) {
         return new Request(RequestType.DownloadBanner, game_id);
+    }
+
+    public static Request DownloadVideo(string game_id) {
+        return new Request(RequestType.DownloadVideo, game_id);
     }
 
     public static Request LaunchGame(string game_id) {

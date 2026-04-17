@@ -1,7 +1,7 @@
 use crate::api::{self, nfc_user};
 
 use crate::api::{
-    download_banner, download_game, download_icon, game_list, game_list_from_fs, kill_current_game,
+    download_banner, download_game, download_icon, download_video, game_list, game_list_from_fs, kill_current_game,
     launch_game, nfc_tags, persistence_flush, persistence_load, persistence_save, tag_games,
     tag_list, user,
 };
@@ -40,6 +40,10 @@ pub async fn handle(req: RequestBody) -> ResponseBody {
             Err(err) => err.into(),
         },
         RequestBody::DownloadBanner(game_id) => match download_banner(game_id).await {
+            Ok(_) => ResponseBody::Ok,
+            Err(err) => err.into(),
+        },
+        RequestBody::DownloadVideo(game_id) => match download_video(game_id).await {
             Ok(_) => ResponseBody::Ok,
             Err(err) => err.into(),
         },

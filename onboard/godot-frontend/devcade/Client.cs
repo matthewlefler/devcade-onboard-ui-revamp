@@ -24,6 +24,9 @@ public static class Client {
     public static event EventHandler<DevcadeGame> onIconFinished = (_, _) => {
         LOG.Info("onIconFinished Invoked");
     };
+    public static event EventHandler<DevcadeGame> onVideoFinished = (_, _) => {
+        LOG.Info("onVideoFinished Invoked");
+    };
     public static event EventHandler<DevcadeGame> onGameFinished = (_, _) => {
         LOG.Info("onGameFinished Invoked");
     };
@@ -299,6 +302,20 @@ public static class Client {
         return sendRequest(Request.DownloadIcon(id))
             .ContinueWith(_ => {
                 onIconFinished.Invoke(null, getGame(id).Result.into_option<DevcadeGame>().unwrap_or(new DevcadeGame()));
+            });
+    }
+
+    /// <summary>
+    /// Sends a request to the backend to download the video for the game with the given id.
+    /// Once the video has been downloaded, invokes the onVideoFinished event.
+    /// </summary>
+    /// <param name="id">The id of the game to download the video for</param>
+    /// <returns>A Task that will be completed once the video has been downloaded</returns>
+    public static Task downloadVideo(string id) {
+        LOG.Info($"Downloading banner for game with id {id}");
+        return sendRequest(Request.DownloadVideo(id))
+            .ContinueWith(response => {
+                onVideoFinished.Invoke(null, getGame(id).Result.into_option<DevcadeGame>().unwrap_or(new DevcadeGame()));
             });
     }
     
