@@ -237,6 +237,8 @@ public partial class GuiManagerGlobal : Node
             {
                 LOG.Info("Setting cards");
 
+                downloadVideos();
+
                 downloadBanners().ContinueWith(_ =>
                 {
                     loadBanners();
@@ -257,7 +259,7 @@ public partial class GuiManagerGlobal : Node
     /// Sends requests to the backend to download the banners for each game in gameTitles
     /// </summary>
     /// <returns> A task that completes when all banners are downloaded </returns>
-    private Task downloadBanners()
+    public Task downloadBanners()
     {
         List<Task> bannerTasks = new();
         foreach(DevcadeGame game in gameTitles)
@@ -271,6 +273,26 @@ public partial class GuiManagerGlobal : Node
         }
 
         return Task.WhenAll(bannerTasks).WaitAsync(TimeSpan.FromSeconds(10));
+    }
+
+    /// <summary>
+    /// Sends requests to the backend to download the videos for each game in gameTitles
+    /// </summary>
+    /// <returns> A task that completes when all videos are downloaded </returns>
+    public Task downloadVideos()
+    {
+        List<Task> videoTasks = new();
+        foreach(DevcadeGame game in gameTitles)
+        {            
+            // Start downloading the textures
+            if (game.id != "error") 
+            {
+                // don't download the banner for the default game
+                 videoTasks.Add(Client.downloadVideo(game.id));
+            } // check if /tmp/ has the banner
+        }
+
+        return Task.WhenAll(videoTasks).WaitAsync(TimeSpan.FromSeconds(10));
     }
 
     /// <summary>
@@ -323,7 +345,6 @@ public partial class GuiManagerGlobal : Node
         Interlocked.Increment(ref call_tagListsUpdated);
         Interlocked.Increment(ref call_tagListUpdated);
     }
-
 
     /// <summary>
     /// launch the given game

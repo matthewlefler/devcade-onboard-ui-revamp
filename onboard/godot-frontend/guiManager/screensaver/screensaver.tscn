@@ -1,21 +1,14 @@
-[gd_scene load_steps=21 format=3 uid="uid://dlupqaxwr7sdp"]
+[gd_scene load_steps=14 format=3 uid="uid://dlupqaxwr7sdp"]
 
 [ext_resource type="Script" uid="uid://bd2ibq7qygtdu" path="res://guiManager/screensaver/Screensaver.cs" id="1_fcd5e"]
 [ext_resource type="FontFile" uid="uid://cnha1ohwbh3ts" path="res://CSHAssets/VT323-Regular.ttf" id="2_fcd5e"]
 [ext_resource type="Texture2D" uid="uid://gsf5hvgxlwu8" path="res://CSHAssets/OnboardBackgroundGradient.png" id="2_s0yr3"]
 [ext_resource type="Script" uid="uid://ei3nslcsxscs" path="res://guiManager/FlashingRichTextLabel.cs" id="3_anfla"]
 [ext_resource type="Shader" uid="uid://b1box1f256y3s" path="res://guiManager/screensaver/screensaverCSHIcons.gdshader" id="3_s0yr3"]
-[ext_resource type="Script" uid="uid://3dod6y75r7mb" path="res://guiManager/screensaver/ScreenSaverGameAnimation.cs" id="4_q4yft"]
 [ext_resource type="Texture2D" uid="uid://d4nlo4q03fi77" path="res://CSHAssets/CSH.png" id="5_d5f7k"]
-[ext_resource type="PackedScene" uid="uid://camd641ivrd43" path="res://guiManager/screensaver/screensaver_games_animations/worldOfWallHoppers/WorldOfWallHoppersScreenSaver.tscn" id="7_s0yr3"]
-[ext_resource type="PackedScene" uid="uid://rf2ubr76htca" path="res://guiManager/screensaver/screensaver_games_animations/BombOmbSquad/BombOmbSquadScreenSaver.tscn" id="7_usgw7"]
-[ext_resource type="PackedScene" uid="uid://bnpwhpnwx1dh2" path="res://guiManager/screensaver/screensaver_games_animations/CubeClimber/cube_climber_game_animation.tscn" id="8_xxjuo"]
-[ext_resource type="PackedScene" uid="uid://crjqi1vferh30" path="res://guiManager/screensaver/screensaver_games_animations/DevcadeDebugger/devcade_debugger_game_animation.tscn" id="9_57oxp"]
-[ext_resource type="PackedScene" uid="uid://chkoyuus5i6o6" path="res://guiManager/screensaver/screensaver_games_animations/lunarLander/lunar_lander_game_animation.tscn" id="10_57oxp"]
 [ext_resource type="Shader" uid="uid://b8yw4hl6yvxdq" path="res://guiManager/screensaver/outline_shine.gdshader" id="10_dt653"]
 [ext_resource type="Texture2D" uid="uid://lqrfprpd7kh3" path="res://CSHAssets/transparent-logo.png" id="10_n0j55"]
 [ext_resource type="Script" uid="uid://62sckdwbwl8r" path="res://GUIs/orignial/DevcadeIcon.cs" id="11_dt653"]
-[ext_resource type="PackedScene" uid="uid://dv35g6sqgpna8" path="res://guiManager/screensaver/screensaver_games_animations/ThreeDTetris/three_d_tetris_game_animation.tscn" id="11_h8c1n"]
 [ext_resource type="Texture2D" uid="uid://bj333tajmq7mt" path="res://CSHAssets/transparent-dev-logo.png" id="12_spuds"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_oh2v1"]
@@ -71,8 +64,6 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("4_q4yft")
-game_name = "Background"
 
 [node name="background" type="TextureRect" parent="gameAnimationsContainer/background"]
 z_index = 1000
@@ -128,30 +119,6 @@ script = ExtResource("11_dt653")
 prodTexture = ExtResource("10_n0j55")
 devTexture = ExtResource("12_spuds")
 
-[node name="WorldOfWallHoppersScreenSaver" parent="gameAnimationsContainer" instance=ExtResource("7_s0yr3")]
-z_index = 4000
-z_as_relative = false
-y_sort_enabled = true
-layout_mode = 1
-
-[node name="BombOmbSquadScreenSaver" parent="gameAnimationsContainer" instance=ExtResource("7_usgw7")]
-z_index = 4000
-z_as_relative = false
-y_sort_enabled = true
-layout_mode = 1
-
-[node name="CubeClimberScreenSaver" parent="gameAnimationsContainer" instance=ExtResource("8_xxjuo")]
-layout_mode = 1
-
-[node name="LunarLanderScreenSaver" parent="gameAnimationsContainer" instance=ExtResource("10_57oxp")]
-layout_mode = 1
-
-[node name="DevcadeDebuggerScreenSaver" parent="gameAnimationsContainer" instance=ExtResource("9_57oxp")]
-layout_mode = 1
-
-[node name="ThreeDTetrisScreenSaver" parent="gameAnimationsContainer" instance=ExtResource("11_h8c1n")]
-layout_mode = 1
-
 [node name="background2" type="Control" parent="gameAnimationsContainer"]
 z_as_relative = false
 y_sort_enabled = true
@@ -161,8 +128,6 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("4_q4yft")
-game_name = "Background2"
 
 [node name="background" type="TextureRect" parent="gameAnimationsContainer/background2"]
 z_index = 1000

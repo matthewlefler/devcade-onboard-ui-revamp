@@ -1,0 +1,34 @@
+[gd_scene load_steps=3 format=3 uid="uid://bss4473lsl3wq"]
+
+[ext_resource type="Script" uid="uid://lc4ln83yyb0m" path="res://guiManager/screensaver/ScreensaverTemplate.cs" id="1_hietb"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0hblq"]
+bg_color = Color(0, 0, 0, 1)
+
+[node name="ScreensaverTemplate" type="Control" node_paths=PackedStringArray("videoPlayer")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_hietb")
+videoPlayer = NodePath("Panel/VideoStreamPlayer")
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_0hblq")
+
+[node name="VideoStreamPlayer" type="VideoStreamPlayer" parent="Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+loop = true

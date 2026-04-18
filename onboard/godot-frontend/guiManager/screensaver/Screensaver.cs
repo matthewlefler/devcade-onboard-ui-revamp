@@ -1,11 +1,16 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Net.NetworkInformation;
 using Godot;
 using onboard;
 using onboard.devcade;
+using onboard.util;
 
 public partial class Screensaver : Control
 {
+    private readonly Logger LOG = Log.get(nameof(Screensaver));
+
     [Export]
     public float scrollSpeed = 1.0f;
 
@@ -13,10 +18,10 @@ public partial class Screensaver : Control
     private Control gamesAnimationsContainer;
 
     [Export]
-    private TextureRect backgroundIcons;
-    
-    private List<ScreenSaverGameAnimation> shownGameAnimationNodes = new List<ScreenSaverGameAnimation>();
-    private List<ScreenSaverGameAnimation> gameAnimationNodes = new List<ScreenSaverGameAnimation>();
+    private PackedScene screensaverTemplate;
+
+    private List<ScreensaverTemplate> shownGameAnimationNodes = new List<ScreensaverTemplate>();
+    private List<ScreensaverTemplate> gameAnimationNodes = new List<ScreensaverTemplate>();
 
     private bool playing = false;
     private int currentGameAnimationIndex = 0;
@@ -36,6 +41,7 @@ public partial class Screensaver : Control
         foreach(var anim in shownGameAnimationNodes)
         {
             anim.Show();
+            anim.videoPlayer.Paused = false;
         }
     }
 
@@ -46,16 +52,22 @@ public partial class Screensaver : Control
         foreach(var anim in shownGameAnimationNodes)
         {
             anim.Hide();
+            anim.videoPlayer.Paused = true;
         }
     }
 
     public override void _Ready()
     {
+        if(screensaverTemplate == null)
+        {
+            LOG.Error("screensaverTemplate is not set");
+
+            throw new ApplicationException("screensaverTemplate unset");
+        }
+
         screenWidth = GetViewportRect().Size.X;
 
         create_screensavers();
-
-        shaderVelInit = getShaderVel();
 
         setScreenSaversShown(GuiManagerGlobal.gameTitles);
 
@@ -63,29 +75,49 @@ public partial class Screensaver : Control
         {
             setScreenSaversShown(GuiManagerGlobal.gameTitles);
         };
+
+        stop();
     }
 
     private void create_screensavers()
     {
         // download videos from backend
-        
-        
-        // gameAnimation.ZIndex = 4000;
-        // gameAnimation.YSortEnabled = true;
-        
-        // gameAnimationNodes.Add(gameAnimation);
-        // gameAnimation.Position = startPosition;
+        GuiManagerGlobal.instance.downloadVideos().ContinueWith(_ =>
+        {
+            foreach (DevcadeGame game in GuiManagerGlobal.gameTitles)
+            {
+                string videoPath = $"{Env.DEVCADE_PATH()}/{game.id}/video.ogv";
+                if(!File.Exists(videoPath))
+                {
+                    continue;
+                }
+            
+                try 
+                {
+                    // godot image class 
+                    VideoStream video = GD.Load<VideoStream>(videoPath);
+
+                    ScreensaverTemplate node = screensaverTemplate.Instantiate<ScreensaverTemplate>();
+                    node.videoPlayer.Stream = video;
+                    node.gameId = game.id;
+                    node.ZIndex = 4000;
+
+                    gamesAnimationsContainer.AddChild(node);
+                    gameAnimationNodes.Add(node);
+                }
+                catch (Exception e) {
+                    LOG.Warn($"Unable to load video: {e.Message}");
+                }
+            }
+        });
     }
 
     public override void _Process(double delta)
     {
         if(!playing)
         {
-            setShaderVel(shaderVelInit);
             return;
         }
-
-        setShaderVel(new Vector2(-scrollSpeed / 2.918f, shaderVelInit.Y));
 
         gamesAnimationsContainer.Position += new Vector2((float) delta * -scrollSpeed * 100.0f, 0);
 
@@ -101,22 +133,17 @@ public partial class Screensaver : Control
 
         shownGameAnimationNodes.Clear();
 
-        foreach(ScreenSaverGameAnimation anim in gameAnimationNodes)
+        foreach(ScreensaverTemplate anim in gameAnimationNodes)
         {
-            if(anim.game_name == "Background" || anim.game_name == "Background2")
-            {
-                shownGameAnimationNodes.Add(anim);
-                continue;
-            }
-
             foreach(DevcadeGame game in games)
             {
-                string gameName = game.name;
+                string gameId = game.id;
                 // GD.Print($"found game: {game.name}");
 
-                if(anim.game_name == gameName)
+                if(anim.gameId == gameId)
                 {
-                    GD.Print($"found matching anim: {anim.game_name}");
+                    // name instead of id b/c readability
+                    GD.Print($"found matching anim: {game.name}");
                     shownGameAnimationNodes.Add(anim);
                 }
             }
@@ -126,19 +153,9 @@ public partial class Screensaver : Control
 
         for (int i = 0; i < shownGameAnimationNodes.Count; i++)
         {
-            ScreenSaverGameAnimation anim = shownGameAnimationNodes[i];
+            ScreensaverTemplate anim = shownGameAnimationNodes[i];
 
             anim.Position = new Vector2(screenWidth * i, 0);
         }
-    }
-
-    private void setShaderVel(Vector2 v)
-    {
-        backgroundIcons.Material.Set("shader_parameter/direction", v);
-    }
-
-    private Vector2 getShaderVel()
-    {
-        return backgroundIcons.Material.Get("shader_parameter/direction").AsVector2();
     }
 }
