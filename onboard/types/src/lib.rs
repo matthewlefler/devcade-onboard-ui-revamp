@@ -65,6 +65,7 @@ pub enum RequestBody {
     DownloadGame(String),   // String is the game ID
     DownloadIcon(String),   // String is the game ID
     DownloadBanner(String), // String is the game ID
+    DownloadVideo(String),  // String is the game ID
 
     GetTagList,
     GetTag(String),             // String is the tag name
@@ -103,6 +104,7 @@ impl RequestBody {
             Self::DownloadGame(String::new()),
             Self::DownloadIcon(String::new()),
             Self::DownloadBanner(String::new()),
+            Self::DownloadVideo(String::new()),
             Self::GetTagList,
             Self::GetTag(String::new()),
             Self::GetGameListFromTag(String::new()),
@@ -204,6 +206,9 @@ impl Display for RequestBody {
             Self::DownloadBanner(game_id) => {
                 write!(f, "Download banner with id '{game_id}'")
             }
+            Self::DownloadVideo(game_id) => {
+                write!(f, "Download video with id '{game_id}'")
+            } 
             Self::LaunchGame(game_id) => {
                 write!(f, "Launch game with id '{game_id}'")
             }
