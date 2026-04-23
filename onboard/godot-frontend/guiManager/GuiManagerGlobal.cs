@@ -283,16 +283,17 @@ public partial class GuiManagerGlobal : Node
     {
         List<Task> videoTasks = new();
         foreach(DevcadeGame game in gameTitles)
-        {            
+        {
             // Start downloading the textures
             if (game.id != "error") 
             {
                 // don't download the banner for the default game
-                 videoTasks.Add(Client.downloadVideo(game.id));
+                //  videoTasks.Add(Client.downloadVideo(game.id));
             } // check if /tmp/ has the banner
         }
 
-        return Task.WhenAll(videoTasks).WaitAsync(TimeSpan.FromSeconds(10));
+        // return Task.WhenAll(videoTasks).WaitAsync(TimeSpan.FromSeconds(10));
+        return new Task(() => {}).WaitAsync(TimeSpan.FromSeconds(2));
     }
 
     /// <summary>
