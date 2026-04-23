@@ -34,14 +34,17 @@ public class GameButton
 
 		float d = (float) (1.0 + -1.0 / (1.0 + 0.13 * float.Abs(deltaRotation)));
 		float rotationSpeed = float.Lerp(minimumRotationSpeed, maxRotationSpeed, d);
+		float rotation = (float) (direction * rotationSpeed * delta);
 
-		if(deltaRotation < errorMargin && deltaRotation > -errorMargin)
+		if(rotation > float.Abs(deltaRotation))
 		{
 			this.childButton.Rotation = targetRotation;
 		}
-		else
+		else if(deltaRotation < errorMargin && deltaRotation > -errorMargin)
 		{
-			this.childButton.Rotation += (float) (direction * rotationSpeed * delta);
+			this.childButton.Rotation = targetRotation;
+		} else {
+			this.childButton.Rotation += rotation;
 		}
 
 		if(this.childButton.Rotation > 3.2f || this.childButton.Rotation < -3.2f) 
