@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Dynamic;
 using Godot;
 
 namespace onboard.devcade.GUI.originalGUI;
@@ -95,6 +96,7 @@ public partial class OriginalGUI : Control
                 if (state == GuiState.ViewGames)
                 {
                     showTagList();
+                    skipProcessLoop = true;
                     AcceptEvent();
                     return;
                 }
@@ -106,6 +108,7 @@ public partial class OriginalGUI : Control
                 if (state == GuiState.Tags && tagContainer.currentX == 0)
                 {
                     showGameList();
+                    skipProcessLoop = true;
                     AcceptEvent();
                     return;
                 }
@@ -133,15 +136,15 @@ public partial class OriginalGUI : Control
         }
     }
 
-    [Export]
-    double secBeforeInputEcho = 0.2;
-    [Export]
-    double secBetweenInputEcho = 0.1;
-
-    Dictionary<string, double> actionsPressTime = new Dictionary<string, double>();
-
+    bool skipProcessLoop = false;
     public override void _Process(double delta)
     {
+        if(skipProcessLoop)
+        {
+            skipProcessLoop = false;
+            return;
+        }
+
         if (state == GuiState.ViewGames)
         {
             if (isRepeatActionPressed("Player1_StickUp", delta) || isRepeatActionPressed("Player2_StickUp", delta))
@@ -189,6 +192,12 @@ public partial class OriginalGUI : Control
         return isActionRepeated(actionName, delta) || Input.IsActionJustPressed(actionName);
     }
 
+    [Export]
+    double secBeforeInputEcho = 0.2;
+    [Export]
+    double secBetweenInputEcho = 0.1;
+
+    Dictionary<string, double> actionsPressTime = new Dictionary<string, double>();
     private bool isActionRepeated(string actionName, double delta)
     {
         if(!actionsPressTime.ContainsKey(actionName))
