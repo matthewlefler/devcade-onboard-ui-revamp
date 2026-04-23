@@ -1,7 +1,8 @@
-[gd_scene load_steps=14 format=3 uid="uid://dlupqaxwr7sdp"]
+[gd_scene load_steps=15 format=3 uid="uid://dlupqaxwr7sdp"]
 
 [ext_resource type="Script" uid="uid://bd2ibq7qygtdu" path="res://guiManager/screensaver/Screensaver.cs" id="1_fcd5e"]
 [ext_resource type="FontFile" uid="uid://cnha1ohwbh3ts" path="res://CSHAssets/VT323-Regular.ttf" id="2_fcd5e"]
+[ext_resource type="PackedScene" uid="uid://bss4473lsl3wq" path="res://guiManager/screensaver/screensaver_template.tscn" id="2_pjrgk"]
 [ext_resource type="Texture2D" uid="uid://gsf5hvgxlwu8" path="res://CSHAssets/OnboardBackgroundGradient.png" id="2_s0yr3"]
 [ext_resource type="Script" uid="uid://ei3nslcsxscs" path="res://guiManager/FlashingRichTextLabel.cs" id="3_anfla"]
 [ext_resource type="Shader" uid="uid://b1box1f256y3s" path="res://guiManager/screensaver/screensaverCSHIcons.gdshader" id="3_s0yr3"]
@@ -29,7 +30,7 @@ shader_parameter/num_segments = 20
 
 [sub_resource type="Theme" id="Theme_q4yft"]
 
-[node name="Control" type="Control" node_paths=PackedStringArray("gamesAnimationsContainer", "backgroundIcons")]
+[node name="Control" type="Control" node_paths=PackedStringArray("gamesAnimationsContainer")]
 z_index = 4096
 y_sort_enabled = true
 layout_mode = 3
@@ -43,7 +44,7 @@ grow_vertical = 2
 script = ExtResource("1_fcd5e")
 scrollSpeed = 2.0
 gamesAnimationsContainer = NodePath("gameAnimationsContainer")
-backgroundIcons = NodePath("gameAnimationsContainer/background/background/backgroundCSHIcons")
+screensaverTemplate = ExtResource("2_pjrgk")
 
 [node name="gameAnimationsContainer" type="Control" parent="."]
 z_as_relative = false

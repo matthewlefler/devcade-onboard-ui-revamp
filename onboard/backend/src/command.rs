@@ -43,10 +43,10 @@ pub async fn handle(req: RequestBody) -> ResponseBody {
             Ok(_) => ResponseBody::Ok,
             Err(err) => err.into(),
         },
-        RequestBody::DownloadVideo(game_id) => match download_video(game_id).await {
-            Ok(_) => ResponseBody::Ok,
-            Err(err) => err.into(),
-        },
+        // RequestBody::DownloadVideo(game_id) => match download_video(game_id).await {
+        //     Ok(_) => ResponseBody::Ok,
+        //     Err(err) => err.into(),
+        // },
         RequestBody::LaunchGame(game_id) => match launch_game(game_id).await {
             Ok(_) => ResponseBody::Ok,
             Err(err) => err.into(),

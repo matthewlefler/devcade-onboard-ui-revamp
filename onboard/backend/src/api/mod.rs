@@ -108,7 +108,7 @@ mod route {
     /**
      * Get a specific game's video by ID
      */
-    pub fn game_icon(id: &str) -> String {
+    pub fn game_video(id: &str) -> String {
         format!("games/{id}/video")
     }
 
