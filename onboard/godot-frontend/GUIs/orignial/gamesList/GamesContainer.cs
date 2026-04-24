@@ -195,6 +195,7 @@ public partial class GamesContainer : Control
     /// <param name="index"> the index of the button </param>
     private void setFocusedGame(int index)
     {
+        this.index = index;
         var currentGames = this.GetChildren();
 
         // loops over all the game buttons in the saved list

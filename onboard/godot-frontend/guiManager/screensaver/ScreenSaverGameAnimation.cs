@@ -8,9 +8,15 @@ public partial class ScreenSaverGameAnimation : Control
     [Export]
     public VideoStreamPlayer videoStreamPlayer;
 
+    private float screenWidth = 0;
+
     public override void _Ready()
     {
         this.Hide();
+        this.screenWidth = GetViewport().GetVisibleRect().Size.X;
+        GetViewport().SizeChanged += () => {
+            this.screenWidth = GetViewport().GetVisibleRect().Size.X;
+        };
     }
 
     public override void _Notification(int what)
@@ -30,11 +36,23 @@ public partial class ScreenSaverGameAnimation : Control
         }
     }
 
+    public override void _Process(double delta)
+    {
+        float xPosition = this.GlobalPosition.X;
+        if(xPosition > -screenWidth && xPosition < screenWidth)
+        {
+            this.play();
+        }
+        else
+        {
+            this.stop();
+        }
+    }
+
     public void play()
     {
         if(videoStreamPlayer == null) { return; }
 
-        videoStreamPlayer.Play();
         videoStreamPlayer.Paused = false;
     }
 
@@ -42,7 +60,6 @@ public partial class ScreenSaverGameAnimation : Control
     {
         if(videoStreamPlayer == null) { return; }
 
-        videoStreamPlayer.Stop();
         videoStreamPlayer.Paused = true;
     }
 }

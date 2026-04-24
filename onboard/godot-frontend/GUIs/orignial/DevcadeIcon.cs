@@ -1,4 +1,5 @@
 using Godot;
+using onboard;
 using onboard.devcade;
 
 public partial class DevcadeIcon : TextureRect
@@ -10,17 +11,10 @@ public partial class DevcadeIcon : TextureRect
 
     public override void _Ready()
     {
-        if(Client.isProduction)
-        {
-            setTextureToProd();
-        }
-        else
-        {
-            setTextureToDev();
-        }
+        GuiManagerGlobal.instance.gameTitlesUpdated += setTexture;
     }
 
-    public override void _Process(double delta)
+    private void setTexture()
     {
         if(Client.isProduction)
         {

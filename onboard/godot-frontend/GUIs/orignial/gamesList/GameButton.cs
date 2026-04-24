@@ -1,10 +1,18 @@
 using Godot;
 
 // used for animations
-public partial class GameButton
+public class GameButton
 {
+	[Export]
+	public float minimumRotationSpeed = 3.0f;
+	[Export]
+	public float maxRotationSpeed = 20.0f;
+
 	public BaseButton childButton;
-	// how close this button can be to the target rotation before it snaps to the target rotation
+
+	/// <summary>
+	/// how close this button can be to the target rotation before it snaps to the target rotation
+	/// </summary>
 	const float errorMargin = 0.05f;
 	public float targetRotation; 
 
@@ -21,14 +29,22 @@ public partial class GameButton
 
 	public void process(double delta)
 	{
+		float deltaRotation = targetRotation - this.childButton.Rotation;
+		float direction = float.Sign(deltaRotation);
 
-		if(!(targetRotation - this.childButton.Rotation < errorMargin && targetRotation - this.childButton.Rotation > -errorMargin))
-		{
-			this.childButton.Rotation += (targetRotation - this.childButton.Rotation) * 20f * (float) delta;
-		}
-		else
+		float d = (float) (1.0 + -1.0 / (1.0 + 0.13 * float.Abs(deltaRotation)));
+		float rotationSpeed = float.Lerp(minimumRotationSpeed, maxRotationSpeed, d);
+		float rotation = (float) (direction * rotationSpeed * delta);
+
+		if(rotation > float.Abs(deltaRotation))
 		{
 			this.childButton.Rotation = targetRotation;
+		}
+		else if(deltaRotation < errorMargin && deltaRotation > -errorMargin)
+		{
+			this.childButton.Rotation = targetRotation;
+		} else {
+			this.childButton.Rotation += rotation;
 		}
 
 		if(this.childButton.Rotation > 3.2f || this.childButton.Rotation < -3.2f) 

@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3 uid="uid://dlupqaxwr7sdp"]
+[gd_scene load_steps=19 format=3 uid="uid://dlupqaxwr7sdp"]
 
 [ext_resource type="Script" uid="uid://bd2ibq7qygtdu" path="res://guiManager/screensaver/Screensaver.cs" id="1_fcd5e"]
 [ext_resource type="FontFile" uid="uid://cnha1ohwbh3ts" path="res://CSHAssets/VT323-Regular.ttf" id="2_fcd5e"]
@@ -12,7 +12,6 @@
 [ext_resource type="PackedScene" uid="uid://bnpwhpnwx1dh2" path="res://guiManager/screensaver/screensaver_games_animations/CubeClimber/cube_climber_game_animation.tscn" id="8_xxjuo"]
 [ext_resource type="PackedScene" uid="uid://crjqi1vferh30" path="res://guiManager/screensaver/screensaver_games_animations/DevcadeDebugger/devcade_debugger_game_animation.tscn" id="9_57oxp"]
 [ext_resource type="PackedScene" uid="uid://chkoyuus5i6o6" path="res://guiManager/screensaver/screensaver_games_animations/lunarLander/lunar_lander_game_animation.tscn" id="10_57oxp"]
-[ext_resource type="Shader" uid="uid://b8yw4hl6yvxdq" path="res://guiManager/screensaver/outline_shine.gdshader" id="10_dt653"]
 [ext_resource type="Texture2D" uid="uid://lqrfprpd7kh3" path="res://CSHAssets/transparent-logo.png" id="10_n0j55"]
 [ext_resource type="Script" uid="uid://62sckdwbwl8r" path="res://GUIs/orignial/DevcadeIcon.cs" id="11_dt653"]
 [ext_resource type="PackedScene" uid="uid://dv35g6sqgpna8" path="res://guiManager/screensaver/screensaver_games_animations/ThreeDTetris/three_d_tetris_game_animation.tscn" id="11_h8c1n"]
@@ -24,15 +23,6 @@ shader_parameter/scale = 7.27
 shader_parameter/direction = Vector2(-0.4, -0.4)
 shader_parameter/x_offset = 1.0
 shader_parameter/alphaScale = 0.72
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_spuds"]
-shader = ExtResource("10_dt653")
-shader_parameter/outline_width = 7
-shader_parameter/start_outline_color = Color(0.466667, 0, 1, 1)
-shader_parameter/end_outline_color = Color(1, 0.968627, 0, 1)
-shader_parameter/shine_speed = -0.2
-shader_parameter/shine_width = 0.23
-shader_parameter/num_segments = 20
 
 [sub_resource type="Theme" id="Theme_q4yft"]
 
@@ -120,7 +110,6 @@ theme_override_constants/margin_bottom = 10
 z_index = 4096
 z_as_relative = false
 y_sort_enabled = true
-material = SubResource("ShaderMaterial_spuds")
 layout_mode = 2
 texture = ExtResource("10_n0j55")
 expand_mode = 5
@@ -210,7 +199,6 @@ theme_override_constants/margin_bottom = 10
 z_index = 4096
 z_as_relative = false
 y_sort_enabled = true
-material = SubResource("ShaderMaterial_spuds")
 layout_mode = 2
 texture = ExtResource("10_n0j55")
 expand_mode = 5
