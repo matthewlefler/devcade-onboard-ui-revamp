@@ -211,7 +211,7 @@ public partial class GuiManager : Control
         }
 
         // switch between dev and normal mode
-        if (Input.IsActionPressed("Player1_B4") && Input.IsActionPressed("Player2_B4") && switchDevButtonCooldownTimer <= 0)
+        if (Env.DEMO_MODE() == false && Input.IsActionPressed("Player1_B4") && Input.IsActionPressed("Player2_B4") && switchDevButtonCooldownTimer <= 0)
         {
             Client.setProduction(!Client.isProduction).ContinueWith(_ => { GuiManagerGlobal.instance.setTag(allTag); GuiManagerGlobal.instance.reloadGameList(); });
             switchDevButtonCooldownTimer = switchDevButtonCooldown;
