@@ -59,6 +59,12 @@ public partial class OriginalGUI : Control
     [Export]
     public Label titleLabel;
 
+    /// <summary>
+    /// the label that holds the author text of the game
+    /// </summary>
+    [Export]
+    public Label AuthorLabel;
+
     public override void _Ready()
     {
         GuiManagerGlobal.instance.gameTitlesUpdated += () =>
@@ -264,6 +270,7 @@ public partial class OriginalGUI : Control
 
         titleLabel.Text = game.name;
         descriptionLabel.Text = game.description;
+        AuthorLabel.Text = $"Author: {game.author}";
 
         description.Show();
     }

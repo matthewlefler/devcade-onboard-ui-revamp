@@ -22,7 +22,7 @@ shader_parameter/scale = 7.27
 shader_parameter/direction = Vector2(-0.4, -0.4)
 shader_parameter/alphaScale = 0.72
 
-[node name="Original" type="Control" node_paths=PackedStringArray("camera", "gameContainer", "tagContainer", "description", "descriptionLabel", "titleLabel")]
+[node name="Original" type="Control" node_paths=PackedStringArray("camera", "gameContainer", "tagContainer", "description", "descriptionLabel", "titleLabel", "AuthorLabel")]
 y_sort_enabled = true
 layout_mode = 3
 anchors_preset = 15
@@ -37,6 +37,7 @@ tagContainer = NodePath("SubViewportContainer/SubViewport/ScrollContainer/tagCon
 description = NodePath("SubViewportContainer/SubViewport/DescriptionContainer")
 descriptionLabel = NodePath("SubViewportContainer/SubViewport/DescriptionContainer/TextureRect2/MarginContainer/VBoxContainer/description")
 titleLabel = NodePath("SubViewportContainer/SubViewport/DescriptionContainer/TextureRect2/MarginContainer/VBoxContainer/title")
+AuthorLabel = NodePath("SubViewportContainer/SubViewport/DescriptionContainer/TextureRect2/MarginContainer/VBoxContainer/Author")
 secBeforeInputEcho = 0.3
 
 [node name="SubViewportContainer" type="SubViewportContainer" parent="."]
@@ -55,7 +56,6 @@ size = Vector2i(2160, 3840)
 render_target_update_mode = 4
 
 [node name="DescriptionContainer" type="MarginContainer" parent="SubViewportContainer/SubViewport"]
-visible = false
 z_as_relative = false
 anchors_preset = 15
 anchor_right = 1.0
@@ -110,10 +110,19 @@ z_index = 200
 z_as_relative = false
 y_sort_enabled = true
 layout_mode = 2
+size_flags_vertical = 2
 theme_override_fonts/font = ExtResource("4_mmnpk")
 theme_override_font_sizes/font_size = 80
 text = "Description"
 autowrap_mode = 2
+
+[node name="Author" type="Label" parent="SubViewportContainer/SubViewport/DescriptionContainer/TextureRect2/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 8
+theme_override_fonts/font = ExtResource("4_mmnpk")
+theme_override_font_sizes/font_size = 80
+text = "Author"
+horizontal_alignment = 1
 
 [node name="Camera2D" type="Camera2D" parent="SubViewportContainer/SubViewport"]
 y_sort_enabled = true
