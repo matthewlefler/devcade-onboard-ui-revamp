@@ -56,6 +56,7 @@ size = Vector2i(2160, 3840)
 render_target_update_mode = 4
 
 [node name="DescriptionContainer" type="MarginContainer" parent="SubViewportContainer/SubViewport"]
+visible = false
 z_as_relative = false
 anchors_preset = 15
 anchor_right = 1.0
