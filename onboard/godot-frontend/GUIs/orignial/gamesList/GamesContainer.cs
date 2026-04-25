@@ -190,7 +190,7 @@ public partial class GamesContainer : Control
     }
 
     /// <summary>
-    /// each button has this set for their on focus gained action
+    /// sets all the buttons' target rotation and z-index
     /// </summary>
     /// <param name="index"> the index of the button </param>
     private void setFocusedGame(int index)
@@ -214,6 +214,46 @@ public partial class GamesContainer : Control
 
             gameButton.childButton.ZIndex = currentGames.Count - offset;
             gameButton.targetRotation = (i - index) * cardSpacing;
+
+            float scaleFactor = -cardScaleAmount * offset / 10.0f;
+            gameButton.childButton.Scale = new Vector2(gameButtonsScale + scaleFactor, gameButtonsScale + scaleFactor);
+
+            if(i - index == 0)
+            {
+                gameButton.childButton.GrabFocus();
+            }
+
+            ++i;
+        }
+    }
+
+    /// <summary>
+    /// sets all the buttons' rotation and z-index
+    /// </summary>
+    /// <param name="index"> the index of the button </param>
+    private void setFocusedGameImmediate(int index)
+    {
+        this.index = index;
+        var currentGames = this.GetChildren();
+
+        // loops over all the game buttons in the saved list
+        // skiping the ones that are not part of the current tag (aka not in the tree)
+        // and setting the z-index and rotation of the buttons based on the integer i
+        // which represents the "index" of the button in the game container (0 being the first/top one)
+        int i = 0;
+        foreach (GameButton gameButton in gameButtons)
+        {
+            if (!gameButton.isInsideTree)
+            {
+                continue;
+            }
+
+            int offset = Math.Abs(i - index);
+
+            gameButton.childButton.ZIndex = currentGames.Count - offset;
+            float rotation = (i - index) * cardSpacing;
+            gameButton.targetRotation = rotation;
+            gameButton.setRotation(rotation);
 
             float scaleFactor = -cardScaleAmount * offset / 10.0f;
             gameButton.childButton.Scale = new Vector2(gameButtonsScale + scaleFactor, gameButtonsScale + scaleFactor);
@@ -253,7 +293,7 @@ public partial class GamesContainer : Control
             }
         });
         numberOfGames = i;
-        setFocusedGame(0);
+        setFocusedGameImmediate(0); // skip buttons' animations
     }
 
     /// <summary>
@@ -288,6 +328,33 @@ public partial class GamesContainer : Control
     public void selectLastPressedButton()
     {
         setFocusedGame(lastButtonPressed.index);
+    }
+
+    /// <summary>
+    /// Sets the last pressed button to a button with an arbitrary index in the gameButtons list immediately, skipping any animations
+    /// </summary>
+    /// <param name="index">must be within or equal to the length of gameButtons and 0</param>
+    public void selectLastPressedButtonImmediate()
+    {
+        setFocusedGameImmediate(lastButtonPressed.index);
+    }
+
+    /// <summary>
+    /// Sets the last pressed button to a button with an arbitrary index in the gameButtons list immediately, skipping any animations
+    /// </summary>
+    /// <param name="index">must be within or equal to the length of gameButtons and 0</param>
+    public void selectCurrentIndex()
+    {
+        setFocusedGame(this.index);
+    }
+
+    /// <summary>
+    /// Sets the last pressed button to a button with an arbitrary index in the gameButtons list immediately, skipping any animations
+    /// </summary>
+    /// <param name="index">must be within or equal to the length of gameButtons and 0</param>
+    public void selectCurrentIndexImmediate()
+    {
+        setFocusedGameImmediate(this.index);
     }
 
 }
