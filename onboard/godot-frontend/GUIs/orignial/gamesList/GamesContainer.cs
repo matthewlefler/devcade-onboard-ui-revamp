@@ -187,6 +187,8 @@ public partial class GamesContainer : Control
         }
 
         lastButtonPressed = gameButtons[0];
+        this.index = 0;
+        selectCurrentIndexImmediate();
     }
 
     /// <summary>
