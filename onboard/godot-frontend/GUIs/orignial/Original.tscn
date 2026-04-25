@@ -68,7 +68,7 @@ theme_override_constants/margin_right = 400
 theme_override_constants/margin_bottom = 300
 
 [node name="TextureRect2" type="TextureRect" parent="SubViewportContainer/SubViewport/DescriptionContainer"]
-z_index = 200
+z_index = 3000
 z_as_relative = false
 y_sort_enabled = true
 layout_mode = 2
