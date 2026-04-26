@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://bs2l3u3gpwk3a"]
+[gd_scene load_steps=18 format=3 uid="uid://bs2l3u3gpwk3a"]
 
 [ext_resource type="Script" uid="uid://bytphx3biwmpk" path="res://GUIs/orignial/OriginalGUI.cs" id="1_eo6uj"]
 [ext_resource type="Texture2D" uid="uid://gsf5hvgxlwu8" path="res://CSHAssets/OnboardBackgroundGradient.png" id="2_4c0jd"]
@@ -10,6 +10,7 @@
 [ext_resource type="Script" uid="uid://d15s735p2xr6b" path="res://GUIs/orignial/gamesList/GamesContainer.cs" id="7_s6n7q"]
 [ext_resource type="Script" uid="uid://cj0skhgydnii2" path="res://GUIs/orignial/Background.cs" id="8_4asay"]
 [ext_resource type="Script" uid="uid://bjnrrsq5svi0h" path="res://GUIs/orignial/tagList/TagContainer.cs" id="8_loec3"]
+[ext_resource type="Script" uid="uid://d1ageyweo8hh5" path="res://GUIs/orignial/BackgroundCshIcons.cs" id="9_2baun"]
 [ext_resource type="Script" uid="uid://62sckdwbwl8r" path="res://GUIs/orignial/DevcadeIcon.cs" id="10_84p7e"]
 [ext_resource type="Script" uid="uid://bnbcabv83bi6o" path="res://GUIs/orignial/SlerpCamera2d.cs" id="10_feq1j"]
 [ext_resource type="Texture2D" uid="uid://bj333tajmq7mt" path="res://CSHAssets/transparent-dev-logo.png" id="11_7qoy5"]
@@ -157,6 +158,8 @@ grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("3_x7jqg")
 expand_mode = 1
+stretch_mode = 1
+script = ExtResource("9_2baun")
 
 [node name="gamesMenu" type="VBoxContainer" parent="SubViewportContainer/SubViewport/Camera2D/background"]
 y_sort_enabled = true
