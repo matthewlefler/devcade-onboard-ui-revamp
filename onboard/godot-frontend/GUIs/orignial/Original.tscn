@@ -148,6 +148,7 @@ camera = NodePath("..")
 
 [node name="backgroundCSHIcons" type="TextureRect" parent="SubViewportContainer/SubViewport/Camera2D/background"]
 y_sort_enabled = true
+texture_filter = 1
 texture_repeat = 2
 material = SubResource("ShaderMaterial_loec3")
 layout_mode = 1
