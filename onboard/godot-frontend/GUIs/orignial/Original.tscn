@@ -10,7 +10,6 @@
 [ext_resource type="Script" uid="uid://d15s735p2xr6b" path="res://GUIs/orignial/gamesList/GamesContainer.cs" id="7_s6n7q"]
 [ext_resource type="Script" uid="uid://cj0skhgydnii2" path="res://GUIs/orignial/Background.cs" id="8_4asay"]
 [ext_resource type="Script" uid="uid://bjnrrsq5svi0h" path="res://GUIs/orignial/tagList/TagContainer.cs" id="8_loec3"]
-[ext_resource type="Script" uid="uid://d1ageyweo8hh5" path="res://GUIs/orignial/BackgroundCshIcons.cs" id="9_2baun"]
 [ext_resource type="Script" uid="uid://62sckdwbwl8r" path="res://GUIs/orignial/DevcadeIcon.cs" id="10_84p7e"]
 [ext_resource type="Script" uid="uid://bnbcabv83bi6o" path="res://GUIs/orignial/SlerpCamera2d.cs" id="10_feq1j"]
 [ext_resource type="Texture2D" uid="uid://bj333tajmq7mt" path="res://CSHAssets/transparent-dev-logo.png" id="11_7qoy5"]
@@ -160,7 +159,6 @@ grow_vertical = 2
 texture = ExtResource("3_x7jqg")
 expand_mode = 1
 stretch_mode = 1
-script = ExtResource("9_2baun")
 
 [node name="gamesMenu" type="VBoxContainer" parent="SubViewportContainer/SubViewport/Camera2D/background"]
 y_sort_enabled = true
