@@ -1,10 +1,13 @@
 using System.Collections.Generic;
 using System.Dynamic;
 using Godot;
+using onboard.util;
 
 namespace onboard.devcade.GUI.originalGUI;
 public partial class OriginalGUI : Control
 {
+    Logger LOG = Log.get(nameof(OriginalGUI));
+
     /// <summary>
     /// the current state of the GUI
     /// this is used to determine what actions to take based on what is / should be on the screen
@@ -58,6 +61,12 @@ public partial class OriginalGUI : Control
     /// </summary>
     [Export]
     public Label titleLabel;
+
+    /// <summary>
+    /// the label that holds the author text of the game
+    /// </summary>
+    [Export]
+    public Label AuthorLabel;
 
     public override void _Ready()
     {
@@ -264,6 +273,9 @@ public partial class OriginalGUI : Control
 
         titleLabel.Text = game.name;
         descriptionLabel.Text = game.description;
+        LOG.Info(game.author);
+        LOG.Info(AuthorLabel.Text);
+        AuthorLabel.Text = $"Author: {game.author}";
 
         description.Show();
     }
@@ -284,7 +296,7 @@ public partial class OriginalGUI : Control
     private void showGameList()
     {
         state = GuiState.ViewGames;
-        gameContainer.selectLastPressedButton();
+        gameContainer.selectCurrentIndexImmediate();
         camera.setRelativeTargetIndex(0);
     }
 

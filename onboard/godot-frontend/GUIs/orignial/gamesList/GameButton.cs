@@ -56,4 +56,9 @@ public class GameButton
 			this.childButton.Show();
 		}
 	}
+
+	public void setRotation(float rotation)
+	{
+		this.childButton.Rotation = rotation;
+	}
 }

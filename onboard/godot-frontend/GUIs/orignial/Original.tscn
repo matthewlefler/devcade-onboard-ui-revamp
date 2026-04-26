@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://bs2l3u3gpwk3a"]
+[gd_scene load_steps=18 format=3 uid="uid://bs2l3u3gpwk3a"]
 
 [ext_resource type="Script" uid="uid://bytphx3biwmpk" path="res://GUIs/orignial/OriginalGUI.cs" id="1_eo6uj"]
 [ext_resource type="Texture2D" uid="uid://gsf5hvgxlwu8" path="res://CSHAssets/OnboardBackgroundGradient.png" id="2_4c0jd"]
@@ -22,7 +22,7 @@ shader_parameter/scale = 7.27
 shader_parameter/direction = Vector2(-0.4, -0.4)
 shader_parameter/alphaScale = 0.72
 
-[node name="Original" type="Control" node_paths=PackedStringArray("camera", "gameContainer", "tagContainer", "description", "descriptionLabel", "titleLabel")]
+[node name="Original" type="Control" node_paths=PackedStringArray("camera", "gameContainer", "tagContainer", "description", "descriptionLabel", "titleLabel", "AuthorLabel")]
 y_sort_enabled = true
 layout_mode = 3
 anchors_preset = 15
@@ -37,6 +37,7 @@ tagContainer = NodePath("SubViewportContainer/SubViewport/ScrollContainer/tagCon
 description = NodePath("SubViewportContainer/SubViewport/DescriptionContainer")
 descriptionLabel = NodePath("SubViewportContainer/SubViewport/DescriptionContainer/TextureRect2/MarginContainer/VBoxContainer/description")
 titleLabel = NodePath("SubViewportContainer/SubViewport/DescriptionContainer/TextureRect2/MarginContainer/VBoxContainer/title")
+AuthorLabel = NodePath("SubViewportContainer/SubViewport/DescriptionContainer/TextureRect2/MarginContainer/VBoxContainer/Author")
 secBeforeInputEcho = 0.3
 
 [node name="SubViewportContainer" type="SubViewportContainer" parent="."]
@@ -68,7 +69,7 @@ theme_override_constants/margin_right = 400
 theme_override_constants/margin_bottom = 300
 
 [node name="TextureRect2" type="TextureRect" parent="SubViewportContainer/SubViewport/DescriptionContainer"]
-z_index = 200
+z_index = 3000
 z_as_relative = false
 y_sort_enabled = true
 layout_mode = 2
@@ -110,10 +111,19 @@ z_index = 200
 z_as_relative = false
 y_sort_enabled = true
 layout_mode = 2
+size_flags_vertical = 2
 theme_override_fonts/font = ExtResource("4_mmnpk")
 theme_override_font_sizes/font_size = 80
 text = "Description"
 autowrap_mode = 2
+
+[node name="Author" type="Label" parent="SubViewportContainer/SubViewport/DescriptionContainer/TextureRect2/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 8
+theme_override_fonts/font = ExtResource("4_mmnpk")
+theme_override_font_sizes/font_size = 80
+text = "Author"
+horizontal_alignment = 1
 
 [node name="Camera2D" type="Camera2D" parent="SubViewportContainer/SubViewport"]
 y_sort_enabled = true
@@ -137,6 +147,7 @@ camera = NodePath("..")
 
 [node name="backgroundCSHIcons" type="TextureRect" parent="SubViewportContainer/SubViewport/Camera2D/background"]
 y_sort_enabled = true
+texture_filter = 1
 texture_repeat = 2
 material = SubResource("ShaderMaterial_loec3")
 layout_mode = 1
@@ -147,6 +158,7 @@ grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("3_x7jqg")
 expand_mode = 1
+stretch_mode = 1
 
 [node name="gamesMenu" type="VBoxContainer" parent="SubViewportContainer/SubViewport/Camera2D/background"]
 y_sort_enabled = true

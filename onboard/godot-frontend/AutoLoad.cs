@@ -32,14 +32,13 @@ public partial class AutoLoad : Node
             targetLogPath = ProjectSettings.GlobalizePath(targetLogPath);
 
             // remove link if target locations differ
-            if(File.Exists(logLocation))
+            if(Directory.Exists(logLocation))
             {
-                FileInfo linkInfo = new FileInfo(logLocation);
-                FileSystemInfo target = linkInfo.ResolveLinkTarget(returnFinalTarget: true);
+                FileSystemInfo target = Directory.ResolveLinkTarget(logLocation, true);
                 if(target.FullName != targetLogPath)
                 {
                     LOG.Info("removing link with target: " + target.FullName);
-                    File.Delete(logLocation);
+                    Directory.Delete(logLocation);
 
                     Directory.CreateSymbolicLink(logLocation, targetLogPath);
                     LOG.Info("created symlink to: " + targetLogPath);

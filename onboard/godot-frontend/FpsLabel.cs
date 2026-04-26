@@ -1,6 +1,5 @@
 using Godot;
 using onboard.devcade;
-using System;
 using System.Linq;
 
 public partial class FpsLabel : Label
