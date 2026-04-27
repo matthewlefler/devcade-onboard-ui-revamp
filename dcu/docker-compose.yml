@@ -1,0 +1,16 @@
+
+services:
+  devcade-onboard:
+    build:
+      args:
+        USERNAME_VAR: ${USERNAME_VAR}
+        PASSWORD_VAR: ${PASSWORD_VAR}
+    ports:
+      - "2200:22"
+    volumes:
+      - persistence:/var/share/persistence'
+      - ssh_host_keys:/etc/ssh/
+  
+volumes:
+  persistence:
+  ssh_host_keys:

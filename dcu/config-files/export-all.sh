@@ -8,8 +8,12 @@ fi
 
 # backend
 # cargo build the backend cause yeah
+cd $2/onboard/backend
+cargo build --release
+cd $2
+cp $2/onboard/backend/target/release/backend $3/backend
 
 # godot frontend
-$1 --path $2/onboard/godot-frontend --headless --export-release "Linux" $3/godot_frontend
+$1 --path $2/onboard/godot-frontend --headless --export-release "Linux" $3/frontend
 
 exit

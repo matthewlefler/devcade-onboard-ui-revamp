@@ -19,20 +19,15 @@ function cleanup() {
 	exit 1
 }
 
+godot=/home/devcade/Godot_v4.4.1-stable_mono_linux_x86_64/Godot_v4.4.1-stable_mono_linux.x86_64
+# compile frontend                       Usage: export_all <godot_executable> <path_to_root_folder>          <out_path>
+/home/devcade/devcade-onboard-ui-revamp/HACKING/export-all.sh $godot /var/home/devcade/devcade-onboard-ui-revamp /var/home/devcade
+
 ./backend &
 backend_pid=$!
 
-### old monogame frontend
-#./frontend &
-
-godot=/home/devcade/Godot_v4.4.1-stable_mono_linux_x86_64/Godot_v4.4.1-stable_mono_linux.x86_64
-### new godot frontend
-#/home/devcade/Godot_v4.4.1-stable_mono_linux_x86_64/Godot_v4.4.1-stable_mono_linux.x86_64 --headless --quit --build-solutions --path /home/devcade/devcade-onboard-ui-revamp/onboard/godot-frontend/ &
-# compile frontend                       Usage: export_all <godot_executable> <path_to_root_folder>          <out_path>
-/home/devcade/devcade-onboard-ui-revamp/HACKING/export-all.sh $godot /home/devcade/devcade-onboard-ui-revamp /home/devcade
-
 ### run frontend
-../godot_frontend &
+../frontend &
 frontend_pid=$!
 
 # run 'cleanup' on exit
