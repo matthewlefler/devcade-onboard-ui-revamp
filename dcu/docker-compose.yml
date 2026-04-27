@@ -8,9 +8,9 @@ services:
     ports:
       - "2200:22"
     volumes:
-      - persistence:/var/share/persistence'
+      - ssh_authed_keys:/var/home/${USERNAME_VAR}/.ssh/
       - ssh_host_keys:/etc/ssh/
   
 volumes:
-  persistence:
+  ssh_authed_keys:
   ssh_host_keys:
