@@ -359,6 +359,10 @@ HACKING/__pycache__/**
 .env
 onboard/.env
 HACKING/.env
+.build-args
+dcu/.build-args
+HACKING/.build-args
+onboard/.build-args
 
 # test locations for save data
 onboard/backend/.save
