@@ -15,9 +15,6 @@ RUN useradd ${USERNAME_VAR} && \
 WORKDIR /var/home/${USERNAME_VAR}
 ENV HOME /var/home/${USERNAME_VAR}
 
-# enable rpm repository (for nvidia drivers)
-RUN sudo dnf install -y \
-    https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
 ### required software
 RUN dnf install -y \
     openbox picom awk scrot xterm pamixer \
@@ -89,7 +86,7 @@ RUN ./export-all.sh \
 USER root
 # niceity software
 RUN dnf install -y \
-    vim fastfetch nvidia-smi \
+    vim fastfetch \
     && dnf clean all
 
 RUN chown -R ${USERNAME_VAR}:${USERNAME_VAR} ${HOME}
