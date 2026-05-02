@@ -5,12 +5,15 @@ COPY ./config-files/sleep.conf /etc/systemd/sleep.conf
 ### User Creation
 ARG PASSWORD_VAR
 ARG USERNAME_VAR
+ARG ROOT_PASSWORD_VAR
 # create devcade user
 RUN useradd ${USERNAME_VAR} && \
 #                username:password
     echo "${USERNAME_VAR}:${PASSWORD_VAR}" | chpasswd && \
 # add to sudoer's group
-    usermod -aG wheel ${USERNAME_VAR}
+    usermod -aG wheel ${USERNAME_VAR} && \
+# set root user password
+    echo "root:${ROOT_PASSWORD_VAR}" | chpasswd &&
 
 WORKDIR /var/home/${USERNAME_VAR}
 ENV HOME /var/home/${USERNAME_VAR}
