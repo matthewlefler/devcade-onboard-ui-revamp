@@ -13,7 +13,7 @@ RUN useradd ${USERNAME_VAR} && \
 # add to sudoer's group
     usermod -aG wheel ${USERNAME_VAR} && \
 # set root user password
-    echo "root:${ROOT_PASSWORD_VAR}" | chpasswd &&
+    echo "root:${ROOT_PASSWORD_VAR}" | chpasswd 
 
 WORKDIR /var/home/${USERNAME_VAR}
 ENV HOME /var/home/${USERNAME_VAR}
