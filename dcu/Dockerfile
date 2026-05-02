@@ -4,21 +4,25 @@ FROM quay.io/fedora/fedora-bootc:latest
 ARG PASSWORD_VAR
 ARG USERNAME_VAR
 # create devcade user
-RUN useradd devcade && \
-#         username:password
+RUN useradd ${USERNAME_VAR} && \
+#                username:password
     echo "${USERNAME_VAR}:${PASSWORD_VAR}" | chpasswd && \
 # add to sudoer's group
-    sudo usermod -aG wheel devcade
+    usermod -aG wheel ${USERNAME_VAR}
 
 WORKDIR /var/home/${USERNAME_VAR}
 ENV HOME /var/home/${USERNAME_VAR}
 
 ### required software
-RUN rpm-ostree install -y \
-    openbox gcc git wget unzip dotnet-sdk-10.0 \
-    xrandr grep openssh-server openssl-devel glib2-devel \
-    flatpak-devel libnfc-devel make cmake \
-    autoconf automake libtool xauth
+RUN dnf install -y \
+    openbox picom awk scrot xterm \
+    gcc git wget unzip dotnet-sdk-10.0 \
+    grep openssh-server openssl-devel \
+    glib2-devel flatpak-devel libnfc-devel \
+    make cmake \
+    autoconf automake libtool \
+    xrandr @base-x 
+
 # install libfreefare-devel, as it is not in the package manager yet
 RUN git clone https://github.com/nfc-tools/libfreefare.git && \
     cd libfreefare && \
@@ -26,7 +30,8 @@ RUN git clone https://github.com/nfc-tools/libfreefare.git && \
     ./configure --prefix=/usr && \
     make && make install && \
     cd .. && rm -r libfreefare
-    
+
+USER ${USERNAME_VAR}
 # Rust
 RUN curl https://sh.rustup.rs -sSf | bash -s -- -y 
 ENV PATH="${HOME}/.cargo/bin:${PATH}"
@@ -37,6 +42,9 @@ RUN wget https://github.com/godotengine/godot/releases/download/4.4.1-stable/God
     unzip Godot_v4.4.1-stable_mono_linux_x86_64.zip && \
     rm Godot_v4.4.1-stable_mono_linux_x86_64.zip
 
+# file required for xauth
+RUN touch .Xauthority
+
 ### copy required files 
 # openbox config file
 COPY ./config-files/rc.xml ./.config/openbox/rc.xml
@@ -45,20 +53,39 @@ COPY ./config-files/tty1_service_override.conf /etc/systemd/system/getty@tty1.se
 # sshd config
 COPY ./config-files/sshd_config /etc/ssh/sshd_config
 # restart services 
-#   - enable autologin
 #   - start ssh server
-RUN systemctl enable getty@tty1; \
-    systemctl enable sshd
+#   - enable autologin
+RUN systemctl enable sshd; \
+    systemctl enable getty@tty1
+
+# expose port for SSH connections
 EXPOSE 22
 # export script, xinitrc, bashrc, onboard script
 COPY ["./config-files/export-all.sh", "./config-files/.xinitrc", "./config-files/.bashrc", "./config-files/onboard", "./"]
 
 # export template
-COPY ./config-files/linux_debug.x86_64 ./.local/share/godot/export_templates/4.4.1.stable.mono/linux_release.x86_64
+COPY --chown=${USERNAME_VAR}:${USERNAME_VAR} \
+    ./config-files/linux_debug.x86_64 \
+    ./.local/share/godot/export_templates/4.4.1.stable.mono/linux_release.x86_64
 
-RUN ls
+RUN cp ./devcade-onboard-ui-revamp/onboard/.env.template ./.env
+
 # export-all.sh <godot-path> <src path> <out path>
 RUN ./export-all.sh \
     ${HOME}/Godot_v4.4.1-stable_mono_linux_x86_64/Godot_v4.4.1-stable_mono_linux.x86_64 \
     ${HOME}/devcade-onboard-ui-revamp \
     ${HOME}/
+
+USER root
+# niceity software
+RUN dnf install -y \
+    vim fastfetch \
+    && dnf clean all
+
+RUN chown -R ${USERNAME_VAR}:${USERNAME_VAR} ${HOME}
+
+RUN mkdir -p /boot/efi/EFI
+
+# make it known as a bootc container
+LABEL containers.bootc=1
+LABEL bootc.rootfs=/sysroot

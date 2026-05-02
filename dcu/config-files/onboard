@@ -2,8 +2,6 @@
 
 # This script runs and manages the onboard frontend and backend
 
-cd $HOME/publish
-
 backend_pid=-1
 frontend_pid=-1
 
@@ -19,15 +17,16 @@ function cleanup() {
 	exit 1
 }
 
-godot=/home/devcade/Godot_v4.4.1-stable_mono_linux_x86_64/Godot_v4.4.1-stable_mono_linux.x86_64
-# compile frontend                       Usage: export_all <godot_executable> <path_to_root_folder>          <out_path>
-/home/devcade/devcade-onboard-ui-revamp/HACKING/export-all.sh $godot /var/home/devcade/devcade-onboard-ui-revamp /var/home/devcade
+godot=${HOME}/Godot_v4.4.1-stable_mono_linux_x86_64/Godot_v4.4.1-stable_mono_linux.x86_64
+# compile frontend 
+# Usage: export_all <godot_executable> <path_to_root_folder> <out_path>
+# ${HOME}/export-all.sh $godot ${HOME}/devcade-onboard-ui-revamp/ ${HOME}/
 
 ./backend &
 backend_pid=$!
 
 ### run frontend
-../frontend &
+./frontend &
 frontend_pid=$!
 
 # run 'cleanup' on exit

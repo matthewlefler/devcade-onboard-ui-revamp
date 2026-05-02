@@ -9,7 +9,7 @@ configure_display() {
 }
 
 . ~/.env
-configure_display
+# configure_display
 
-openbox & compton & /usr/libexec/xdg-desktop-portal-gtk &
-~/publish/onboard 2>&1 | systemd-cat -t devcade-onboard
+openbox && picom & /usr/libexec/xdg-desktop-portal-gtk &
+~/onboard 2>&1 | systemd-cat -t devcade-onboard

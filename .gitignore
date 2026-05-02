@@ -360,6 +360,7 @@ HACKING/__pycache__/**
 onboard/.env
 HACKING/.env
 dcu/.env
+dcu/output/**
 
 # test locations for save data
 onboard/backend/.save

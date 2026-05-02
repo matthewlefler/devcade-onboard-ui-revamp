@@ -118,4 +118,4 @@ if [[ -z "$DISPLAY" ]] && [[ $(tty) = /dev/tty1 ]]; then
 fi
 . "$HOME/.cargo/env"
 alias l='ls -lApvh --group-directories-first --color=always'
-alias clr='clear && neofetch'
+alias clr='clear && fastfetch'
