@@ -19,7 +19,7 @@ ENV HOME /var/home/${USERNAME_VAR}
 RUN dnf install -y \
     openbox picom awk scrot xterm pamixer \
     gcc git wget unzip dotnet-sdk-10.0 \
-    grep openssh-server openssl-devel \
+    grep openssh-server openssl-devel fail2ban \
     glib2-devel flatpak-devel libnfc-devel \
     make cmake \
     autoconf automake libtool \
@@ -32,6 +32,9 @@ RUN git clone https://github.com/nfc-tools/libfreefare.git && \
     ./configure --prefix=/usr && \
     make && make install && \
     cd .. && rm -r libfreefare
+
+# root services config file
+COPY ./config-files/sshd.local /etc/fail2ban/jail.d/sshd.local
 
 USER ${USERNAME_VAR}
 # Rust
