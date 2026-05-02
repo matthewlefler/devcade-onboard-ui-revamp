@@ -1,4 +1,4 @@
-FROM quay.io/fedora/fedora-bootc:latest
+FROM quay.io/fedora/fedora-bootc:42
 
 COPY ./config-files/sleep.conf /etc/systemd/sleep.conf
 
@@ -33,6 +33,10 @@ RUN git clone https://github.com/nfc-tools/libfreefare.git && \
     ./configure --prefix=/usr && \
     make && make install && \
     cd .. && rm -r libfreefare
+
+# required flatpak runtimes
+RUN flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo && \
+    flatpak install flathub org.freedesktop.Platform/x86_64/22.08 
 
 # root services config file
 COPY ./config-files/sshd.local /etc/fail2ban/jail.d/sshd.local
