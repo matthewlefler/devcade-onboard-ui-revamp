@@ -30,8 +30,9 @@ bootupd, skopo
 Requirements:
 - USB stick
 - This repository
-- At most 20 minutes
-***Note:* This wipes whatever drive it is installed to, removing all data already there, do not install this to a machine that contains important data, as it will be wiped**
+- At most 20 minutes 
+  
+***Note:* This wipes whatever drive it is installed to, removing all data already there, do not install this to a machine that contains important data, as it will be wiped**   
 create the ISO as follows, in `devcade-onboard/dcu/`:
 ```bash
 ./create-iso.sh
