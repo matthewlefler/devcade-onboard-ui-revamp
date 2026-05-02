@@ -87,7 +87,6 @@ RUN dnf install -y \
 
 RUN chown -R ${USERNAME_VAR}:${USERNAME_VAR} ${HOME}
 
-RUN bootc kargs --append "fbcon=rotate:3"
 # make it known as a bootc container
 LABEL containers.bootc=1
 LABEL bootc.rootfs=/sysroot
