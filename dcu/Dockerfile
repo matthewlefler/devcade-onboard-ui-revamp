@@ -69,7 +69,7 @@ COPY --chown=${USERNAME_VAR}:${USERNAME_VAR} \
 
 # export template
 COPY --chown=${USERNAME_VAR}:${USERNAME_VAR} \
-    ["./config-files/linux_debug.x86_64", "./config-files/linux_release.x86_64", "./.local/share/godot/export_templates/4.4.1.stable.mono/linux_release.x86_64"]
+    ["./config-files/linux_debug.x86_64", "./config-files/linux_release.x86_64", "./.local/share/godot/export_templates/4.4.1.stable.mono/"]
 
 RUN cp ./devcade-onboard-ui-revamp/onboard/.env.template ./.env
 
