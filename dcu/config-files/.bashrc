@@ -111,11 +111,16 @@ if ! shopt -oq posix; then
     . /etc/bash_completion
   fi
 fi
+
 DEVCADE_AUTOLOGIN_INSTALLED=1
 if [[ -z "$DISPLAY" ]] && [[ $(tty) = /dev/tty1 ]]; then
    . startx -- -nocursor
    logout
 fi
+
 . "$HOME/.cargo/env"
+# rotate terminal
+echo 3 | sudo tee /sys/class/graphics/fbcon/rotate
+# custom aliases
 alias l='ls -lApvh --group-directories-first --color=always'
 alias clr='clear && fastfetch'
