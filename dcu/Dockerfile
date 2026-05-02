@@ -15,6 +15,9 @@ RUN useradd ${USERNAME_VAR} && \
 WORKDIR /var/home/${USERNAME_VAR}
 ENV HOME /var/home/${USERNAME_VAR}
 
+# enable rpm repository (for nvidia drivers)
+RUN sudo dnf install -y \
+    https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
 ### required software
 RUN dnf install -y \
     openbox picom awk scrot xterm pamixer \
@@ -24,6 +27,7 @@ RUN dnf install -y \
     make cmake \
     autoconf automake libtool \
     xrandr @base-x 
+    # akmod-nvidia xorg-x11-drv-nvidia
 
 # install libfreefare-devel, as it is not in the package manager yet
 RUN git clone https://github.com/nfc-tools/libfreefare.git && \
@@ -85,7 +89,7 @@ RUN ./export-all.sh \
 USER root
 # niceity software
 RUN dnf install -y \
-    vim fastfetch \
+    vim fastfetch nvidia-smi \
     && dnf clean all
 
 RUN chown -R ${USERNAME_VAR}:${USERNAME_VAR} ${HOME}
