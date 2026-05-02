@@ -26,23 +26,20 @@ Then install dependencies
 ```
 bootupd, skopo
 ```
-## Installing to a partition
-First build the container as always:
+## Installing to a machine
+Requirements:
+- USB stick
+- This repository
+- At most 20 minutes
+***Note:* This wipes whatever drive it is installed to, removing all data already there, do not install this to a machine that contains important data, as it will be wiped**
+create the ISO as follows, in `devcade-onboard/dcu/`:
 ```bash
-sudo ./build.sh
+./create-iso.sh
 ```
-To install to a mounted partition 
-```bash
-sudo bootc install to-filesystem /path/to/mounted/partition --source-imgref containers-storage:localhost/dcu-devcade-onboard:latest
-```
-If you want a boot-loader to be created, mount your efi partition to /boot/efi in the mounted partition:   
-*Note:* this creates new boot entries that can be selected in your **BIOS** and boots using grub
-```bash
-mount /dev/<efi-partition-name> /path/to/mounted/partition/boot/efi
-```
-### Issues
-If issues arise *un-mount* the partition, reformat it to `sudo mkfs -t ext4 /dev/<partition-name>`, mount it and try again   
-*Note:* bootc will mount the partition to an internal file path, in my case `/run/bootc/storage`, use `findmnt | grep <partition-name>` to find it otherwise
+Then create a bootable USB drive using the tool of your choice (I used a Ventoy where i can just copy the ISO to the USB stick)   
+Then insert the USB stick into the machine and turn it on, going to the BIOS if needed to boot from the USB stick.   
+Then select install (the first option) to install the devcade container to the machine.   
+
 # Testing
 ## Using podman
 Refer to: https://github.com/containers/podman/blob/main/docs/tutorials/podman_tutorial.md
