@@ -1,5 +1,7 @@
 FROM quay.io/fedora/fedora-bootc:latest
 
+COPY ./config-files/sleep.conf /etc/systemd/sleep.conf
+
 ### User Creation
 ARG PASSWORD_VAR
 ARG USERNAME_VAR
@@ -15,7 +17,7 @@ ENV HOME /var/home/${USERNAME_VAR}
 
 ### required software
 RUN dnf install -y \
-    openbox picom awk scrot xterm \
+    openbox picom awk scrot xterm pamixer \
     gcc git wget unzip dotnet-sdk-10.0 \
     grep openssh-server openssl-devel \
     glib2-devel flatpak-devel libnfc-devel \
@@ -67,8 +69,7 @@ COPY --chown=${USERNAME_VAR}:${USERNAME_VAR} \
 
 # export template
 COPY --chown=${USERNAME_VAR}:${USERNAME_VAR} \
-    ./config-files/linux_debug.x86_64 \
-    ./.local/share/godot/export_templates/4.4.1.stable.mono/linux_release.x86_64
+    ["./config-files/linux_debug.x86_64", "./config-files/linux_release.x86_64", "./.local/share/godot/export_templates/4.4.1.stable.mono/linux_release.x86_64"]
 
 RUN cp ./devcade-onboard-ui-revamp/onboard/.env.template ./.env
 
@@ -86,6 +87,7 @@ RUN dnf install -y \
 
 RUN chown -R ${USERNAME_VAR}:${USERNAME_VAR} ${HOME}
 
+RUN bootc kargs --append "fbcon=rotate:3"
 # make it known as a bootc container
 LABEL containers.bootc=1
 LABEL bootc.rootfs=/sysroot
