@@ -47,7 +47,8 @@ RUN touch .Xauthority
 
 ### copy required files 
 # openbox config file
-COPY ./config-files/rc.xml ./.config/openbox/rc.xml
+COPY --chown=${USERNAME_VAR}:${USERNAME_VAR} \
+    ./config-files/rc.xml ./.config/openbox/rc.xml
 # autologin service
 COPY ./config-files/tty1_service_override.conf /etc/systemd/system/getty@tty1.service.d/override.conf
 # sshd config
@@ -61,7 +62,8 @@ RUN systemctl enable sshd; \
 # expose port for SSH connections
 EXPOSE 22
 # export script, xinitrc, bashrc, onboard script
-COPY ["./config-files/export-all.sh", "./config-files/.xinitrc", "./config-files/.bashrc", "./config-files/onboard", "./"]
+COPY --chown=${USERNAME_VAR}:${USERNAME_VAR} \
+    ["./config-files/export-all.sh", "./config-files/.xinitrc", "./config-files/.bashrc", "./config-files/onboard", "./"]
 
 # export template
 COPY --chown=${USERNAME_VAR}:${USERNAME_VAR} \
