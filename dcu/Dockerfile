@@ -26,8 +26,7 @@ RUN dnf install -y \
     glib2-devel flatpak-devel libnfc-devel \
     make cmake \
     autoconf automake libtool \
-    xrandr @base-x 
-    # akmod-nvidia xorg-x11-drv-nvidia
+    xrandr @base-x
 
 # install libfreefare-devel, as it is not in the package manager yet
 RUN git clone https://github.com/nfc-tools/libfreefare.git && \
@@ -40,6 +39,8 @@ RUN git clone https://github.com/nfc-tools/libfreefare.git && \
 # required flatpak runtimes
 RUN flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo && \
     flatpak install -y flathub org.freedesktop.Platform/x86_64/22.08 
+    # && \
+    # flatpak install flathub org.freedesktop.Platform.GL.nvidia-580-
 
 # root services config file
 COPY ./config-files/sshd.local /etc/fail2ban/jail.d/sshd.local
@@ -93,7 +94,7 @@ RUN ./export-all.sh \
 USER root
 # niceity software
 RUN dnf install -y \
-    vim fastfetch btop \
+    vim fastfetch btop lspci \
     && dnf clean all
 
 RUN chown -R ${USERNAME_VAR}:${USERNAME_VAR} ${HOME}
