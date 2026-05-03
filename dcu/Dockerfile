@@ -93,7 +93,7 @@ RUN ./export-all.sh \
 USER root
 # niceity software
 RUN dnf install -y \
-    vim fastfetch \
+    vim fastfetch btop \
     && dnf clean all
 
 RUN chown -R ${USERNAME_VAR}:${USERNAME_VAR} ${HOME}

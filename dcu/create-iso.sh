@@ -6,6 +6,7 @@ sudo bash -c '
   mkdir -p output &&
   podman run --rm -it --privileged \
     -v /var/lib/containers/storage:/var/lib/containers/storage \
+    -v $(pwd)/config.toml:/config.toml \
     -v $(pwd)/output:/output \
     quay.io/centos-bootc/bootc-image-builder:latest \
     --rootfs ext4 \
