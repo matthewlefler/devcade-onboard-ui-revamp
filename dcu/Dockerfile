@@ -67,12 +67,6 @@ COPY --chown=${USERNAME_VAR}:${USERNAME_VAR} \
 COPY ./config-files/tty1_service_override.conf /etc/systemd/system/getty@tty1.service.d/override.conf
 # sshd config
 COPY ./config-files/sshd_config /etc/ssh/sshd_config
-# restart services 
-#   - start ssh server
-#   - enable autologin
-RUN systemctl enable sshd; \
-    systemctl enable getty@tty1; \
-    systemctl enable fail2ban
 
 # expose port for SSH connections
 EXPOSE 22
@@ -93,6 +87,13 @@ RUN ./export-all.sh \
     ${HOME}/
 
 USER root
+# restart services 
+#   - start ssh server
+#   - enable autologin
+RUN systemctl enable sshd; \
+    systemctl enable getty@tty1; \
+    systemctl enable fail2ban
+
 # niceity software
 RUN dnf install -y \
     vim fastfetch btop lspci \
