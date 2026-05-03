@@ -20,8 +20,9 @@ ENV HOME /var/home/${USERNAME_VAR}
 
 ### required software
 RUN dnf install -y \
-    openbox picom awk scrot xterm pamixer \
-    gcc git wget unzip dotnet-sdk-10.0 \
+    kernel-devel-matched kernel-headers \
+    openbox picom awk scrot xterm pamixer xdg-desktop-portal-gtk \
+    gcc-c++ git wget unzip dotnet-sdk-10.0 \
     grep openssh-server openssl-devel fail2ban \
     glib2-devel flatpak-devel libnfc-devel \
     make cmake \
@@ -36,12 +37,18 @@ RUN git clone https://github.com/nfc-tools/libfreefare.git && \
     make && make install && \
     cd .. && rm -r libfreefare
 
-# nvidia stuff (for nvidia-smi and drivers)
+# nvidia stuff (for drivers and nvidia-smi and stuff)
+# see: https://rpmfusion.org/Howto/NVIDIA and https://rpmfusion.org/Configuration
 RUN sudo dnf -y install \
     https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
     https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm &&\
     dnf clean all && \
-    dnf -y install akmod-nvidia xorg-x11-drv-nvidia-cuda
+    dnf -y install akmod-nvidia xorg-x11-drv-nvidia-cuda dkms && \
+    mkdir -p /var/log/akmods && touch /var/log/akmods/akmods.log && \
+    akmods --force --kernels "$(rpm -q --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}' kernel-devel)"
+# see: https://mrguitar.net/?p=2664
+COPY --chmod=755 ./config-files/dkms.sh /tmp
+RUN /tmp/dkms.sh
 
 # required flatpak runtimes
 RUN flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo && \
@@ -106,7 +113,8 @@ RUN dnf install -y \
     vim fastfetch btop lspci \
     && dnf clean all
 
-RUN chown -R ${USERNAME_VAR}:${USERNAME_VAR} ${HOME}
+RUN echo -e "changing ownership of ${HOME}"; \
+    chown -R ${USERNAME_VAR}:${USERNAME_VAR} ${HOME}
 
 # make it known as a bootc container
 LABEL containers.bootc=1
