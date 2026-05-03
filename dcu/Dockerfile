@@ -37,11 +37,11 @@ RUN git clone https://github.com/nfc-tools/libfreefare.git && \
     cd .. && rm -r libfreefare
 
 # nvidia stuff (for nvidia-smi and drivers)
-RUN curl -O https://developer.download.nvidia.com/compute/cuda/repos/fedora43/$(uname -m)/cuda-fedora43.repo && \
-    mv cuda-fedora43.repo /etc/yum.repos.d/ && \
+RUN sudo dnf -y install \
+    https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
+    https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm &&\
     dnf clean all && \
-    # dnf list --available --repo=cuda-fedora43-x86_64 && \
-    dnf -y install xorg-x11-nvidia.x86_64
+    dnf -y install akmod-nvidia xorg-x11-drv-nvidia-cuda
 
 # required flatpak runtimes
 RUN flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo && \
