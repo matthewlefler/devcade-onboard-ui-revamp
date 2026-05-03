@@ -70,8 +70,9 @@ COPY ./config-files/sshd_config /etc/ssh/sshd_config
 # restart services 
 #   - start ssh server
 #   - enable autologin
-RUN systemctl enable sshd; \
-    systemctl enable getty@tty1
+RUN systemctl enable --now sshd; \
+    systemctl enable --now getty@tty1; \
+    systemctl enable --now fail2ban
 
 # expose port for SSH connections
 EXPOSE 22
