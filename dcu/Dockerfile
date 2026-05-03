@@ -39,7 +39,6 @@ RUN git clone https://github.com/nfc-tools/libfreefare.git && \
 
 # nvidia stuff (for drivers and nvidia-smi and stuff)
 # see: https://rpmfusion.org/Howto/NVIDIA and https://rpmfusion.org/Configuration
-# see: https://mrguitar.net/?p=2664
 RUN sudo dnf -y install \
     https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
     https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm &&\
@@ -47,7 +46,9 @@ RUN sudo dnf -y install \
     dnf -y install akmod-nvidia xorg-x11-drv-nvidia-cuda dkms && \
     mkdir -p /var/log/akmods && touch /var/log/akmods/akmods.log && \
     akmods --force --kernels "$(rpm -q --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}' kernel-devel)" && \
+# https://docs.fedoraproject.org/en-US/bootc/initramfs/#_regenerating_the_initrd
     set -xe; kver=$(ls /usr/lib/modules); env DRACUT_NO_XATTR=1 dracut -vf /usr/lib/modules/$kver/initramfs.img "$kver"
+# see: https://mrguitar.net/?p=2664
 # COPY --chmod=755 ./config-files/dkms.sh /tmp
 # RUN /tmp/dkms.sh
 
