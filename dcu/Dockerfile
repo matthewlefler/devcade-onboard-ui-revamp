@@ -121,3 +121,5 @@ RUN echo -e "changing ownership of ${HOME}"; \
 # make it known as a bootc container
 LABEL containers.bootc=1
 LABEL bootc.rootfs=/sysroot
+
+RUN bootc container lint
