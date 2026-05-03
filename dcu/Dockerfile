@@ -1,4 +1,4 @@
-FROM quay.io/fedora/fedora-bootc:42
+FROM quay.io/fedora/fedora-bootc:43
 
 COPY ./config-files/sleep.conf /etc/systemd/sleep.conf
 
@@ -36,11 +36,18 @@ RUN git clone https://github.com/nfc-tools/libfreefare.git && \
     make && make install && \
     cd .. && rm -r libfreefare
 
+# nvidia stuff (for nvidia-smi and drivers)
+RUN curl -O https://developer.download.nvidia.com/compute/cuda/repos/fedora43/$(uname -m)/cuda-fedora43.repo && \
+    mv cuda-fedora43.repo /etc/yum.repos.d/ && \
+    dnf clean all && \
+    # dnf list --available --repo=cuda-fedora43-x86_64 && \
+    dnf -y install xorg-x11-nvidia.x86_64
+
 # required flatpak runtimes
 RUN flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo && \
     flatpak install -y flathub org.freedesktop.Platform/x86_64/22.08 
     # && \
-    # flatpak install flathub org.freedesktop.Platform.GL.nvidia-580-
+    # flatpak install flathub org.freedesktop.Platform.GL.nvidia-595-
 
 # root services config file
 COPY ./config-files/sshd.local /etc/fail2ban/jail.d/sshd.local
