@@ -39,7 +39,7 @@ RUN git clone https://github.com/nfc-tools/libfreefare.git && \
 
 # required flatpak runtimes
 RUN flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo && \
-    flatpak install flathub org.freedesktop.Platform/x86_64/22.08 
+    flatpak install -y flathub org.freedesktop.Platform/x86_64/22.08 
 
 # root services config file
 COPY ./config-files/sshd.local /etc/fail2ban/jail.d/sshd.local
