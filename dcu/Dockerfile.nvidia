@@ -10,7 +10,7 @@ RUN set -xeuo pipefail && \
     dnf clean all && \
     groupadd -f video && \
     useradd core && \
-    nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml && \
+    # nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml && \
     systemctl enable nvidia-persistenced nvidia-cdi-refresh
 
 COPY ./config-files/sleep.conf /etc/systemd/sleep.conf
