@@ -1,5 +1,15 @@
 FROM quay.io/coreos-devel/fedora-bootc-nvidia:43
 
+RUN set -xeuo pipefail && \
+    source /usr/lib/os-release && \
+    curl https://developer.download.nvidia.com/compute/cuda/repos/${ID}${VERSION_ID}/$(arch)/cuda-${ID}${VERSION_ID}.repo \
+        -o /etc/yum.repos.d/cuda.repo && \
+    dnf install -y \
+        nvidia-driver-cuda && \
+    dnf clean all && \
+    systemctl enable nvidia-persistenced nvidia-cdi-refresh && \
+
+
 COPY ./config-files/sleep.conf /etc/systemd/sleep.conf
 
 ### User Creation
@@ -37,11 +47,11 @@ RUN git clone https://github.com/nfc-tools/libfreefare.git && \
     make && make install && \
     cd .. && rm -r libfreefare
 
-RUN sudo dnf -y install \
-    https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
-    https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm && \
-    dnf clean all && \
-    dnf -y install xorg-x11-drv-nvidia-cuda
+# RUN sudo dnf -y install \
+#     https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
+#     https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm && \
+#     dnf clean all && \
+#     dnf -y install xorg-x11-drv-nvidia-cuda
 
 # required flatpak runtimes
 RUN flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo && \
