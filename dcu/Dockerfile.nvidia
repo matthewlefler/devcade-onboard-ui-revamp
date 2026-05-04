@@ -1,4 +1,5 @@
-FROM quay.io/coreos-devel/fedora-bootc-nvidia:43
+# see https://quay.io/repository/coreos-devel/fedora-bootc-nvidia?tab=tags
+FROM quay.io/coreos-devel/fedora-bootc-nvidia:coreos-stable-580.95.05
 
 RUN set -xeuo pipefail && \
     source /usr/lib/os-release && \
