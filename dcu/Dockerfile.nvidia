@@ -8,9 +8,9 @@ RUN set -xeuo pipefail && \
     dnf install -y \
         nvidia-driver-cuda && \
     dnf clean all && \
-    sudo groupadd -f video && \
-    sudo usermod -aG video core && \
-    sudo nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml && \
+    groupadd -f video && \
+    useradd core && \
+    nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml && \
     systemctl enable nvidia-persistenced nvidia-cdi-refresh
 
 COPY ./config-files/sleep.conf /etc/systemd/sleep.conf
