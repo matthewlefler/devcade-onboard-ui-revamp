@@ -1,17 +1,27 @@
 # see https://quay.io/repository/coreos-devel/fedora-bootc-nvidia?tab=tags
-FROM quay.io/coreos-devel/fedora-bootc-nvidia:coreos-stable-580.95.05
+# FROM quay.io/coreos-devel/fedora-bootc-nvidia:coreos-stable-580.95.05
+FROM quay.io/fedora/fedora-bootc:43
 
-RUN set -xeuo pipefail && \
-    source /usr/lib/os-release && \
-    curl https://developer.download.nvidia.com/compute/cuda/repos/${ID}${VERSION_ID}/$(arch)/cuda-${ID}${VERSION_ID}.repo \
-        -o /etc/yum.repos.d/cuda.repo && \
-    dnf install -y \
-        nvidia-driver-cuda && \
-    dnf clean all && \
-    groupadd -f video && \
-    useradd core && \
-    # nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml && \
-    systemctl enable nvidia-persistenced nvidia-cdi-refresh
+COPY --chmod=755 ./config-files/wait-for-driver-install.sh /tmp/wait-for-driver-install.sh
+RUN dnf -y install \
+        https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
+        https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm && \
+    dnf -y install akmod-nvidia xorg-x11-drv-nvidia-cuda 
+    #&& \
+    # /tmp/wait-for-driver-install.sh && \
+    # rm /tmp/wait-for-driver-install.sh
+# RUN set -xeuo pipefail && \
+#     source /usr/lib/os-release && \
+#     curl https://developer.download.nvidia.com/compute/cuda/repos/${ID}${VERSION_ID}/$(arch)/cuda-${ID}${VERSION_ID}.repo \
+#         -o /etc/yum.repos.d/cuda.repo && \
+#     dnf install -y \
+#         nvidia-driver-cuda && \
+#     dnf clean all && \
+#     groupadd -f video && \
+#     useradd core && \
+#     # nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml && \
+#     systemctl enable nvidia-persistenced nvidia-cdi-refresh
+
 
 COPY ./config-files/sleep.conf /etc/systemd/sleep.conf
 
