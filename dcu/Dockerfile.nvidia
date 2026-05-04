@@ -7,7 +7,7 @@ RUN set -xeuo pipefail && \
     dnf install -y \
         nvidia-driver-cuda && \
     dnf clean all && \
-    systemctl enable nvidia-persistenced nvidia-cdi-refresh && \
+    systemctl enable nvidia-persistenced nvidia-cdi-refresh 
 
 
 COPY ./config-files/sleep.conf /etc/systemd/sleep.conf
