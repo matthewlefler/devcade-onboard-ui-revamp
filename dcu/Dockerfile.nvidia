@@ -26,7 +26,7 @@ COPY ./config-files/files.conf /usr/lib/tmpfiles.d/custom_files.conf
 COPY ./config-files/users.conf /usr/lib/sysusers.d/custom_users.conf
 
 # disable sleep/hiberate features
-COPY ./config-files/sleep.conf /etc/systemd/sleep.conf
+RUN systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
 
 ### User Creation
 ARG PASSWORD_VAR
