@@ -464,6 +464,7 @@ fn generate_clean_env() -> HashMap<String, String> {
                 || key == "LANG"
                 || key == "TERM"
                 || key == "DEVCADE_PATH"
+                || key == "HOSTNAME"
         })
         .map(|(k, v)| (k.clone(), v.clone()))
         .collect::<HashMap<String, String>>()
@@ -516,8 +517,8 @@ pub async fn launch_game(game_id: String) -> Result<(), Error> {
         // This unwrap is safe because it is guaranteed to have a parent
         .current_dir(path.parent().unwrap())
         // Oops, there's kind of secrets in there
-        // .env_clear()
-        // .envs(envs)
+        .env_clear()
+        .envs(envs)
         .spawn()
         .expect("Failed to launch game");
 
