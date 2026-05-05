@@ -20,7 +20,7 @@ public partial class AutoLoad : Node
     {
         // load the .env file (contains the enviorment variables)
         LOG.Info("loading env");
-        Env.load("../.env");
+        Env.load("./.env");
 
         string logLocation = Env.LOG_LOCATION();
         try

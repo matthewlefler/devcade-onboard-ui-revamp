@@ -630,7 +630,7 @@
 
   <!-- default menu file (or custom one in $HOME/.config/openbox/) -->
   <!-- system menu files on Debian systems -->
-  <file>/var/lib/openbox/debian-menu.xml</file>
+  <file>/etc/xdg/openbox/menu.xml</file>
   <file>menu.xml</file>
   <hideDelay>200</hideDelay>
   <!-- if a press-release lasts longer than this setting (in milliseconds), the

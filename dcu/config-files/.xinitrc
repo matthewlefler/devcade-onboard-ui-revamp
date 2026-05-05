@@ -11,5 +11,7 @@ configure_display() {
 . ~/.env
 configure_display
 
-openbox && picom & /usr/libexec/xdg-desktop-portal-gtk &
-~/onboard 2>&1 | systemd-cat -t devcade-onboard
+picom & 
+/usr/libexec/xdg-desktop-portal-gtk &
+~/onboard 2>&1 | systemd-cat -t devcade-onboard &
+exec openbox

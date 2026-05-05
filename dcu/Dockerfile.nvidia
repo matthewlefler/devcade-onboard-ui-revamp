@@ -66,7 +66,8 @@ RUN git clone https://github.com/nfc-tools/libfreefare.git && \
 # required flatpak runtimes
 RUN flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo && \
     flatpak install -y flathub org.freedesktop.Platform/x86_64/22.08 && \
-    flatpak install -y flathub org.freedesktop.Platform.GL.nvidia-580-142
+    flatpak install -y flathub org.freedesktop.Platform.GL.nvidia-580-142 && \
+    flatpak install -y flathub org.freedesktop.Platform.ffmpeg-full
 
 # root services config file
 # ban people from ssh'ing after some number of attempts for some amount of time
