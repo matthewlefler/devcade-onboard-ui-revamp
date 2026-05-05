@@ -22,8 +22,8 @@ match-architectures = ["x86_64", "aarch64"]
 EOF
 
 # user and file systemd configs
-COPY ./config-files/files.conf /usr/lib/tmpfiles.d/files.conf
-COPY ./config-files/users.conf /usr/lib/sysusers.d/users.conf
+COPY ./config-files/files.conf /usr/lib/tmpfiles.d/custom_files.conf
+COPY ./config-files/users.conf /usr/lib/sysusers.d/custom_users.conf
 
 # disable sleep/hiberate features
 COPY ./config-files/sleep.conf /etc/systemd/sleep.conf
