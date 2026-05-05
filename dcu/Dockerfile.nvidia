@@ -1,28 +1,27 @@
-# see https://quay.io/repository/coreos-devel/fedora-bootc-nvidia?tab=tags
-# FROM quay.io/coreos-devel/fedora-bootc-nvidia:coreos-stable-580.95.05
 FROM quay.io/fedora/fedora-bootc:43
 
-COPY --chmod=755 ./config-files/wait-for-driver-install.sh /tmp/wait-for-driver-install.sh
+### Nvidia drivers
+# enable require repositories
 RUN dnf -y install \
         https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
         https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm && \
-    dnf -y install akmod-nvidia xorg-x11-drv-nvidia-cuda 
-    #&& \
-    # /tmp/wait-for-driver-install.sh && \
-    # rm /tmp/wait-for-driver-install.sh
-# RUN set -xeuo pipefail && \
-#     source /usr/lib/os-release && \
-#     curl https://developer.download.nvidia.com/compute/cuda/repos/${ID}${VERSION_ID}/$(arch)/cuda-${ID}${VERSION_ID}.repo \
-#         -o /etc/yum.repos.d/cuda.repo && \
-#     dnf install -y \
-#         nvidia-driver-cuda && \
-#     dnf clean all && \
-#     groupadd -f video && \
-#     useradd core && \
-#     # nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml && \
-#     systemctl enable nvidia-persistenced nvidia-cdi-refresh
+# Install NVIDIA drivers
+    dnf install -y --allowerasing \
+        akmod-nvidia \
+        xorg-x11-drv-nvidia \
+        xorg-x11-drv-nvidia-cuda 
 
+# Rebuild akmods
+RUN akmods --force --kernels `rpm -q --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}' kernel-devel`
+# add kernel arguments
+# see: https://bootc.dev/bootc//building/kernel-arguments.html
+RUN mkdir -p /usr/lib/bootc/kargs.d
+RUN cat <<EOF >> /usr/lib/bootc/kargs.d/01-nvidia-driver.toml
+kargs = ["rd.driver.blacklist=nouveau", "modprobe.blacklist=nouveau", "nvidia-drm.modeset=1"]
+match-architectures = ["x86_64", "aarch64"]
+EOF
 
+# disable sleep/hiberate features
 COPY ./config-files/sleep.conf /etc/systemd/sleep.conf
 
 ### User Creation
@@ -60,12 +59,6 @@ RUN git clone https://github.com/nfc-tools/libfreefare.git && \
     make && make install && \
     cd .. && rm -r libfreefare
 
-# RUN sudo dnf -y install \
-#     https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
-#     https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm && \
-#     dnf clean all && \
-#     dnf -y install xorg-x11-drv-nvidia-cuda
-
 # required flatpak runtimes
 RUN flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo && \
     flatpak install -y flathub org.freedesktop.Platform/x86_64/22.08 
@@ -73,7 +66,12 @@ RUN flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flath
     # flatpak install flathub org.freedesktop.Platform.GL.nvidia-595-
 
 # root services config file
+# ban people from ssh'ing after some number of attempts for some amount of time
 COPY ./config-files/sshd.local /etc/fail2ban/jail.d/sshd.local
+COPY ./config-files/sshd_config /etc/ssh/sshd_config
+RUN systemctl enable fail2ban; \
+    systemctl enable sshd
+
 
 USER ${USERNAME_VAR}
 # Rust
@@ -96,7 +94,7 @@ COPY --chown=${USERNAME_VAR}:${USERNAME_VAR} \
 # autologin service
 COPY ./config-files/tty1_service_override.conf /etc/systemd/system/getty@tty1.service.d/override.conf
 # sshd config
-COPY ./config-files/sshd_config /etc/ssh/sshd_config
+
 
 # expose port for SSH connections
 EXPOSE 22
@@ -117,12 +115,9 @@ RUN ./export-all.sh \
     ${HOME}/
 
 USER root
-# restart services 
-#   - start ssh server
-#   - enable autologin
-RUN systemctl enable sshd; \
-    systemctl enable getty@tty1; \
-    systemctl enable fail2ban
+
+# enable autologin
+RUN systemctl enable getty@tty1
 
 # niceity software
 RUN dnf install -y \
