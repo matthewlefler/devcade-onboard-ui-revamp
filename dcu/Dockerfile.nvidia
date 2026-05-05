@@ -82,7 +82,10 @@ USER ${USERNAME_VAR}
 RUN curl https://sh.rustup.rs -sSf | bash -s -- -y 
 ENV PATH="${HOME}/.cargo/bin:${PATH}"
 # git repository
-RUN git clone https://github.com/matthewlefler/devcade-onboard-ui-revamp.git
+ARG BRANCH_VAR
+RUN git clone https://github.com/matthewlefler/devcade-onboard-ui-revamp.git && \
+    cd devcade-onboard-ui-revamp && git switch ${BRANCH_VAR}
+
 # godot 4.4.1
 RUN wget https://github.com/godotengine/godot/releases/download/4.4.1-stable/Godot_v4.4.1-stable_mono_linux_x86_64.zip && \
     unzip Godot_v4.4.1-stable_mono_linux_x86_64.zip && \
