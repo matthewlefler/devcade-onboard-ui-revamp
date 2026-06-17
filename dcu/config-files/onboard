@@ -17,16 +17,16 @@ function cleanup() {
 	exit 1
 }
 
-godot=${HOME}/Godot_v4.4.1-stable_mono_linux_x86_64/Godot_v4.4.1-stable_mono_linux.x86_64
+godot=Godot_v4.4.1-stable_mono_linux.x86_64
 # compile frontend 
 # Usage: export_all <godot_executable> <path_to_root_folder> <out_path>
 # ${HOME}/export-all.sh $godot ${HOME}/devcade-onboard-ui-revamp/ ${HOME}/
 
-./backend &
+devcade_backend &
 backend_pid=$!
 
 ### run frontend
-./frontend &
+devcade_frontend &
 frontend_pid=$!
 
 # run 'cleanup' on exit

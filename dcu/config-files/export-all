@@ -11,9 +11,9 @@ fi
 cd $2/onboard/backend
 cargo build --release
 cd $2
-cp $2/onboard/backend/target/release/backend $3/backend
+cp $2/onboard/backend/target/release/backend $3/devcade_backend
 
 # godot frontend
-$1 --path $2/onboard/godot-frontend --headless --export-release "Linux" $3/frontend
+$1 --path $2/onboard/godot-frontend --headless --export-debug "Linux" $3/devcade_frontend
 
 exit
