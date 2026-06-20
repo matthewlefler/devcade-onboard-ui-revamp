@@ -17,7 +17,7 @@ cp $2/onboard/backend/target/release/backend $3/devcade_backend
 /usr/bin/dotnet build "$2/onboard/godot-frontend/godot-frontend.csproj" -c Release
 echo "build solutions return code"
 echo $?
-$1 --verbose --quit --no-addons --path $2/onboard/godot-frontend --headless --export-release "Linux" $3/devcade_frontend
+$1 --path $2/onboard/godot-frontend --headless --export-release "Linux" $3/devcade_frontend
 echo "compile return code"
 echo $?
 

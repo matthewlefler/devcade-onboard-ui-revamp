@@ -41,12 +41,12 @@ RUN systemctl enable fail2ban; \
 RUN curl https://sh.rustup.rs -sSf | bash -s -- -y; 
 ENV PATH "/root/.cargo/bin:${PATH}"
 
-# install godot 4.4.1-stable mono
-RUN wget "https://github.com/godotengine/godot/releases/download/4.4.1-stable/Godot_v4.4.1-stable_mono_linux_x86_64.zip" &&             \
-    unzip Godot_v4.4.1-stable_mono_linux_x86_64.zip &&                                                                                  \
-    mv Godot_v4.4.1-stable_mono_linux_x86_64/Godot_v4.4.1-stable_mono_linux.x86_64 /usr/bin/Godot_v4.4.1-stable_mono_linux.x86_64 &&    \
-    mv Godot_v4.4.1-stable_mono_linux_x86_64/GodotSharp /usr/bin/GodotSharp;                                                            \
-    rm Godot_v4.4.1-stable_mono_linux_x86_64.zip
+# install godot 4.6.1-stable mono
+RUN wget "https://github.com/godotengine/godot/releases/download/4.6.1-stable/Godot_v4.6.1-stable_mono_linux_x86_64.zip" &&             \
+    unzip Godot_v4.6.1-stable_mono_linux_x86_64.zip &&                                                                                  \
+    mv Godot_v4.6.1-stable_mono_linux_x86_64/Godot_v4.6.1-stable_mono_linux.x86_64 /usr/bin/Godot_v4.6.1-stable_mono_linux.x86_64 &&    \
+    mv Godot_v4.6.1-stable_mono_linux_x86_64/GodotSharp /usr/bin/GodotSharp;                                                            \
+    rm Godot_v4.6.1-stable_mono_linux_x86_64.zip
 
 # file required for xauth
 RUN touch .Xauthority
@@ -70,11 +70,16 @@ COPY ./config-files/tty1_service_override.conf /etc/systemd/system/getty@tty1.se
 COPY ./config-files/export-all ./config-files/onboard /usr/bin/
 
 # export templates
-COPY ./config-files/linux_debug.x86_64 ./config-files/linux_release.x86_64 /usr/share/godot/export_templates/4.4.1.stable.mono/
+COPY ./config-files/linux_debug.x86_64      \
+     ./config-files/linux_release.x86_64    \
+     ./config-files/linux_debug.x86_32      \
+     ./config-files/linux_release.x86_32    \
+     /usr/share/godot/export_templates/4.6.1.stable.mono/
+
 # symlink required for the export functionality of the godot cli, 
 # I blame godot for not letting me change the install location of the export templates
 RUN mkdir -p /root/.local/share/godot/export_templates && \
-    ln -s -f /usr/share/godot/export_templates/4.4.1.stable.mono /root/.local/share/godot/export_templates/
+    ln -s -f /usr/share/godot/export_templates/4.6.1.stable.mono /root/.local/share/godot/export_templates/
 
 # devcade-onboard git repository
 ARG BRANCH_VAR
@@ -86,7 +91,7 @@ RUN mkdir -p /usr/share/devcade/ && \
 
 # export-all <godot-path> <absolute src path> <absolute out path>
 RUN export-all                              \
-    Godot_v4.4.1-stable_mono_linux.x86_64   \
+    Godot_v4.6.1-stable_mono_linux.x86_64   \
     /devcade-onboard-ui-revamp              \
     /usr/bin
 
