@@ -39,8 +39,7 @@ public partial class GuiManagerGlobal : Node
     /// <summary>
     /// Emit to set the state of the loading animation
     /// </summary>
-    [Signal]
-    public delegate void setLoadingAnimationEventHandler(bool show);
+    [Signal] public delegate void setLoadingAnimationEventHandler(bool show);
     private int call_setLoadingAnimation = 0;
     private bool state_setLoadingAnimation = false;
 
@@ -64,8 +63,7 @@ public partial class GuiManagerGlobal : Node
     /// <summary>
     /// Emitted when the current tag changes value
     /// </summary>
-    [Signal]
-    public delegate void currentTagUpdatedEventHandler();
+    [Signal] public delegate void currentTagUpdatedEventHandler();
     private int call_currentTagUpdated = 0;
 
     /// <summary>
@@ -75,8 +73,7 @@ public partial class GuiManagerGlobal : Node
     /// <summary>
     /// Emitted when the tag list changes
     /// </summary>
-    [Signal]
-    public delegate void tagListUpdatedEventHandler();
+    [Signal] public delegate void tagListUpdatedEventHandler();
     private int call_tagListUpdated = 0;
 
     /// <summary>
@@ -86,8 +83,7 @@ public partial class GuiManagerGlobal : Node
     /// <summary>
     /// Emitted when the tag list changes
     /// </summary>
-    [Signal]
-    public delegate void tagListsUpdatedEventHandler();
+    [Signal] public delegate void tagListsUpdatedEventHandler();
     private int call_tagListsUpdated = 0;
 
 #endregion
@@ -102,8 +98,7 @@ public partial class GuiManagerGlobal : Node
     /// <summary>
     /// Emitted when the reloading game list value is changed
     /// </summary>
-    [Signal]
-    public delegate void reloadingGameListUpdatedEventHandler(bool reloadGameList);
+    [Signal] public delegate void reloadingGameListUpdatedEventHandler(bool reloadGameList);
     private int call_reloadingGameListUpdated = 0;
 
     /// <summary>
@@ -130,16 +125,14 @@ public partial class GuiManagerGlobal : Node
     /// <summary>
     /// Emitted when the game titles changes
     /// </summary>
-    [Signal]
-    public delegate void gameTitlesUpdatedEventHandler();
+    [Signal] public delegate void gameTitlesUpdatedEventHandler();
     private int call_gameTitlesUpdated = 0;
 
     /// <summary>
     /// Emitted when a game is launched or closed
     /// True when launched, False when closed
     /// </summary>
-    [Signal]
-    public delegate void onGameLaunchedEventHandler(bool launched);
+    [Signal] public delegate void onGameLaunchedEventHandler(bool launched);
     private int call_onGameLaunched = 0;
     private bool state_onGameLaunched = false;
 

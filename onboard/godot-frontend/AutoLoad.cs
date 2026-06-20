@@ -10,8 +10,6 @@ public partial class AutoLoad : Node
 {
     Logger LOG = Log.get(nameof(AutoLoad));
 
-    public AutoLoad() {} // must be empty?
-
     /// <summary>
     /// load the required services as early as possible
     /// with set properties
@@ -27,6 +25,10 @@ public partial class AutoLoad : Node
         else if(File.Exists("../.env"))
         {
             Env.load("../.env");
+        }
+        else if(File.Exists("/usr/share/devcade/.env"))
+        {
+            Env.load("../.env"); // note somehow that default .env is being used
         }
 
         string logLocation = Env.LOG_LOCATION();
