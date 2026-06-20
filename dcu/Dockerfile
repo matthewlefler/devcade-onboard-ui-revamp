@@ -52,16 +52,18 @@ RUN wget "https://github.com/godotengine/godot/releases/download/4.6.1-stable/Go
 RUN touch .Xauthority
 
 ### copy required files 
-# NOTE: required symlinks for many global config files are created in dcu/config-files/files.conf
+# NOTE: required symlinks for some config files are created in dcu/config-files/files.conf
+# ostree settings
+COPY ./config-files/prepare-root.conf /usr/lib/ostree/prepare-root.conf
 
 # openbox config file
-COPY ./config-files/rc.xml /usr/openbox/etc/rc.xml
+COPY ./config-files/rc.xml /etc/xdg/openbox/rc.xml 
 
 # x11 init file
-COPY ./config-files/.xinitrc /usr/X11/xinit/etc/.xinitrc
+COPY ./config-files/.xinitrc /etc/X11/xinit/xinitrc  
 
 # bash init file
-COPY ./config-files/.bashrc /usr/bash/etc/.bashrc
+COPY ./config-files/.bashrc /etc/bashrc
 
 # autologin service
 COPY ./config-files/tty1_service_override.conf /etc/systemd/system/getty@tty1.service.d/override.conf

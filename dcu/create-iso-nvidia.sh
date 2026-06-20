@@ -1,8 +1,5 @@
 # only prompts for password once
 sudo bash -c '
-  podman build -f ./Dockerfile.nvidia --network=host --build-arg-file=./.env -t dcu-devcade-onboard:latest-nvidia . &&
-  podman images &&
-  echo -e "\n" &&
   mkdir -p output &&
   podman run --rm -it --privileged \
     -v /var/lib/containers/storage:/var/lib/containers/storage \
