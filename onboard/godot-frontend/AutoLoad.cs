@@ -8,7 +8,7 @@ namespace onboard;
 
 public partial class AutoLoad : Node
 {
-    Logger LOG = Log.get(nameof(AutoLoad));
+    util.Logger LOG = Log.get(nameof(AutoLoad));
 
     /// <summary>
     /// load the required services as early as possible

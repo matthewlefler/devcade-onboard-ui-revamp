@@ -19,7 +19,7 @@ namespace onboard;
 /// in the proccess loop aka the main thread.
 public partial class GuiManagerGlobal : Node
 {
-    Logger LOG = Log.get(nameof(GuiManagerGlobal));
+    util.Logger LOG = Log.get(nameof(GuiManagerGlobal));
 
     /// <summary>
     /// The one instance of this class

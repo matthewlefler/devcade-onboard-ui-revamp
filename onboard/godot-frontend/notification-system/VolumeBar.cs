@@ -1,10 +1,11 @@
 using System.Diagnostics;
+using System.Net;
 using Godot;
 using onboard.util;
 
 public partial class VolumeBar : ProgressBar
 {
-    private Logger LOG = Log.get(nameof(VolumeBar));
+    private onboard.util.Logger LOG = Log.get(nameof(VolumeBar));
 
     [Export]
     NotificationWindow window;
