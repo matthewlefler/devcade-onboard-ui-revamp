@@ -37,11 +37,11 @@ COPY ./config-files/sshd_config /etc/ssh/sshd_config
 RUN systemctl enable fail2ban; \
     systemctl enable sshd
 
-# Rust
-RUN curl https://sh.rustup.rs -sSf | bash -s -- -y 
-ENV PATH="${HOME}/.cargo/bin:${PATH}"
+# install Rust
+RUN curl https://sh.rustup.rs -sSf | bash -s -- -y; 
+ENV PATH "/root/.cargo/bin:${PATH}"
 
-# godot 4.4.1-stable mono
+# install godot 4.4.1-stable mono
 RUN wget "https://github.com/godotengine/godot/releases/download/4.4.1-stable/Godot_v4.4.1-stable_mono_linux_x86_64.zip" &&             \
     unzip Godot_v4.4.1-stable_mono_linux_x86_64.zip &&                                                                                  \
     mv Godot_v4.4.1-stable_mono_linux_x86_64/Godot_v4.4.1-stable_mono_linux.x86_64 /usr/bin/Godot_v4.4.1-stable_mono_linux.x86_64 &&    \
@@ -81,15 +81,17 @@ ARG BRANCH_VAR
 RUN git clone https://github.com/matthewlefler/devcade-onboard-ui-revamp.git && \
     cd devcade-onboard-ui-revamp && git switch ${BRANCH_VAR}
 
-RUN cp ./devcade-onboard-ui-revamp/onboard/.env.template /home/devcade/.env && \
-    chown devcade: /home/devcade/.env
+RUN mkdir -p /usr/share/devcade/ && \
+    cp ./devcade-onboard-ui-revamp/onboard/.env.template /usr/share/devcade/.env
 
 # export-all <godot-path> <absolute src path> <absolute out path>
 RUN export-all                              \
     Godot_v4.4.1-stable_mono_linux.x86_64   \
     /devcade-onboard-ui-revamp              \
-    /usr/bin/ &&                            \
-    rm -r /devcade-onboard-ui-revamp
+    /usr/bin
+
+# delete git repo
+RUN rm -r /devcade-onboard-ui-revamp
 
 # enable autologin
 RUN systemctl enable getty@tty1
@@ -98,6 +100,22 @@ RUN systemctl enable getty@tty1
 RUN dnf install -y                      \
     vim fastfetch btop lspci usbutils   \
     && dnf clean all
+
+### cleanup
+# remove all log files, runtime only, and temporary files
+RUN rm -rf /var;        \
+    rm -rf /run;        \
+    rm -rf /tmp;        \
+    mkdir -p /var/home; \
+    mkdir -p /run;      \
+    mkdir -p /tmp;
+
+ARG PASSWORD_VAR
+ARG ROOT_PASSWORD_VAR
+# set passwords and set devcade acc to not expire
+RUN echo -e "devcade:${PASSWORD_VAR}" | chpasswd;   \
+    chage -E -1 devcade; \
+    echo -e "root:${ROOT_PASSWORD_VAR}" | chpasswd; 
 
 # make it known as a bootc container
 LABEL containers.bootc=1
