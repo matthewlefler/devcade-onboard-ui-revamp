@@ -69,7 +69,7 @@ COPY ./config-files/.bashrc /etc/bashrc
 COPY ./config-files/tty1_service_override.conf /etc/systemd/system/getty@tty1.service.d/override.conf
 
 # required custom executables
-COPY ./config-files/export-all ./config-files/onboard /usr/bin/
+COPY ./config-files/export-all ./config-files/devcade_onboard /usr/bin/
 
 # export templates
 COPY ./config-files/linux_debug.x86_64      \
@@ -104,8 +104,8 @@ RUN rm -r /devcade-onboard-ui-revamp
 RUN systemctl enable getty@tty1
 
 # niceity software
-RUN dnf install -y                      \
-    vim fastfetch btop lspci usbutils   \
+RUN dnf install -y                          \
+    vim fastfetch btop lspci usbutils gdb   \
     && dnf clean all
 
 ### cleanup
@@ -120,8 +120,8 @@ RUN rm -rf /var;        \
 ARG PASSWORD_VAR
 ARG ROOT_PASSWORD_VAR
 # set passwords and set devcade acc to not expire
-RUN echo -e "devcade:${PASSWORD_VAR}" | chpasswd;   \
-    chage -E -1 devcade; \
+RUN chage -E -1 devcade;                            \
+    echo -e "devcade:${PASSWORD_VAR}" | chpasswd;   \
     echo -e "root:${ROOT_PASSWORD_VAR}" | chpasswd; 
 
 # make it known as a bootc container
