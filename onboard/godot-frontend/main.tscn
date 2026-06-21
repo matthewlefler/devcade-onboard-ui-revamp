@@ -5,7 +5,6 @@
 [ext_resource type="Texture2D" uid="uid://cm8hlcb1in1rd" path="res://CSHAssets/transparent-logo-white.png" id="3_1bvp3"]
 [ext_resource type="SpriteFrames" uid="uid://cwsn76nuho5hi" path="res://CSHAssets/loadingAnimation.tres" id="3_h2yge"]
 [ext_resource type="PackedScene" uid="uid://dlupqaxwr7sdp" path="res://guiManager/screensaver/screensaver.tscn" id="5_lquwl"]
-[ext_resource type="PackedScene" uid="uid://cswy8mipsaud4" path="res://notification-system/notificationWindow.tscn" id="6_7mycd"]
 [ext_resource type="FontFile" uid="uid://cnha1ohwbh3ts" path="res://CSHAssets/VT323-Regular.ttf" id="7_5vw27"]
 [ext_resource type="Script" uid="uid://bft2wse50dh2e" path="res://FpsLabel.cs" id="7_272bh"]
 
@@ -76,10 +75,6 @@ sprite_frames = ExtResource("3_h2yge")
 
 [node name="screensaver" parent="." unique_id=1558778186 instance=ExtResource("5_lquwl")]
 layout_mode = 1
-
-[node name="NotificationWindow" parent="." unique_id=449864609 instance=ExtResource("6_7mycd")]
-oversampling_override = 1.0
-exclusive = false
 
 [node name="fpsLabel" type="Label" parent="." unique_id=496146832]
 top_level = true

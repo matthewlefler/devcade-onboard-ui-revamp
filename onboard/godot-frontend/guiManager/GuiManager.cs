@@ -157,15 +157,15 @@ public partial class GuiManager : Control
     {   
         if(@event.IsEcho()) { GetViewport().SetInputAsHandled();}
 
-        if(@event is InputEventJoypadButton joy)
-        {
-            LOG.Verbose($"{joy.Device}, {joy.ButtonIndex}");
-        }
+        // if(@event is InputEventJoypadButton joy)
+        // {
+        //     LOG.Verbose($"{joy.Device}, {joy.ButtonIndex}");
+        // }
 
-        if(@event is InputEventJoypadMotion axis)
-        {
-            LOG.Verbose($"{axis.Device}, {axis.Axis}");
-        }
+        // if(@event is InputEventJoypadMotion axis)
+        // {
+        //     LOG.Verbose($"{axis.Device}, {axis.Axis}");
+        // }
 
         if(showingScreenSaverAnimation)
         {
