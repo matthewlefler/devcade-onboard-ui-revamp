@@ -42,11 +42,11 @@ RUN curl https://sh.rustup.rs -sSf | bash -s -- -y;
 ENV PATH "/root/.cargo/bin:${PATH}"
 
 # install godot 4.6.1-stable mono
-RUN wget "https://github.com/godotengine/godot/releases/download/4.6.1-stable/Godot_v4.6.1-stable_mono_linux_x86_64.zip" &&             \
-    unzip Godot_v4.6.1-stable_mono_linux_x86_64.zip &&                                                                                  \
-    mv Godot_v4.6.1-stable_mono_linux_x86_64/Godot_v4.6.1-stable_mono_linux.x86_64 /usr/bin/Godot_v4.6.1-stable_mono_linux.x86_64 &&    \
-    mv Godot_v4.6.1-stable_mono_linux_x86_64/GodotSharp /usr/bin/GodotSharp;                                                            \
-    rm Godot_v4.6.1-stable_mono_linux_x86_64.zip
+RUN wget "https://github.com/godotengine/godot/releases/download/4.7-stable/Godot_v4.7-stable_mono_linux_x86_64.zip" &&             \
+    unzip Godot_v4.7-stable_mono_linux_x86_64.zip &&                                                                                  \
+    mv Godot_v4.7-stable_mono_linux_x86_64/Godot_v4.7-stable_mono_linux.x86_64 /usr/bin/Godot_v4.7-stable_mono_linux.x86_64 &&    \
+    mv Godot_v4.7-stable_mono_linux_x86_64/GodotSharp /usr/bin/GodotSharp;                                                            \
+    rm Godot_v4.7-stable_mono_linux_x86_64.zip
 
 # file required for xauth
 RUN touch .Xauthority
@@ -92,9 +92,9 @@ RUN mkdir -p /usr/share/devcade/ && \
     cp ./devcade-onboard-ui-revamp/onboard/.env.template /usr/share/devcade/.env
 
 # export-all <godot-path> <absolute src path> <absolute out path>
-RUN export-all                              \
-    Godot_v4.6.1-stable_mono_linux.x86_64   \
-    /devcade-onboard-ui-revamp              \
+RUN export-all                          \
+    Godot_v4.7-stable_mono_linux.x86_64 \
+    /devcade-onboard-ui-revamp          \
     /usr/bin
 
 # delete git repo
