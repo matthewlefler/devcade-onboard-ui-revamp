@@ -1,4 +1,4 @@
-[gd_resource type="SpriteFrames" load_steps=27 format=3 uid="uid://cwsn76nuho5hi"]
+[gd_resource type="SpriteFrames" format=3 uid="uid://cwsn76nuho5hi"]
 
 [ext_resource type="Texture2D" uid="uid://cvmfeo0polfva" path="res://CSHAssets/loadingSheet.jpg" id="1_ukx4a"]
 
@@ -180,7 +180,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_63fqu")
 }],
-"loop": true,
+"loop": 1,
 "name": &"default",
 "speed": 50.0
 }]
