@@ -1,0 +1,30 @@
+FROM localhost/dcu-devcade-onboard
+
+### Nvidia drivers
+# enable require repositories
+RUN dnf -y install                                                                                              \
+        https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm           \
+        https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm &&  \
+# Install NVIDIA drivers
+    dnf install -y --allowerasing   \
+        akmod-nvidia                \
+        xorg-x11-drv-nvidia         \
+        xorg-x11-drv-nvidia-cuda 
+
+# Rebuild akmods
+RUN akmods --force --kernels `rpm -q --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}' kernel-devel`
+# add kernel arguments
+# see: https://bootc.dev/bootc/building/kernel-arguments.html
+RUN mkdir -p /usr/lib/bootc/kargs.d
+RUN cat <<EOF >> /usr/lib/bootc/kargs.d/01-nvidia-driver.toml
+kargs = ["rd.driver.blacklist=nouveau", "modprobe.blacklist=nouveau", "nvidia-drm.modeset=1"]
+match-architectures = ["x86_64", "aarch64"]
+EOF
+
+RUN flatpak install -y flathub org.freedesktop.Platform.GL.nvidia-580-142
+
+# make it known as a bootc container
+LABEL containers.bootc=1
+LABEL bootc.rootfs=/sysroot
+
+RUN bootc container lint

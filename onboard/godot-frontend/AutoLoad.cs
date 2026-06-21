@@ -8,9 +8,7 @@ namespace onboard;
 
 public partial class AutoLoad : Node
 {
-    Logger LOG = Log.get(nameof(AutoLoad));
-
-    public AutoLoad() {} // must be empty?
+    util.Logger LOG = Log.get(nameof(AutoLoad));
 
     /// <summary>
     /// load the required services as early as possible
@@ -20,7 +18,18 @@ public partial class AutoLoad : Node
     {
         // load the .env file (contains the enviorment variables)
         LOG.Info("loading env");
-        Env.load("../.env");
+        if(File.Exists("./.env"))
+        {
+            Env.load("./.env");
+        }
+        else if(File.Exists("../.env"))
+        {
+            Env.load("../.env");
+        }
+        else if(File.Exists("/usr/share/devcade/.env"))
+        {
+            Env.load("../.env"); // note somehow that default .env is being used
+        }
 
         string logLocation = Env.LOG_LOCATION();
         try

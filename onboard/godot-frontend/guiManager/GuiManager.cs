@@ -10,7 +10,7 @@ namespace onboard.devcade.GUI;
 
 public partial class GuiManager : Control
 {
-    Logger LOG = Log.get(nameof(GuiManager));
+    util.Logger LOG = Log.get(nameof(GuiManager));
 
     /// <summary>
     /// the initial GUI scene to show when devcade starts up

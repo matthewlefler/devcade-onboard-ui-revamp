@@ -6,7 +6,7 @@ using onboard.util;
 namespace onboard.devcade.GUI.originalGUI;
 public partial class OriginalGUI : Control
 {
-    Logger LOG = Log.get(nameof(OriginalGUI));
+    util.Logger LOG = Log.get(nameof(OriginalGUI));
 
     /// <summary>
     /// the current state of the GUI

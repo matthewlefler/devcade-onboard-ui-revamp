@@ -464,6 +464,7 @@ fn generate_clean_env() -> HashMap<String, String> {
                 || key == "LANG"
                 || key == "TERM"
                 || key == "DEVCADE_PATH"
+                || key == "HOSTNAME"
         })
         .map(|(k, v)| (k.clone(), v.clone()))
         .collect::<HashMap<String, String>>()
@@ -508,6 +509,9 @@ pub async fn launch_game(game_id: String) -> Result<(), Error> {
         .arg("run")
         .arg("--user")
         .arg("--device=dri")
+        .arg("--socket=wayland")
+        .arg("--socket=x11")
+        .arg("--socket=fallback-x11")
         .arg("--cwd=/app/publish")
         .arg(game.flatpak_app_id.clone().unwrap())
         // This unwrap is safe because it is guaranteed to have a parent
