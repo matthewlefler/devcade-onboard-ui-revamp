@@ -148,13 +148,9 @@ public partial class GuiManagerGlobal : Node
         isDemoMode = Env.DEMO_MODE();
     }
 
-    public static void init()
-    {
-        // force initialization of the class
-    }
-
     public void setTag(Tag newTag)
     {
+        LOG.Info($"setting tag, {newTag.name}");
         currentTag = newTag;
         
         Interlocked.Increment(ref call_currentTagUpdated);
@@ -170,6 +166,8 @@ public partial class GuiManagerGlobal : Node
     /// <returns></returns>
     public Task reloadGameList()
     {
+        LOG.Info($"Reloading game list");
+
         reloadingGameList = true;
         Interlocked.Increment(ref call_reloadingGameListUpdated);
 
@@ -272,6 +270,7 @@ public partial class GuiManagerGlobal : Node
     /// </summary>
     public void loadBanners()
     {
+        LOG.Info("loading banners");
         foreach(DevcadeGame game in gameTitles)
         {                                    
             string bannerPath = $"{Env.DEVCADE_PATH()}/{game.id}/banner.png";

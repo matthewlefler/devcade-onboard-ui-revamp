@@ -28,6 +28,7 @@ public partial class AutoLoad : Node
         }
         else if(File.Exists("/usr/share/devcade/.env"))
         {
+            LOG.Warn("default .env is being used");
             Env.load("../.env"); // note somehow that default .env is being used
         }
 
