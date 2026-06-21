@@ -56,7 +56,6 @@ size = Vector2i(2160, 3840)
 render_target_update_mode = 4
 
 [node name="DescriptionContainer" type="MarginContainer" parent="SubViewportContainer/SubViewport" unique_id=1243988512]
-visible = false
 z_as_relative = false
 anchors_preset = 15
 anchor_right = 1.0
@@ -107,7 +106,7 @@ horizontal_alignment = 1
 autowrap_mode = 3
 
 [node name="description" type="Label" parent="SubViewportContainer/SubViewport/DescriptionContainer/TextureRect2/MarginContainer/VBoxContainer" unique_id=151021099]
-z_index = 200
+z_index = 3000
 z_as_relative = false
 y_sort_enabled = true
 layout_mode = 2
