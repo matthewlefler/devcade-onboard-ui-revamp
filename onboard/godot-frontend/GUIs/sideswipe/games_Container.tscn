@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://csyc721ldv5vr"]
+
+[ext_resource type="Script" uid="uid://xgn4usf2ud3m" path="res://GUIs/sideswipe/GamesContainer.cs" id="1_v83r3"]
+
+[node name="GamesContainer" type="Control" unique_id=290602592]
+layout_mode = 3
+anchors_preset = 14
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+script = ExtResource("1_v83r3")

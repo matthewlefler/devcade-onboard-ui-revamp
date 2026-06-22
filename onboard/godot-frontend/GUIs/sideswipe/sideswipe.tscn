@@ -1,0 +1,119 @@
+[gd_scene format=3 uid="uid://8cp7ikw2q4g6"]
+
+[ext_resource type="Texture2D" uid="uid://cm8hlcb1in1rd" path="res://CSHAssets/transparent-logo-white.png" id="1_5usg3"]
+[ext_resource type="Texture2D" uid="uid://d4nlo4q03fi77" path="res://CSHAssets/CSH.png" id="1_rqn0s"]
+[ext_resource type="Script" uid="uid://62sckdwbwl8r" path="res://GUIs/orignial/DevcadeIcon.cs" id="3_kvap2"]
+[ext_resource type="Texture2D" uid="uid://bj333tajmq7mt" path="res://CSHAssets/transparent-dev-logo.png" id="4_dm3ko"]
+[ext_resource type="PackedScene" uid="uid://csyc721ldv5vr" path="res://GUIs/sideswipe/games_Container.tscn" id="5_2u7yr"]
+
+[sub_resource type="Gradient" id="Gradient_2u7yr"]
+offsets = PackedFloat32Array(0.21153846, 1)
+colors = PackedColorArray(0.43564403, 0.00048602434, 0.524503, 1, 0, 0, 0.3019608, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_b1ev3"]
+gradient = SubResource("Gradient_2u7yr")
+fill_from = Vector2(1, 0)
+fill_to = Vector2(0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2u7yr"]
+content_margin_left = 50.0
+content_margin_top = 50.0
+content_margin_right = 50.0
+content_margin_bottom = 50.0
+bg_color = Color(0, 0, 0, 1)
+
+[sub_resource type="Shader" id="Shader_kvap2"]
+code = "shader_type canvas_item;
+
+uniform float scale = 1.0;
+uniform vec2 direction;
+
+uniform float alphaScale = 1.0;
+
+void fragment() {
+	// Called for every pixel the material is visible on.
+	float screen_width = 1.0 / SCREEN_PIXEL_SIZE.r;
+	float screen_height = 1.0 / SCREEN_PIXEL_SIZE.g;
+
+	// delta movement value
+	float dx = -direction.r * mod(TIME, 1.0 / direction.r);
+	float dy = direction.g * mod(TIME, 1.0 / direction.g);
+
+	COLOR = texture(TEXTURE, fract(SCREEN_UV * vec2(scale, scale * (screen_height / screen_width))) + vec2(dx, dy));
+
+	COLOR.a *= alphaScale;
+}
+"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_dm3ko"]
+shader = SubResource("Shader_kvap2")
+shader_parameter/scale = 16.0
+shader_parameter/direction = Vector2(-0.4, -0.4)
+shader_parameter/alphaScale = 1.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_c7cdg"]
+bg_color = Color(0.19064137, 0.00018276449, 0.2674095, 1)
+
+[node name="Sideswipe" type="Control" unique_id=1401272219]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TextureRect" type="TextureRect" parent="." unique_id=342261117]
+z_index = -1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = SubResource("GradientTexture2D_b1ev3")
+
+[node name="logo_background" type="PanelContainer" parent="TextureRect" unique_id=907339269]
+z_index = 1
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 600.0
+grow_horizontal = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_2u7yr")
+
+[node name="TextureRect" type="TextureRect" parent="TextureRect/logo_background" unique_id=1840302485]
+custom_minimum_size = Vector2(0, 400)
+layout_mode = 2
+texture = ExtResource("1_5usg3")
+stretch_mode = 5
+script = ExtResource("3_kvap2")
+prodTexture = ExtResource("1_5usg3")
+devTexture = ExtResource("4_dm3ko")
+
+[node name="backgroundCSHIcons" type="TextureRect" parent="TextureRect" unique_id=1086014485]
+y_sort_enabled = true
+texture_filter = 1
+texture_repeat = 2
+material = SubResource("ShaderMaterial_dm3ko")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_rqn0s")
+expand_mode = 1
+stretch_mode = 1
+
+[node name="games_background" type="PanelContainer" parent="TextureRect/backgroundCSHIcons" unique_id=84274087]
+custom_minimum_size = Vector2(0, 1200)
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 1549.0
+offset_bottom = 2749.0
+grow_horizontal = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_c7cdg")
+
+[node name="GamesContainer" parent="TextureRect/backgroundCSHIcons/games_background" unique_id=290602592 instance=ExtResource("5_2u7yr")]
+layout_mode = 2
