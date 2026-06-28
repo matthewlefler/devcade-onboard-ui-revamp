@@ -106,14 +106,17 @@ expand_mode = 1
 stretch_mode = 1
 
 [node name="games_background" type="PanelContainer" parent="TextureRect/backgroundCSHIcons" unique_id=84274087]
-custom_minimum_size = Vector2(0, 1200)
+custom_minimum_size = Vector2(0, 700)
 layout_mode = 1
-anchors_preset = 10
+anchors_preset = 14
+anchor_top = 0.5
 anchor_right = 1.0
-offset_top = 1549.0
-offset_bottom = 2749.0
+anchor_bottom = 0.5
 grow_horizontal = 2
+grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_c7cdg")
 
 [node name="GamesContainer" parent="TextureRect/backgroundCSHIcons/games_background" unique_id=290602592 instance=ExtResource("5_2u7yr")]
 layout_mode = 2
+size_flags_horizontal = 1
+size_flags_vertical = 1
