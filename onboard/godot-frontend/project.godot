@@ -19,6 +19,8 @@ run/main_scene="uid://br86segmlm7yg"
 run/enable_alt_space_menu=true
 config/features=PackedStringArray("4.7", "C#", "GL Compatibility")
 run/low_processor_mode=true
+boot_splash/bg_color=Color(0, 0, 0, 1)
+boot_splash/image="uid://cm8hlcb1in1rd"
 config/icon="res://icon.svg"
 
 [autoload]
