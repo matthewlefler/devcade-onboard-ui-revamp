@@ -10,9 +10,14 @@ public partial class GamesContainer : Control
     // seconds it takes for the game cards to move from one position to another
     [Export] float game_card_transistion_time = 0.3f;
 
+    [Export] private Label game_name_label = null;
+    [Export] private Label game_author_label = null;
+    [Export] private Label game_description_label = null;
+
     private ReferenceRect lleft, left, middle, right, rright;
 
     private List<TextureRect> game_cards = new List<TextureRect>();
+    private List<DevcadeGame> games = new List<DevcadeGame>();
     private int game_card_index = 0;
 
     public override void _Ready()
@@ -58,7 +63,7 @@ public partial class GamesContainer : Control
         if (@event.IsActionPressed("Player1_A1") || @event.IsActionPressed("Player2_A1"))
         {
             // launch currently selected game
-            _ = GuiManagerGlobal.instance.launchGame(GuiManagerGlobal.gameTitles[game_card_index]);
+            _ = GuiManagerGlobal.instance.launchGame(games[game_card_index]);
         }
     }
 
@@ -86,6 +91,7 @@ public partial class GamesContainer : Control
 
             this.AddChild(rect);
             game_cards.Add(rect);
+            games.Add(game);
         }
     }
 
@@ -158,6 +164,19 @@ public partial class GamesContainer : Control
                 tween.TweenProperty(rect, "custom_maximum_size", middle.Size, game_card_transistion_time);
                 tween.TweenProperty(rect, "custom_minimum_size", middle.Size, game_card_transistion_time);
                 rect.Show();
+
+                if(game_author_label != null)
+                {
+                    game_author_label.Text = $"Author: {games[i].author}";
+                }
+                if(game_name_label != null)
+                {
+                    game_name_label.Text = games[i].name;
+                }
+                if(game_description_label != null)
+                {
+                    game_description_label.Text = games[i].description;
+                }
             }
             else if(index == 1)
             {

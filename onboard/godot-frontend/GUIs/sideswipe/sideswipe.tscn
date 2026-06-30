@@ -54,6 +54,13 @@ shader_parameter/alphaScale = 1.0
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_c7cdg"]
 bg_color = Color(0.19064137, 0.00018276449, 0.2674095, 1)
 
+[sub_resource type="Gradient" id="Gradient_6lxsb"]
+colors = PackedColorArray(0.27739233, 5.175259e-05, 0.27739024, 1, 0.17450827, 2.1189564e-05, 0.17450678, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_03twh"]
+gradient = SubResource("Gradient_6lxsb")
+fill_to = Vector2(1, 1)
+
 [node name="Sideswipe" type="Control" unique_id=1401272219]
 layout_mode = 3
 anchors_preset = 15
@@ -105,18 +112,86 @@ texture = ExtResource("1_rqn0s")
 expand_mode = 1
 stretch_mode = 1
 
-[node name="games_background" type="PanelContainer" parent="TextureRect/backgroundCSHIcons" unique_id=84274087]
-custom_minimum_size = Vector2(0, 700)
+[node name="VBoxContainer" type="VBoxContainer" parent="TextureRect/backgroundCSHIcons" unique_id=953241033]
 layout_mode = 1
-anchors_preset = 14
-anchor_top = 0.5
+anchors_preset = 12
+anchor_top = 1.0
 anchor_right = 1.0
-anchor_bottom = 0.5
+anchor_bottom = 1.0
+offset_top = -2484.0
 grow_horizontal = 2
-grow_vertical = 2
+grow_vertical = 0
+theme_override_constants/separation = 0
+
+[node name="games_background" type="PanelContainer" parent="TextureRect/backgroundCSHIcons/VBoxContainer" unique_id=84274087]
+custom_minimum_size = Vector2(0, 700)
+layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_c7cdg")
 
-[node name="GamesContainer" parent="TextureRect/backgroundCSHIcons/games_background" unique_id=290602592 instance=ExtResource("5_2u7yr")]
+[node name="GamesContainer" parent="TextureRect/backgroundCSHIcons/VBoxContainer/games_background" unique_id=290602592 node_paths=PackedStringArray("game_name_label", "game_author_label", "game_description_label") instance=ExtResource("5_2u7yr")]
 layout_mode = 2
 size_flags_horizontal = 1
 size_flags_vertical = 1
+game_name_label = NodePath("../../TextureRect/VBoxContainer/HBoxContainer/MarginContainer2/selected_game_name")
+game_author_label = NodePath("../../TextureRect/VBoxContainer/HBoxContainer/MarginContainer/selected_game_author_name")
+game_description_label = NodePath("../../TextureRect/VBoxContainer/MarginContainer/selected_game_description")
+
+[node name="TextureRect" type="TextureRect" parent="TextureRect/backgroundCSHIcons/VBoxContainer" unique_id=1107959585]
+layout_mode = 2
+size_flags_vertical = 3
+texture = SubResource("GradientTexture2D_03twh")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="TextureRect/backgroundCSHIcons/VBoxContainer/TextureRect" unique_id=535005026]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="TextureRect/backgroundCSHIcons/VBoxContainer/TextureRect/VBoxContainer" unique_id=439525043]
+layout_mode = 2
+
+[node name="MarginContainer2" type="MarginContainer" parent="TextureRect/backgroundCSHIcons/VBoxContainer/TextureRect/VBoxContainer/HBoxContainer" unique_id=1708293111]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="selected_game_name" type="Label" parent="TextureRect/backgroundCSHIcons/VBoxContainer/TextureRect/VBoxContainer/HBoxContainer/MarginContainer2" unique_id=176659209]
+layout_mode = 2
+theme_override_font_sizes/font_size = 80
+text = "game_name"
+
+[node name="MarginContainer" type="MarginContainer" parent="TextureRect/backgroundCSHIcons/VBoxContainer/TextureRect/VBoxContainer/HBoxContainer" unique_id=1363152218]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="selected_game_author_name" type="Label" parent="TextureRect/backgroundCSHIcons/VBoxContainer/TextureRect/VBoxContainer/HBoxContainer/MarginContainer" unique_id=1827804002]
+layout_mode = 2
+theme_override_font_sizes/font_size = 80
+text = "Author: [temp]"
+horizontal_alignment = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="TextureRect/backgroundCSHIcons/VBoxContainer/TextureRect/VBoxContainer" unique_id=1134915454]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 40
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 40
+
+[node name="selected_game_description" type="Label" parent="TextureRect/backgroundCSHIcons/VBoxContainer/TextureRect/VBoxContainer/MarginContainer" unique_id=1433445345]
+layout_mode = 2
+size_flags_vertical = 0
+theme_override_font_sizes/font_size = 80
+text = "Game Description:
+~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~"
