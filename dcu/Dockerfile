@@ -15,7 +15,8 @@ RUN dnf install -y                                                  \
     glib2-devel flatpak-devel libnfc-devel                          \
     make cmake                                                      \
     autoconf automake libtool                                       \
-    xrandr @base-x
+    xrandr @base-x                                                  \
+    plymouth-plugin-script
 
 # install libfreefare-devel, as it is not in the package manager yet
 RUN git clone https://github.com/nfc-tools/libfreefare.git &&   \
@@ -36,6 +37,12 @@ COPY ./config-files/sshd.local /etc/fail2ban/jail.d/sshd.local
 COPY ./config-files/sshd_config /etc/ssh/sshd_config
 RUN systemctl enable fail2ban; \
     systemctl enable sshd
+
+# # copy boot splash over
+# COPY ./boot-splash/devcade /usr/share/plymouth/themes/devcade
+# # set theme
+# RUN ls -l /usr/share/plymouth/themes &&     \
+#     plymouth-set-default-theme -R devcade 
 
 # install Rust
 RUN curl https://sh.rustup.rs -sSf | bash -s -- -y; 
