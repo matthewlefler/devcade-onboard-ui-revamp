@@ -124,3 +124,4 @@ echo 3 | sudo tee /sys/class/graphics/fbcon/rotate
 # custom aliases
 alias l='ls -lApvh --group-directories-first --color=always'
 alias clr='clear && fastfetch'
+alias c='clear'

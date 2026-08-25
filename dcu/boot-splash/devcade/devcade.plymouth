@@ -1,0 +1,13 @@
+[Plymouth Theme]
+Name=Devcade
+Description=Script example plugin.
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes//devcade
+ScriptFile=/usr/share/plymouth/themes//devcade/devcade.script
+ConsoleLogBackgroundColor=0x000000ff
+
+[script-env-vars]
+example_env_var=example env var value
+

@@ -21,7 +21,8 @@ kargs = ["rd.driver.blacklist=nouveau", "modprobe.blacklist=nouveau", "nvidia-dr
 match-architectures = ["x86_64", "aarch64"]
 EOF
 
-RUN flatpak install -y flathub org.freedesktop.Platform.GL.nvidia-580-142
+RUN flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo && \
+    flatpak install -y flathub org.freedesktop.Platform.GL.nvidia-580-142
 
 # make it known as a bootc container
 LABEL containers.bootc=1

@@ -41,11 +41,11 @@ RUN systemctl enable fail2ban; \
 RUN curl https://sh.rustup.rs -sSf | bash -s -- -y; 
 ENV PATH "/root/.cargo/bin:${PATH}"
 
-# install godot 4.6.1-stable mono
-RUN wget "https://github.com/godotengine/godot/releases/download/4.7-stable/Godot_v4.7-stable_mono_linux_x86_64.zip" &&             \
-    unzip Godot_v4.7-stable_mono_linux_x86_64.zip &&                                                                                  \
-    mv Godot_v4.7-stable_mono_linux_x86_64/Godot_v4.7-stable_mono_linux.x86_64 /usr/bin/Godot_v4.7-stable_mono_linux.x86_64 &&    \
-    mv Godot_v4.7-stable_mono_linux_x86_64/GodotSharp /usr/bin/GodotSharp;                                                            \
+# install godot 4.7-stable mono
+RUN wget "https://github.com/godotengine/godot/releases/download/4.7-stable/Godot_v4.7-stable_mono_linux_x86_64.zip" &&         \
+    unzip Godot_v4.7-stable_mono_linux_x86_64.zip &&                                                                            \
+    mv Godot_v4.7-stable_mono_linux_x86_64/Godot_v4.7-stable_mono_linux.x86_64 /usr/bin/Godot_v4.7-stable_mono_linux.x86_64 &&  \
+    mv Godot_v4.7-stable_mono_linux_x86_64/GodotSharp /usr/bin/GodotSharp;                                                      \
     rm Godot_v4.7-stable_mono_linux_x86_64.zip
 
 # file required for xauth
@@ -76,12 +76,12 @@ COPY ./config-files/linux_debug.x86_64      \
      ./config-files/linux_release.x86_64    \
      ./config-files/linux_debug.x86_32      \
      ./config-files/linux_release.x86_32    \
-     /usr/share/godot/export_templates/4.6.1.stable.mono/
+     /usr/share/godot/export_templates/4.7.stable.mono/
 
 # symlink required for the export functionality of the godot cli, 
 # I blame godot for not letting me change the install location of the export templates
 RUN mkdir -p /root/.local/share/godot/export_templates && \
-    ln -s -f /usr/share/godot/export_templates/4.6.1.stable.mono /root/.local/share/godot/export_templates/
+    ln -s -f /usr/share/godot/export_templates/4.7.stable.mono /root/.local/share/godot/export_templates/
 
 # devcade-onboard git repository
 ARG BRANCH_VAR
@@ -129,3 +129,5 @@ LABEL containers.bootc=1
 LABEL bootc.rootfs=/sysroot
 
 RUN bootc container lint
+
+RUN plymouth-set-default-theme --list
