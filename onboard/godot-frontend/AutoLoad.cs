@@ -29,6 +29,7 @@ public partial class AutoLoad : Node
             string fullPath = Path.GetFullPath(path);
             if(File.Exists(fullPath))
             {
+                LOG.Debug($"loaded enivorment file (.env) from {path} with full path {fullPath}");
                 Env.load(fullPath);
             }
         }

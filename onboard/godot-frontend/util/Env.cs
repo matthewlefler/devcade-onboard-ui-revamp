@@ -13,14 +13,14 @@ public static class Env {
 
     // Logging level for the backend
     // Allowed log levels: trace, debug, info, warn, error 
-    public static string RUST_LOG() { return get("RUST_LOG").unwrap_or("error"); }
+    public static string RUST_LOG() { return get("RUST_LOG").unwrap_or("trace"); }
     public static Option<string> DEVCADE_API_DOMAIN() { return get("DEVCADE_API_DOMAIN"); }
     public static Option<string> DEVCADE_DEV_API_DOMAIN() { return get("DEVCADE_DEV_API_DOMAIN"); }
     
     // Frontend 
     // Logging level for the frontend 
     // Allowed log levels: trace, verbose, debug, info, warn, error, fatal 
-    public static string FRONTEND_LOG() { return get("FRONTEND_LOG").unwrap_or("error"); }
+    public static string FRONTEND_LOG() { return get("FRONTEND_LOG").unwrap_or("trace"); }
     // Amount of time in seconds until the screen saver is shown
     public static double SCREENSAVER_TIMEOUT_SEC() { return get("SCREENSAVER_TIMEOUT_SEC").map_or(5.0, double.Parse); }
     // Amount of time in seconds that the supervisor buttons need to be heldW
