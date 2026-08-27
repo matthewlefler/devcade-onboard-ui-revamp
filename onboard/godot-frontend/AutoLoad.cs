@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Godot;
@@ -18,18 +19,18 @@ public partial class AutoLoad : Node
     {
         // load the .env file (contains the enviorment variables)
         LOG.Info("loading env");
-        if(File.Exists("./.env"))
+        List<string> envPaths = [
+            "~/.env",
+            "./.env",
+            "/usr/share/devcade/.env"
+        ];
+        foreach(string path in envPaths)
         {
-            Env.load("./.env");
-        }
-        else if(File.Exists("../.env"))
-        {
-            Env.load("../.env");
-        }
-        else if(File.Exists("/usr/share/devcade/.env"))
-        {
-            LOG.Warn("default .env is being used");
-            Env.load("../.env"); // note somehow that default .env is being used
+            string fullPath = Path.GetFullPath(path);
+            if(File.Exists(fullPath))
+            {
+                Env.load(fullPath);
+            }
         }
 
         string logLocation = Env.LOG_LOCATION();

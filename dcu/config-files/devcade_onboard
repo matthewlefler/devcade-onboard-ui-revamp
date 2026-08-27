@@ -17,7 +17,7 @@ function cleanup() {
 	exit 1
 }
 
-godot=Godot_v4.4.1-stable_mono_linux.x86_64
+# godot=Godot_v4.7-stable_mono_linux.x86_64
 # compile frontend 
 # Usage: export_all <godot_executable> <path_to_root_folder> <out_path>
 # ${HOME}/export-all.sh $godot ${HOME}/devcade-onboard-ui-revamp/ ${HOME}/

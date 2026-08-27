@@ -45,7 +45,8 @@ RUN systemctl enable fail2ban; \
 #     plymouth-set-default-theme -R devcade 
 
 # install Rust
-RUN curl https://sh.rustup.rs -sSf | bash -s -- -y; 
+RUN mkdir -p /var/roothome && \
+    curl https://sh.rustup.rs -sSf | bash -s -- -y; 
 ENV PATH "/root/.cargo/bin:${PATH}"
 
 # install godot 4.7-stable mono
@@ -54,9 +55,6 @@ RUN wget "https://github.com/godotengine/godot/releases/download/4.7-stable/Godo
     mv Godot_v4.7-stable_mono_linux_x86_64/Godot_v4.7-stable_mono_linux.x86_64 /usr/bin/Godot_v4.7-stable_mono_linux.x86_64 &&  \
     mv Godot_v4.7-stable_mono_linux_x86_64/GodotSharp /usr/bin/GodotSharp;                                                      \
     rm Godot_v4.7-stable_mono_linux_x86_64.zip
-
-# file required for xauth
-RUN touch .Xauthority
 
 ### copy required files 
 # NOTE: required symlinks for some config files are created in dcu/config-files/files.conf
