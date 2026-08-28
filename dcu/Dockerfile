@@ -74,7 +74,8 @@ COPY ./config-files/.bashrc /etc/bashrc
 COPY ./config-files/tty1_service_override.conf /etc/systemd/system/getty@tty1.service.d/override.conf
 
 # required custom executables
-COPY ./config-files/export-all ./config-files/devcade_onboard /usr/bin/
+COPY ./config-files/export-all /usr/share/devcade/
+COPY ./config-files/devcade_onboard /usr/bin/
 
 # export templates
 COPY ./config-files/linux_debug.x86_64      \
@@ -97,7 +98,7 @@ RUN mkdir -p /usr/share/devcade/ && \
     cp ./devcade-onboard-ui-revamp/onboard/.env.template /usr/share/devcade/.env
 
 # export-all <godot-path> <absolute src path> <absolute out path>
-RUN export-all                          \
+RUN /usr/share/devcade/export-all       \
     Godot_v4.7-stable_mono_linux.x86_64 \
     /devcade-onboard-ui-revamp          \
     /usr/bin
@@ -134,5 +135,3 @@ LABEL containers.bootc=1
 LABEL bootc.rootfs=/sysroot
 
 RUN bootc container lint
-
-RUN plymouth-set-default-theme --list

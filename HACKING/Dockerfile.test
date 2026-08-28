@@ -1,0 +1,9 @@
+FROM localhost/dcu-devcade-onboard
+
+# disable autologin
+RUN systemctl disable getty@tty1
+
+RUN passwd --delete devcade
+
+# different bash init file
+COPY ./.bashrc /etc/bashrc
