@@ -23,7 +23,7 @@ async fn main() -> ! {
         .iter()
         .any(|path| {
             if dotenvy::from_path(&path).is_ok() {
-                log!(Level::Info, "Loaded environment from {}", path.display());
+                log!(Level::Debug, "Loaded environment from {}", path.display());
                 true
             } else {
                 false

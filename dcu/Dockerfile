@@ -95,7 +95,7 @@ RUN git clone https://github.com/matthewlefler/devcade-onboard-ui-revamp.git && 
     cd devcade-onboard-ui-revamp && git switch ${BRANCH_VAR}
 
 RUN mkdir -p /usr/share/devcade/ && \
-    cp ./devcade-onboard-ui-revamp/onboard/.env.template /usr/share/devcade/.env
+    cp ./devcade-onboard-ui-revamp/onboard/.env.template /usr/share/devcade/.env.template
 
 # export-all <godot-path> <absolute src path> <absolute out path>
 RUN /usr/share/devcade/export-all       \
