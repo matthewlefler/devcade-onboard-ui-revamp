@@ -3,7 +3,7 @@
 # export required enviorment variables
 touch ./tmp/env_var
 
-echo "" > .env_var
+echo "" > ./tmp/.env_var
 echo "WAYLAND_DISPLAY=$WAYLAND_DISPLAY" >> ./tmp/env_var
 echo "XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR" >> ./tmp/env_var
 echo "DISPLAY=$DISPLAY" >> ./tmp/env_var
