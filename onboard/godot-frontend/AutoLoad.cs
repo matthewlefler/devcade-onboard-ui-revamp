@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using Godot;
 using onboard.util;
 
@@ -26,7 +27,10 @@ public partial class AutoLoad : Node
         ];
         foreach(string path in envPaths)
         {
-            string fullPath = Path.GetFullPath(path);
+            string fullPath = path
+                .Replace("~/", $"{System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile)}/")
+                .Replace("./", $"{Directory.GetCurrentDirectory()}/");
+
             if(File.Exists(fullPath))
             {
                 LOG.Debug($"loaded enivorment file (.env) from {path} with full path {fullPath}");

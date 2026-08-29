@@ -362,8 +362,8 @@ HACKING/.env
 dcu/.env
 dcu/output/**
 
-# HACKING temp passthrough file
-.env_var
+# HACKING temp passthrough files
+HACKING/tmp/**
 
 # test locations for save data
 onboard/backend/.save

@@ -120,4 +120,4 @@ alias c='clear'
 export $(cat /tmp/.env_var | xargs)
 
 # allow devcade (id -u) to read/write to wayland socket
-sudo setfacl -m u:$(id -u):rwx $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY
+sudo setfacl -m u:$(id -u):rw $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY

@@ -12,12 +12,28 @@ async fn main() -> ! {
         compile_error!("This project only supports Linux.\nTo build for linux, run `cargo build --target x86_64-unknown-linux-gnu`");
     }
 
-    match dotenvy::from_filename("../.env") {
-        Ok(_) => (),
-        Err(e) => {
-            log!(Level::Error, "Error loading .env file: {}", e);
-        }
+    let env_file_paths = vec![
+        std::path::PathBuf::from(".env"),
+        std::env::home_dir().map(|home| home.join(".env")).unwrap_or(std::path::PathBuf::from(".env")),
+        std::path::PathBuf::from("../.env"),
+        std::path::PathBuf::from("/usr/share/devcade/.env"),
+    ];
+
+    let loaded = env_file_paths
+        .iter()
+        .any(|path| {
+            if dotenvy::from_path(&path).is_ok() {
+                log!(Level::Info, "Loaded environment from {}", path.display());
+                true
+            } else {
+                false
+            }
+        });
+
+    if !loaded {
+        log!(Level::Warn, "No .env file found");
     }
+
     env_logger::init();
 
     fs::create_dir_all(devcade_path())

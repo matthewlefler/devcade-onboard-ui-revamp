@@ -1,5 +1,7 @@
 #!/bin/bash
 
+INIT_PWD=$(pwd)
+
 # first arg is --help or -h             or # of args != 3
 if [[ $1 == --help ]] || [[ $1 == -h ]] || [[ $# -ne 3 ]]; then
     echo "Usage:" $0 "<godot_executable> <path_to_root_folder> <out_path>" 
