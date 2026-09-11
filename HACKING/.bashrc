@@ -112,12 +112,19 @@ if ! shopt -oq posix; then
   fi
 fi
 
+export $(cat /tmp/.env_var | xargs)
+
+# allow devcade (id -u) to read/write to wayland socket
+sudo setfacl -m u:$(id -u):rw $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY
+
+DEVCADE_AUTOLOGIN_INSTALLED=1
+if [[ -z "$DISPLAY" ]] && [[ $(tty) = /dev/tty1 ]]; then
+   . startx -- -nocursor
+   logout
+fi
+
 # custom aliases
 alias l='ls -lApvh --group-directories-first --color=always'
 alias clr='clear && fastfetch'
 alias c='clear'
 
-export $(cat /tmp/.env_var | xargs)
-
-# allow devcade (id -u) to read/write to wayland socket
-sudo setfacl -m u:$(id -u):rw $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY

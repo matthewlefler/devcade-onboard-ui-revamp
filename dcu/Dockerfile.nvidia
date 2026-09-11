@@ -11,8 +11,10 @@ RUN dnf -y install                                                              
         xorg-x11-drv-nvidia         \
         xorg-x11-drv-nvidia-cuda 
 
-# Rebuild akmods
-RUN akmods --force --kernels `rpm -q --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}' kernel-devel`
+# make tmp and /var/tmp writable and Rebuild akmods
+RUN chmod -R 777 /tmp && chmod -R 777 /var/tmp &&                                                           \
+    /usr/sbin/akmods --force --kernels `rpm -q --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}' kernel-devel`  
+
 # add kernel arguments
 # see: https://bootc.dev/bootc/building/kernel-arguments.html
 RUN mkdir -p /usr/lib/bootc/kargs.d
