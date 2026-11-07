@@ -75,7 +75,6 @@ COPY ./config-files/tty1_service_override.conf /etc/systemd/system/getty@tty1.se
 
 # required custom executables
 COPY ./config-files/export-all /usr/share/devcade/
-COPY ./config-files/devcade_onboard /usr/bin/
 
 # export templates
 COPY ./config-files/linux_debug.x86_64      \
