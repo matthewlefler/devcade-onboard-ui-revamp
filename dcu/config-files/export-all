@@ -8,6 +8,17 @@ if [[ $1 == --help ]] || [[ $1 == -h ]] || [[ $# -ne 3 ]]; then
     exit 1
 fi
 
+# onboard
+cd $2/onboard/devcade-onboard
+cargo build --release
+onboard_exit_code=$?
+if [[ $onboard_exit_code -ne 0 ]]; then
+    echo "onboard failed to compile"
+    exit 2
+fi
+cd $2
+cp $2/onboard/devcade-onboard/target/release/backend $3/devcade_onboard
+
 # backend
 # cargo build the backend cause yeah
 cd $2/onboard/backend
@@ -15,7 +26,7 @@ cargo build --release
 backend_exit_code=$?
 if [[ $backend_exit_code -ne 0 ]]; then
     echo "backend failed to compile"
-    exit 2
+    exit 3
 fi
 cd $2
 cp $2/onboard/backend/target/release/backend $3/devcade_backend
@@ -27,7 +38,7 @@ $1 --path $2/onboard/godot-frontend --headless --export-release "Linux" $3/devca
 frontend_exit_code=$?
 if [[ $frontend_exit_code -ne 0 ]]; then
     echo "frontend failed to compile"
-    exit 3
+    exit 4
 fi
 
 exit 0
