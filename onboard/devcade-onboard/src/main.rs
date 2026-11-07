@@ -14,9 +14,9 @@ static DEV_DEVCADE_BACKEND_PATH: &str = "/home/devcade/devcade_backend";
 static SPAWN_PROCESS_RETRIES: i32 = 10;
 static POLLING_DELAY_SECS: u64 = 5;
 
-static STABLE_ENV_NAME: &str = "stable";
-static BRANCH_ENV_NAME: &str = "branch";
-static GIT_REPO_ENV_NAME: &str = "gitrepo";
+static STABLE_ENV_NAME: &str = "USE_STABLE";
+static BRANCH_ENV_NAME: &str = "BRANCH_NAME";
+static GIT_REPO_ENV_NAME: &str = "GIT_REPOSITORY";
 
 static DEFAULT_GIT_REPOSITORY: &str =
     "https://github.com/matthewlefler/devcade-onboard-ui-revamp.git";
