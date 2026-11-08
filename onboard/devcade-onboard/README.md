@@ -1,5 +1,5 @@
 # devcade-onboard
-administrator software to fix the inablility of `bootc` to handle rapid testing of the other onboard software (`devcade_frontend` and `devcade_backend`)
+administrator software to fix the inablility of `bootc` to handle rapid testing and switching of the other onboard software (`devcade_frontend` and `devcade_backend`)
 
 ## Main points
 relates to the `devcade_onboard` bash file (will probability replace it), cause it would start and handle the running of the two executable's `devcade_frontend` and `devcade_backend`

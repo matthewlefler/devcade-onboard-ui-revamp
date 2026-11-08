@@ -38,7 +38,7 @@ HostKey /etc/ssh/ssh_host_ed25519_key
 #PubkeyAuthentication yes
 
 # Expect .ssh/authorized_keys2 to be disregarded by default in future.
-AuthorizedKeysFile	/etc/.ssh/authorized_keys /etc/.ssh/authorized_keys2
+AuthorizedKeysFile	/etc/.ssh/authorized_keys /etc/.ssh/authorized_keys2 
 
 #AuthorizedPrincipalsFile none
 
