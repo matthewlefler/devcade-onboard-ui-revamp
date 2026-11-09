@@ -1,0 +1,21 @@
+{
+    "KPlugin": {
+        "Name": "devcade window manager",
+        "Description": "Description of the script",
+        "Icon": "preferences-system-windows",
+        
+        "Authors": [
+            {
+                "Email": "devcadeWM+matthewlefler1@gmail.com",
+                "Name": "Matthew Lefler"
+            }
+        ],
+        "Id": "devcadeWM",
+        "Version": "0.1",
+        "License": "MIT",
+        "Website": "https://github.com/ComputerScienceHouse/devcade-onboard"
+    },
+    "X-Plasma-API": "javascript",
+    "X-Plasma-MainScript": "code/main.js",
+    "KPackageStructure": "KWin/Script"
+}

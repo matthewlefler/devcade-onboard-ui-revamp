@@ -1,16 +1,17 @@
+use std::io;
 use std::path::Path;
 use std::process::Command;
 
-static DEFAULT_DOTENV_PATH = "/usr/share/devcade/.env.template"
-static DOTENV_PATH = "/home/devcade/.env"
+static DEFAULT_DOTENV_PATH: &str = "/usr/share/devcade/.env.template";
+static DOTENV_PATH: &str = "/home/devcade/.env";
 
 fn dotenv_exists() -> bool {
     Path::new(DOTENV_PATH).exists()
 }
 
-fn create_dotenv_if_not_exists() -> bool {
+pub fn create_dotenv_if_not_exists() -> io::Result<std::process::Output> {
     if dotenv_exists() {
-        false
+        return Err(io::Error::from(io::ErrorKind::AlreadyExists));
     }
 
     Command::new("cp")

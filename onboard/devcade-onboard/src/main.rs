@@ -32,7 +32,12 @@ fn main() -> ! {
         );
     }
 
-    if dotenv::create_dotenv_if_not_exists() {
+    if let Err(error) = dotenv::create_dotenv_if_not_exists() {
+        if error.kind() == io::ErrorKind::AlreadyExists {
+            log!(Level::Info, ".env already exists");
+        }
+        log!(Level::Error, "failed to create default .env: {}\nwill attempt to continue", error);
+    } else {
         log!(Level::Info, "created default .env");
     }
 

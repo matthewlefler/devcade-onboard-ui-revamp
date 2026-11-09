@@ -1,15 +1,15 @@
 FROM quay.io/fedora/fedora-bootc:43
 
 # user and file systemd configs
-COPY ./config-files/files.conf /usr/lib/tmpfiles.d/custom_files.conf
-COPY ./config-files/users.conf /usr/lib/sysusers.d/custom_users.conf
+COPY ./config-files/systemd/files.conf /usr/lib/tmpfiles.d/custom_files.conf
+COPY ./config-files/systemd/users.conf /usr/lib/sysusers.d/custom_users.conf
 
 # disable sleep/hiberate features
 RUN systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
 
 ### required software
 RUN dnf install -y                                                  \
-    openbox picom awk scrot xterm pamixer xdg-desktop-portal-gtk    \
+    kwin awk scrot xterm pamixer xdg-desktop-portal-gtk             \
     gcc-c++ git wget unzip dotnet-sdk-10.0                          \
     grep openssh-server openssl-devel fail2ban                      \
     glib2-devel flatpak-devel libnfc-devel                          \
@@ -72,16 +72,16 @@ COPY ./config-files/.xinitrc /etc/X11/xinit/xinitrc
 COPY ./config-files/.bashrc /etc/bashrc
 
 # autologin service
-COPY ./config-files/tty1_service_override.conf /etc/systemd/system/getty@tty1.service.d/override.conf 
+COPY ./config-files/systemd/tty1_service_override.conf /etc/systemd/system/getty@tty1.service.d/override.conf 
 
 # required custom executables
 COPY ./config-files/export-all /usr/share/devcade/
 
 # export templates
-COPY ./config-files/linux_debug.x86_64      \
-     ./config-files/linux_release.x86_64    \
-     ./config-files/linux_debug.x86_32      \
-     ./config-files/linux_release.x86_32    \
+COPY ./config-files/godot-export-templates/linux_debug.x86_64      \
+     ./config-files/godot-export-templates/linux_release.x86_64    \
+     ./config-files/godot-export-templates/linux_debug.x86_32      \
+     ./config-files/godot-export-templates/linux_release.x86_32    \
      /usr/share/godot/export_templates/4.7.stable.mono/
 
 # symlink required for the export functionality of the godot cli, 
