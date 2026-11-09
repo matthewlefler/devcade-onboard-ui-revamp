@@ -16,7 +16,8 @@ RUN dnf install -y                                                  \
     make cmake                                                      \
     autoconf automake libtool                                       \
     xrandr @base-x                                                  \
-    plymouth-plugin-script
+    plymouth-plugin-script                                          \
+    kernel-modules-extra joystick-support 
 
 # install libfreefare-devel, as it is not in the package manager yet
 RUN git clone https://github.com/nfc-tools/libfreefare.git &&   \
@@ -71,7 +72,7 @@ COPY ./config-files/.xinitrc /etc/X11/xinit/xinitrc
 COPY ./config-files/.bashrc /etc/bashrc
 
 # autologin service
-COPY ./config-files/tty1_service_override.conf /etc/systemd/system/getty@tty1.service.d/override.conf
+COPY ./config-files/tty1_service_override.conf /etc/systemd/system/getty@tty1.service.d/override.conf 
 
 # required custom executables
 COPY ./config-files/export-all /usr/share/devcade/
@@ -118,9 +119,11 @@ RUN dnf install -y                          \
 RUN rm -rf /var;        \
     rm -rf /run;        \
     rm -rf /tmp;        \
+    rm -rf /boot;       \
     mkdir -p /var/home; \
     mkdir -p /run;      \
-    mkdir -p /tmp;
+    mkdir -p /tmp;      \
+    mkdir -p /boot;
 
 ARG PASSWORD_VAR
 ARG ROOT_PASSWORD_VAR

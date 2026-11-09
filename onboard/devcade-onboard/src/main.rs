@@ -5,6 +5,8 @@ use std::process::{Child, Command, exit};
 use std::thread::sleep;
 use std::time::Duration;
 
+mod dotenv;
+
 static STABLE_DEVCADE_FRONTEND_PATH: &str = "/usr/bin/devcade_frontend";
 static STABLE_DEVCADE_BACKEND_PATH: &str = "/usr/bin/devcade_backend";
 
@@ -28,6 +30,10 @@ fn main() -> ! {
         compile_error!(
             "This project only supports Linux.\nTo build for linux, run `cargo build --target x86_64-unknown-linux-gnu`"
         );
+    }
+
+    if dotenv::create_dotenv_if_not_exists() {
+        log!(Level::Info, "created default .env");
     }
 
     let env_file_paths = vec![
