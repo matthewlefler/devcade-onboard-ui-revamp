@@ -36,7 +36,11 @@ fn main() -> ! {
         if error.kind() == io::ErrorKind::AlreadyExists {
             log!(Level::Info, ".env already exists");
         }
-        log!(Level::Error, "failed to create default .env: {}\nwill attempt to continue", error);
+        log!(
+            Level::Error,
+            "failed to create default .env: {}\nwill attempt to continue",
+            error
+        );
     } else {
         log!(Level::Info, "created default .env");
     }
@@ -145,7 +149,7 @@ fn main() -> ! {
             Ok(child) => child,
             Err(e) => {
                 log!(Level::Error, "failed to spawn devcade_backend: {}", e);
-                exit(-1)
+                exit(1)
             }
         };
     let mut devcade_frontend =
@@ -157,7 +161,7 @@ fn main() -> ! {
                     Ok(_) => log!(Level::Info, "killed backend"),
                     Err(e) => log!(Level::Error, "failed to kill backend: {}", e),
                 }
-                exit(-1)
+                exit(1)
             }
         };
 
@@ -166,7 +170,7 @@ fn main() -> ! {
             Err(e) => {
                 log!(Level::Error, "failed to get backend status: {}", e);
                 cleanup(&mut devcade_frontend, &mut devcade_backend);
-                exit(-1);
+                exit(1);
             }
             Ok(Some(exit_status)) => {
                 log!(
@@ -182,7 +186,7 @@ fn main() -> ! {
                         Err(e) => {
                             log!(Level::Error, "failed to spawn devcade_backend: {}", e);
                             cleanup(&mut devcade_frontend, &mut devcade_backend);
-                            exit(-1)
+                            exit(1)
                         }
                     }
             }
@@ -193,7 +197,7 @@ fn main() -> ! {
             Err(e) => {
                 log!(Level::Error, "failed to get frontend status: {}", e);
                 cleanup(&mut devcade_frontend, &mut devcade_backend);
-                exit(-1);
+                exit(1);
             }
             Ok(Some(exit_status)) => {
                 log!(
@@ -209,7 +213,7 @@ fn main() -> ! {
                         Err(e) => {
                             log!(Level::Error, "failed to spawn devcade_frontend: {}", e);
                             cleanup(&mut devcade_frontend, &mut devcade_backend);
-                            exit(-1)
+                            exit(1)
                         }
                     }
             }

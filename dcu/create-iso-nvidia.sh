@@ -1,7 +1,7 @@
 # only prompts for password once
 sudo bash -c '
   mkdir -p output &&
-  podman run --rm -it --privileged \
+  podman run --network=host --rm -it --privileged \
     -v /var/lib/containers/storage:/var/lib/containers/storage \
     -v $(pwd)/config.toml:/config.toml \
     -v $(pwd)/output:/output \

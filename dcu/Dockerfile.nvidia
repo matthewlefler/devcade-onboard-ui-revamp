@@ -1,19 +1,34 @@
 FROM localhost/dcu-devcade-onboard:latest
 
 ### Nvidia drivers
+### prev implementation
 # enable require repositories
-RUN dnf -y install                                                                                              \
-        https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm           \
-        https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm &&  \
-# Install NVIDIA drivers
-    dnf install -y --allowerasing   \
-        akmod-nvidia                \
-        xorg-x11-drv-nvidia         \
-        xorg-x11-drv-nvidia-cuda 
+# RUN dnf -y install                                                                                              \
+#         https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm           \
+#         https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm &&  \
+# # Install NVIDIA drivers
+#     dnf install -y --allowerasing   \
+#         akmod-nvidia                \
+#         xorg-x11-drv-nvidia         \
+#         xorg-x11-drv-nvidia-cuda 
+# # make tmp and /var/tmp writable and Rebuild akmods
+# RUN chmod -R 777 /tmp && chmod -R 777 /var/tmp &&                                                           \
+#     /usr/sbin/akmods --force --kernels `rpm -q --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}' kernel-devel`  
+### test implementation
 
-# make tmp and /var/tmp writable and Rebuild akmods
-RUN chmod -R 777 /tmp && chmod -R 777 /var/tmp &&                                                           \
-    /usr/sbin/akmods --force --kernels `rpm -q --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}' kernel-devel`  
+RUN dnf install -y https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm    \
+    https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm &&          \
+    dnf makecache --refresh &&                                                                                      \
+    dnf install -y akmods dkms &&                                                                                        \
+    dnf install -y akmod-nvidia-580xx xorg-x11-drv-nvidia-580xx xorg-x11-drv-nvidia-580xx-cuda
+
+RUN chmod -R 777 /tmp && chmod -R 777 /var/tmp && \
+    printf '%s\n' '%_without_kmod_nvidia_detect 1' \
+    > /etc/rpm/macros.nvidia-kmod && \
+    /usr/sbin/akmods --force --kernels "$(rpm -q --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}' kernel-devel)"
+
+### END
+
 
 # add kernel arguments
 # see: https://bootc.dev/bootc/building/kernel-arguments.html
@@ -23,10 +38,13 @@ kargs = ["rd.driver.blacklist=nouveau", "modprobe.blacklist=nouveau", "nvidia-dr
 match-architectures = ["x86_64", "aarch64"]
 EOF
 
+RUN ln -sdf /var/lib/flatpak /usr/lib/flatpak
 RUN flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo && \
     flatpak install -y flathub org.freedesktop.Platform.GL.nvidia-580-142
 
 ### cleanup
+RUN dnf clean all
+
 # remove all log files, runtime only, and temporary files
 RUN rm -rf /var;        \
     rm -rf /run;        \

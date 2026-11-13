@@ -368,3 +368,6 @@ HACKING/tmp/**
 # test locations for save data
 onboard/backend/.save
 onboard/backend/src/.save
+
+# vscode config directory
+.vscode/

@@ -113,8 +113,8 @@ if ! shopt -oq posix; then
 fi
 
 DEVCADE_AUTOLOGIN_INSTALLED=1
-if [[ -z "$DISPLAY" ]] && [[ $(tty) = /dev/tty1 ]]; then
-   . startx -- -nocursor
+if [[ $(tty) = /dev/tty1 ]]; then
+   sway
    logout
 fi
 

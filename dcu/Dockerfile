@@ -1,4 +1,4 @@
-FROM quay.io/fedora/fedora-bootc:43
+FROM quay.io/fedora/fedora-bootc:44
 
 # user and file systemd configs
 COPY ./config-files/systemd/files.conf /usr/lib/tmpfiles.d/custom_files.conf
@@ -8,15 +8,15 @@ COPY ./config-files/systemd/users.conf /usr/lib/sysusers.d/custom_users.conf
 RUN systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
 
 ### required software
-RUN dnf install -y                                                  \
-    kwin awk scrot xterm pamixer xdg-desktop-portal-gtk             \
-    gcc-c++ git wget unzip dotnet-sdk-10.0                          \
-    grep openssh-server openssl-devel fail2ban                      \
-    glib2-devel flatpak-devel libnfc-devel                          \
-    make cmake                                                      \
-    autoconf automake libtool                                       \
-    xrandr @base-x                                                  \
-    plymouth-plugin-script                                          \
+RUN dnf install -y                                              \
+    sway awk scrot wmenu foot pamixer xdg-desktop-portal-gtk    \
+    gcc-c++ git wget unzip dotnet-sdk-10.0                      \
+    grep openssh-server openssl-devel fail2ban                  \
+    glib2-devel flatpak-devel libnfc-devel                      \
+    make cmake                                                  \
+    autoconf automake libtool                                   \
+    xrandr @base-x                                              \
+    plymouth-plugin-script                                      \
     kernel-modules-extra joystick-support 
 
 # install libfreefare-devel, as it is not in the package manager yet
@@ -28,6 +28,7 @@ RUN git clone https://github.com/nfc-tools/libfreefare.git &&   \
     cd .. && rm -r libfreefare
 
 # required flatpak runtimes
+RUN ln -sdf /var/lib/flatpak /usr/lib/flatpak
 RUN flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo &&   \
     flatpak install -y flathub org.freedesktop.Platform/x86_64/22.08
 
@@ -62,11 +63,8 @@ RUN wget "https://github.com/godotengine/godot/releases/download/4.7-stable/Godo
 # ostree settings
 COPY ./config-files/prepare-root.conf /usr/lib/ostree/prepare-root.conf
 
-# openbox config file
-COPY ./config-files/rc.xml /etc/xdg/openbox/rc.xml 
-
-# x11 init file
-COPY ./config-files/.xinitrc /etc/X11/xinit/xinitrc  
+# sway config file
+COPY ./config-files/sway-config.txt /etc/sway/config
 
 # bash init file
 COPY ./config-files/.bashrc /etc/bashrc
@@ -84,6 +82,9 @@ COPY ./config-files/godot-export-templates/linux_debug.x86_64      \
      ./config-files/godot-export-templates/linux_release.x86_32    \
      /usr/share/godot/export_templates/4.7.stable.mono/
 
+RUN mkdir -p /usr/share/devcade/
+COPY ./config-files/.env.dcu /usr/share/devcade/.env
+
 # symlink required for the export functionality of the godot cli, 
 # I blame godot for not letting me change the install location of the export templates
 RUN mkdir -p /root/.local/share/godot/export_templates && \
@@ -93,9 +94,6 @@ RUN mkdir -p /root/.local/share/godot/export_templates && \
 ARG BRANCH_VAR
 RUN git clone https://github.com/matthewlefler/devcade-onboard-ui-revamp.git && \
     cd devcade-onboard-ui-revamp && git switch ${BRANCH_VAR}
-
-RUN mkdir -p /usr/share/devcade/ && \
-    cp ./devcade-onboard-ui-revamp/onboard/.env.template /usr/share/devcade/.env.template
 
 # export-all <godot-path> <absolute src path> <absolute out path>
 RUN /usr/share/devcade/export-all       \
