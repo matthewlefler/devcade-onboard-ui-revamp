@@ -29,6 +29,9 @@ RUN flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.
 ### cleanup
 RUN dnf clean all
 
+# specific nvidia 
+COPY ./config-files/.bashrc.nvidia /etc/bashrc
+
 # remove all log files, runtime only, and temporary files
 RUN rm -rf /var;        \
     rm -rf /run;        \
